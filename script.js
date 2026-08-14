@@ -733,6 +733,7 @@ function toggleTheme() {
 }
 
 
+
 /* ═══════════════════════════════════════════════════════
    NAVBAR & MOBILE MENU
 ═══════════════════════════════════════════════════════ */
@@ -949,3 +950,340 @@ var statContainers = document.querySelectorAll('.stats-container');
 for (var i = 0; i < statContainers.length; i++) {
     statsObserver.observe(statContainers[i]);
 }
+
+/* ═══════════════════════════════════════════════════════
+   CHANGE 2: MODE DROPDOWN SELECTOR
+═══════════════════════════════════════════════════════ */
+
+function toggleModeDropdown() {
+    var dropdown = document.getElementById('modeDropdown');
+    var arrow = document.getElementById('modeArrow');
+    dropdown.classList.toggle('open');
+    arrow.classList.toggle('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    var selector = document.getElementById('modeSelector');
+    if (selector && !selector.contains(e.target)) {
+        document.getElementById('modeDropdown').classList.remove('open');
+        document.getElementById('modeArrow').classList.remove('open');
+    }
+});
+
+function selectMode(mode) {
+    // Close dropdown
+    document.getElementById('modeDropdown').classList.remove('open');
+    document.getElementById('modeArrow').classList.remove('open');
+
+    // Don't switch if already in same mode
+    if (mode === currentTheme) return;
+
+    // Update checkmarks
+    if (mode === 'normal') {
+        document.getElementById('checkNormal').style.display = 'inline';
+        document.getElementById('checkHacker').style.display = 'none';
+        document.getElementById('modeIcon').textContent = '☀️';
+        document.getElementById('modeLabel').textContent = 'Normal';
+    } else {
+        document.getElementById('checkNormal').style.display = 'none';
+        document.getElementById('checkHacker').style.display = 'inline';
+        document.getElementById('modeIcon').textContent = '💀';
+        document.getElementById('modeLabel').textContent = 'Hacker';
+    }
+
+    // Trigger the existing theme toggle
+    toggleTheme();
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   CHANGE 3: TERMINAL OS SWITCHER (Mac / Windows)
+═══════════════════════════════════════════════════════ */
+
+var terminalOS = 'mac';
+
+var macTermLines = [
+    { type: 'prompt',  text: 'cryptokit hash --algo SHA-256 --input "Hello"' },
+    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
+    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
+    { type: 'success', text: '✅ Hash generated in 2ms' },
+    { type: 'blank',   text: '' },
+    { type: 'prompt',  text: 'cryptokit rsa --generate --bits 2048' },
+    { type: 'success', text: '⚙  Generating RSA-2048 key pair...' },
+    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
+    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
+    { type: 'success', text: '✅ Keys generated in 180ms' },
+    { type: 'blank',   text: '' },
+    { type: 'prompt',  text: 'cryptokit verify --file report.pdf' },
+    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
+    { type: 'success', text: '✅ File integrity verified!' },
+    { type: 'blank',   text: '' },
+    { type: 'cursor',  text: '' }
+];
+
+var winTermLines = [
+    { type: 'prompt',  text: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello"' },
+    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
+    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
+    { type: 'success', text: '[OK] Hash generated in 2ms' },
+    { type: 'blank',   text: '' },
+    { type: 'prompt',  text: 'cryptokit.exe rsa /generate /bits:2048' },
+    { type: 'success', text: '[...] Generating RSA-2048 key pair...' },
+    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
+    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
+    { type: 'success', text: '[OK] Keys generated in 180ms' },
+    { type: 'blank',   text: '' },
+    { type: 'prompt',  text: 'cryptokit.exe verify /file:report.pdf' },
+    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
+    { type: 'success', text: '[OK] File integrity verified!' },
+    { type: 'blank',   text: '' },
+    { type: 'cursor',  text: '' }
+];
+
+function switchTermOS(os) {
+    terminalOS = os;
+
+    // Update button states
+    document.getElementById('osMac').classList.toggle('active', os === 'mac');
+    document.getElementById('osWin').classList.toggle('active', os === 'win');
+
+    // Update terminal title
+    var title = document.getElementById('terminalTitle');
+    if (os === 'mac') {
+        title.textContent = 'cryptokit ~ zsh';
+    } else {
+        title.textContent = 'C:\\cryptokit> cmd';
+    }
+
+    // Update the terminal lines reference used by the animation
+    termLines = (os === 'mac') ? macTermLines : winTermLines;
+
+    // Restart terminal animation
+    termBody.innerHTML = '';
+    lineIdx = 0;
+    addTermLine();
+}
+
+// Override the original termLines with mac by default
+termLines = macTermLines;
+
+
+/* ═══════════════════════════════════════════════════════
+   CHANGE 5: FEEDBACK FORM FUNCTIONS
+═══════════════════════════════════════════════════════ */
+
+var currentRating = 0;
+
+function setRating(rating) {
+    currentRating = rating;
+    var stars = document.querySelectorAll('.rating-star');
+
+    for (var i = 0; i < stars.length; i++) {
+        if (i < rating) {
+            stars[i].textContent = '★';
+            stars[i].classList.add('active');
+        } else {
+            stars[i].textContent = '☆';
+            stars[i].classList.remove('active');
+        }
+    }
+}
+
+function submitFeedback(event) {
+    event.preventDefault();
+
+    if (currentRating === 0) {
+        alert('Please select a rating!');
+        return false;
+    }
+
+    // Get form data
+    var form = document.getElementById('feedbackForm');
+    var inputs = form.querySelectorAll('input, textarea');
+    var name = inputs[0].value;
+
+    // Show success message
+    var wrapper = document.querySelector('.feedback-form-wrapper');
+    wrapper.innerHTML =
+        '<div style="text-align:center;padding:40px 20px;">' +
+        '<div style="font-size:48px;margin-bottom:16px;">🎉</div>' +
+        '<h3 style="font-family:Space Grotesk,sans-serif;font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:8px;">Thank You, ' + name + '!</h3>' +
+        '<p style="color:var(--text-secondary);font-size:15px;">Your ' + currentRating + '-star feedback has been received.<br>We truly appreciate your input!</p>' +
+        '</div>';
+
+    return false;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FIXED: selectMode + toggleTheme + mobileThemeSwitch
+═══════════════════════════════════════════════════════ */
+
+function mobileThemeSwitch() {
+    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
+    selectMode(newMode);
+}
+
+function selectMode(mode) {
+
+    // Step 1: Close the dropdown
+    var dd = document.getElementById('modeDropdown');
+    var ar = document.getElementById('modeArrow');
+    if (dd) dd.classList.remove('open');
+    if (ar) ar.classList.remove('open');
+
+    // Step 2: Skip if already in this mode
+    if (mode === currentTheme) return;
+
+    // Step 3: Pick the right boot messages
+    var isGoingHacker = (mode === 'hacker');
+    var bootMsgs = isGoingHacker ? hackerBoot : normalBoot;
+
+    // Step 4: Show transition overlay then switch everything
+    showTransition(bootMsgs, function() {
+
+        if (isGoingHacker) {
+            // ── SWITCH TO HACKER ──
+            currentTheme = 'hacker';
+            document.documentElement.setAttribute('data-theme', 'hacker');
+
+            // Stop normal particles
+            cancelAnimationFrame(pAnimId);
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+            // Start matrix rain
+            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
+            columns = Math.floor(mCanvas.width / fontSize);
+            drops = [];
+            for (var i = 0; i < columns; i++) drops[i] = 1;
+            drawMatrix();
+
+            // Update dropdown UI to show Hacker is selected
+            document.getElementById('modeIcon').textContent = '💀';
+            document.getElementById('modeLabel').textContent = 'Hacker';
+            document.getElementById('checkNormal').style.display = 'none';
+            document.getElementById('checkHacker').style.display = 'inline';
+
+            // Update AI assistant
+            updateAiTheme(true);
+
+        } else {
+            // ── SWITCH TO NORMAL ──
+            currentTheme = 'normal';
+            document.documentElement.setAttribute('data-theme', 'normal');
+
+            // Stop matrix rain
+            cancelAnimationFrame(mAnimId);
+            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
+
+            // Start normal particles
+            animateParticles();
+
+            // Update dropdown UI to show Normal is selected
+            document.getElementById('modeIcon').textContent = '☀️';
+            document.getElementById('modeLabel').textContent = 'Normal';
+            document.getElementById('checkNormal').style.display = 'inline';
+            document.getElementById('checkHacker').style.display = 'none';
+
+            // Update AI assistant
+            updateAiTheme(false);
+        }
+
+        // Refresh AI chat if it was open
+        if (chatOpen && msgCount > 0) {
+            document.getElementById('aiMessages').innerHTML = '';
+            msgCount = 0;
+            showWelcome();
+        }
+    });
+}
+
+/* ═══════════════════════════════════════════════════════
+   FIXED: selectMode + toggleTheme + mobileThemeSwitch
+═══════════════════════════════════════════════════════ */
+
+function mobileThemeSwitch() {
+    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
+    selectMode(newMode);
+}
+
+function selectMode(mode) {
+
+    // Step 1: Close the dropdown
+    var dd = document.getElementById('modeDropdown');
+    var ar = document.getElementById('modeArrow');
+    if (dd) dd.classList.remove('open');
+    if (ar) ar.classList.remove('open');
+
+    // Step 2: Skip if already in this mode
+    if (mode === currentTheme) return;
+
+    // Step 3: Pick the right boot messages
+    var isGoingHacker = (mode === 'hacker');
+    var bootMsgs = isGoingHacker ? hackerBoot : normalBoot;
+
+    // Step 4: Show transition overlay then switch everything
+    showTransition(bootMsgs, function() {
+
+        if (isGoingHacker) {
+            // ── SWITCH TO HACKER ──
+            currentTheme = 'hacker';
+            document.documentElement.setAttribute('data-theme', 'hacker');
+
+            // Stop normal particles
+            cancelAnimationFrame(pAnimId);
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+            // Start matrix rain
+            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
+            columns = Math.floor(mCanvas.width / fontSize);
+            drops = [];
+            for (var i = 0; i < columns; i++) drops[i] = 1;
+            drawMatrix();
+
+            // Update dropdown UI to show Hacker is selected
+            document.getElementById('modeIcon').textContent = '💀';
+            document.getElementById('modeLabel').textContent = 'Hacker';
+            document.getElementById('checkNormal').style.display = 'none';
+            document.getElementById('checkHacker').style.display = 'inline';
+
+            // Update AI assistant
+            updateAiTheme(true);
+
+        } else {
+            // ── SWITCH TO NORMAL ──
+            currentTheme = 'normal';
+            document.documentElement.setAttribute('data-theme', 'normal');
+
+            // Stop matrix rain
+            cancelAnimationFrame(mAnimId);
+            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
+
+            // Start normal particles
+            animateParticles();
+
+            // Update dropdown UI to show Normal is selected
+            document.getElementById('modeIcon').textContent = '☀️';
+            document.getElementById('modeLabel').textContent = 'Normal';
+            document.getElementById('checkNormal').style.display = 'inline';
+            document.getElementById('checkHacker').style.display = 'none';
+
+            // Update AI assistant
+            updateAiTheme(false);
+        }
+
+        // Refresh AI chat if it was open
+        if (chatOpen && msgCount > 0) {
+            document.getElementById('aiMessages').innerHTML = '';
+            msgCount = 0;
+            showWelcome();
+        }
+    });
+}
+
+// Keep toggleTheme as a wrapper (used by nothing now but safe to keep)
+function toggleTheme() {
+    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
+    selectMode(newMode);
+}
+
