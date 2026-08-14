@@ -1941,8 +1941,9 @@ a {
 
 
 /* ═══════════════════════════════════════════
-   CHANGE 5: MEET OUR TEAM SECTION
+   TEAM SECTION - COMPLETE REDESIGN
 ═══════════════════════════════════════════ */
+
 .team-section {
     position: relative;
     z-index: 2;
@@ -1952,141 +1953,196 @@ a {
 
 .team-header {
     text-align: center;
-    margin-bottom: 64px;
+    margin-bottom: 70px;
 }
 
 .team-grid {
-    max-width: 1100px;
+    max-width: 1150px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 28px;
+    gap: 30px;
 }
 
-/* Team Card */
+/* ── Main Card ── */
 .team-card {
     position: relative;
-    border-radius: 20px;
-    padding: 32px 20px 24px;
-    text-align: center;
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    border-radius: 24px;
     overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     cursor: default;
+    display: flex;
+    flex-direction: column;
 }
 
 [data-theme="normal"] .team-card {
-    background: #fff;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow);
+    background: #ffffff;
+    border: 1px solid rgba(108, 99, 255, 0.1);
+    box-shadow: 0 4px 24px rgba(108, 99, 255, 0.08);
 }
 
 [data-theme="hacker"] .team-card {
-    background: #050505;
+    background: #080808;
     border: 1px solid rgba(0, 255, 65, 0.12);
+    box-shadow: 0 4px 20px rgba(0, 255, 65, 0.05);
 }
 
 .team-card:hover {
-    transform: translateY(-12px) scale(1.02);
+    transform: translateY(-14px) scale(1.02);
 }
 
 [data-theme="normal"] .team-card:hover {
-    box-shadow: 0 25px 50px rgba(108, 99, 255, 0.2);
-    border-color: rgba(108, 99, 255, 0.4);
+    box-shadow: 0 30px 60px rgba(108, 99, 255, 0.18);
+    border-color: rgba(108, 99, 255, 0.35);
 }
 
 [data-theme="hacker"] .team-card:hover {
-    box-shadow: 0 0 40px rgba(0, 255, 65, 0.15);
-    border-color: rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 50px rgba(0, 255, 65, 0.15);
+    border-color: rgba(0, 255, 65, 0.45);
+    animation: none;
 }
 
-/* Card Background Animation */
-.team-card-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    transition: height 0.5s ease;
-}
-
-[data-theme="normal"] .team-card-bg {
-    background: linear-gradient(135deg, #6C63FF, #00B4D8);
-    opacity: 0.08;
-}
-
-[data-theme="hacker"] .team-card-bg {
-    background: linear-gradient(135deg, #00FF41, #00FFFF);
-    opacity: 0.04;
-}
-
-.team-card:hover .team-card-bg {
-    height: 100%;
-}
-
-/* Avatar Ring */
-.team-avatar-ring {
+/* ── Top Colored Banner ── */
+.team-card-banner {
+    height: 90px;
     position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 18px;
-    border-radius: 50%;
-    padding: 3px;
-    z-index: 1;
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    flex-shrink: 0;
+    transition: height 0.4s ease;
 }
 
-[data-theme="normal"] .team-avatar-ring {
+[data-theme="normal"] .team-card-banner {
     background: linear-gradient(135deg, #6C63FF, #00B4D8);
 }
 
-[data-theme="hacker"] .team-avatar-ring {
-    background: linear-gradient(135deg, #00FF41, #00FFFF);
-    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+[data-theme="hacker"] .team-card-banner {
+    background: linear-gradient(135deg, rgba(0,255,65,0.15), rgba(0,255,255,0.08));
+    border-bottom: 1px solid rgba(0, 255, 65, 0.2);
 }
 
-.team-card:hover .team-avatar-ring {
-    transform: scale(1.1) rotate(5deg);
+/* Banner pattern overlay */
+.team-card-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,255,255,0.04) 10px,
+        rgba(255,255,255,0.04) 20px
+    );
 }
 
-.team-avatar {
-    width: 100%;
-    height: 100%;
+/* ── Photo Container ── */
+.team-photo-wrap {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin: -48px auto 0;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+/* Spinning gradient ring */
+.team-photo-ring {
+    position: absolute;
+    inset: -4px;
     border-radius: 50%;
+    padding: 4px;
+    transition: all 0.4s ease;
+}
+
+[data-theme="normal"] .team-photo-ring {
+    background: linear-gradient(135deg, #6C63FF, #00B4D8, #FF6584, #6C63FF);
+    background-size: 300% 300%;
+    animation: ringRotate 4s linear infinite;
+}
+
+[data-theme="hacker"] .team-photo-ring {
+    background: linear-gradient(135deg, #00FF41, #00FFFF, #00FF41);
+    background-size: 200% 200%;
+    animation: ringRotate 3s linear infinite;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+}
+
+@keyframes ringRotate {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.team-card:hover .team-photo-ring {
+    animation-duration: 1.5s;
+    transform: scale(1.08);
+}
+
+/* Inner white circle behind photo */
+.team-photo-inner {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-[data-theme="normal"] .team-avatar {
+[data-theme="normal"] .team-photo-inner {
     background: #F0F4FF;
+    border: 3px solid #fff;
 }
 
-[data-theme="hacker"] .team-avatar {
+[data-theme="hacker"] .team-photo-inner {
     background: #0A0A0A;
+    border: 3px solid #000;
 }
 
-.team-avatar-letter {
+/* Actual Photo */
+.team-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 50%;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.team-card:hover .team-photo {
+    transform: scale(1.08);
+}
+
+/* Letter fallback */
+.team-photo-letter {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 28px;
+    font-size: 34px;
     font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
-[data-theme="normal"] .team-avatar-letter {
+[data-theme="normal"] .team-photo-letter {
     background: linear-gradient(135deg, #6C63FF, #00B4D8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-[data-theme="hacker"] .team-avatar-letter {
-    color: var(--primary);
-    text-shadow: 0 0 12px var(--primary);
-    -webkit-text-fill-color: var(--primary);
+[data-theme="hacker"] .team-photo-letter {
+    color: #00FF41;
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.6);
+    -webkit-text-fill-color: #00FF41;
 }
 
-/* Team Info */
+/* ── Info Section ── */
 .team-info {
-    position: relative;
-    z-index: 1;
+    padding: 16px 20px 6px;
+    text-align: center;
+    flex: 1;
 }
 
 .team-name {
@@ -2094,117 +2150,169 @@ a {
     font-size: 17px;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    line-height: 1.3;
 }
 
-.team-role {
-    display: inline-block;
+/* ── Role Badge ── */
+.team-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 14px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 3px 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
 }
 
-[data-theme="normal"] .team-role {
-    background: rgba(108, 99, 255, 0.1);
+[data-theme="normal"] .team-role-badge {
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(0,180,216,0.1));
     color: var(--primary);
+    border: 1px solid rgba(108, 99, 255, 0.2);
 }
 
-[data-theme="hacker"] .team-role {
-    background: rgba(0, 255, 65, 0.08);
+[data-theme="hacker"] .team-role-badge {
+    background: rgba(0, 255, 65, 0.06);
     color: var(--primary);
     border: 1px solid rgba(0, 255, 65, 0.2);
+    font-family: 'Share Tech Mono', monospace;
 }
 
+.team-role-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+}
+
+[data-theme="normal"] .team-role-dot {
+    background: var(--primary);
+}
+
+[data-theme="hacker"] .team-role-dot {
+    background: #00FF41;
+    box-shadow: 0 0 6px #00FF41;
+}
+
+/* ── Bio ── */
 .team-bio {
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 14px;
+    line-height: 1.6;
+    margin-bottom: 0;
+    padding: 0 4px;
 }
 
-/* Team Social Links */
+/* ── Divider ── */
+.team-divider {
+    height: 1px;
+    margin: 14px 20px;
+    flex-shrink: 0;
+}
+
+[data-theme="normal"] .team-divider {
+    background: linear-gradient(90deg, transparent, rgba(108,99,255,0.15), transparent);
+}
+
+[data-theme="hacker"] .team-divider {
+    background: linear-gradient(90deg, transparent, rgba(0,255,65,0.15), transparent);
+}
+
+/* ── Social Links ── */
 .team-social {
     display: flex;
     justify-content: center;
     gap: 8px;
-    position: relative;
-    z-index: 1;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.4s ease;
-}
-
-.team-card:hover .team-social {
-    opacity: 1;
-    transform: translateY(0);
+    padding: 0 20px 18px;
+    flex-shrink: 0;
 }
 
 .team-social-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
 }
 
 [data-theme="normal"] .team-social-btn {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    color: var(--text-secondary);
+    background: rgba(108, 99, 255, 0.06);
+    border: 1px solid rgba(108, 99, 255, 0.15);
+    color: var(--text-muted);
 }
 
 [data-theme="normal"] .team-social-btn:hover {
     background: var(--primary);
+    border-color: var(--primary);
     color: #fff;
     transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(108, 99, 255, 0.35);
 }
 
 [data-theme="hacker"] .team-social-btn {
-    background: rgba(0, 255, 65, 0.05);
-    border: 1px solid rgba(0, 255, 65, 0.2);
-    color: var(--text-secondary);
+    background: rgba(0, 255, 65, 0.04);
+    border: 1px solid rgba(0, 255, 65, 0.15);
+    color: rgba(0, 255, 65, 0.5);
 }
 
 [data-theme="hacker"] .team-social-btn:hover {
-    background: rgba(0, 255, 65, 0.15);
+    background: rgba(0, 255, 65, 0.12);
+    border-color: var(--primary);
     color: var(--primary);
     transform: translateY(-3px);
-    box-shadow: 0 0 10px var(--primary-glow);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
 }
 
-/* Card Glow */
+/* ── Bottom Glow ── */
 .team-glow {
     position: absolute;
-    bottom: -30px;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 60%;
-    height: 60px;
-    border-radius: 50%;
+    width: 70%;
+    height: 2px;
+    border-radius: 2px;
     opacity: 0;
-    transition: opacity 0.5s;
-    pointer-events: none;
+    transition: opacity 0.4s ease;
 }
 
 [data-theme="normal"] .team-glow {
-    background: radial-gradient(circle, rgba(108, 99, 255, 0.2), transparent 70%);
+    background: linear-gradient(90deg, transparent, #6C63FF, #00B4D8, transparent);
+    box-shadow: 0 0 12px rgba(108, 99, 255, 0.6);
 }
 
 [data-theme="hacker"] .team-glow {
-    background: radial-gradient(circle, rgba(0, 255, 65, 0.15), transparent 70%);
+    background: linear-gradient(90deg, transparent, #00FF41, #00FFFF, transparent);
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.5);
 }
 
 .team-card:hover .team-glow {
     opacity: 1;
 }
 
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 700px;
+    }
+}
+
+@media (max-width: 540px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+        max-width: 320px;
+    }
+}
 
 /* ═══════════════════════════════════════════
    CHANGE 5: FEEDBACK & REVIEW SECTION
