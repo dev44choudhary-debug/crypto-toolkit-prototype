@@ -674,35 +674,91 @@ function addTermLine() {
 setTimeout(addTermLine, 800);
 
 
-/* ═══════════════════════════════════════════════════════
-   TERMINAL OS SWITCHER (Mac / Windows)
-═══════════════════════════════════════════════════════ */
 
-var terminalOS = 'mac';
+// ═══════════════════════════════════════════════════════
+// TERMINAL OS SWITCHER — Uses YOUR existing CSS classes
+// ═══════════════════════════════════════════════════════
+const TERM_COMMANDS = {
+    mac: {
+        title: 'cryptokit ~ zsh',
+        lines: [
+            { type: 'cmd', prompt: '➜', cmd: 'cryptokit hash --algo SHA-256 --input "Hello"' },
+            { type: 'out', html: '<span class="terminal-key">Algorithm:</span> <span class="terminal-value">SHA-256</span>' },
+            { type: 'out', html: '<span class="terminal-value">185f8db32921bd46d35e5f139f501d393a6b...</span>' },
+            { type: 'out', html: '<span class="terminal-success">✅ Hash generated in 2ms</span>' },
+            { type: 'blank' },
+            { type: 'cmd', prompt: '➜', cmd: 'cryptokit rsa --generate --bits 2048' },
+            { type: 'out', html: '<span class="terminal-success">⚙ Generating RSA-2048 key pair...</span>' },
+            { type: 'out', html: '<span class="terminal-key">Public:</span>  <span class="terminal-value">-----BEGIN PUBLIC KEY-----</span>' },
+            { type: 'out', html: '<span class="terminal-key">Private:</span> <span class="terminal-value">-----BEGIN PRIVATE KEY-----</span>' },
+            { type: 'out', html: '<span class="terminal-success">✅ Keys generated in 180ms</span>' },
+            { type: 'blank' },
+            { type: 'cmd', prompt: '➜', cmd: 'cryptokit verify --file report.pdf' },
+            { type: 'out', html: '<span class="terminal-value">a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...</span>' },
+            { type: 'out', html: '<span class="terminal-success">✅ File integrity verified!</span>' },
+            { type: 'blank' },
+            { type: 'cmd', prompt: '➜', cmd: '<span class="terminal-cursor"></span>' }
+        ]
+    },
+    win: {
+        title: 'C:\\CryptoKit> cmd.exe',
+        lines: [
+            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello"' },
+            { type: 'out', html: '<span class="terminal-key">Algorithm:</span> <span class="terminal-value">SHA-256</span>' },
+            { type: 'out', html: '<span class="terminal-value">185F8DB32921BD46D35E5F139F501D393A6B...</span>' },
+            { type: 'out', html: '<span class="terminal-success">[OK] Hash generated in 2ms</span>' },
+            { type: 'blank' },
+            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: 'cryptokit.exe rsa /generate /bits:2048' },
+            { type: 'out', html: '<span class="terminal-success">[*] Generating RSA-2048 key pair...</span>' },
+            { type: 'out', html: '<span class="terminal-key">Public:</span>  <span class="terminal-value">-----BEGIN PUBLIC KEY-----</span>' },
+            { type: 'out', html: '<span class="terminal-key">Private:</span> <span class="terminal-value">-----BEGIN PRIVATE KEY-----</span>' },
+            { type: 'out', html: '<span class="terminal-success">[OK] Keys generated in 180ms</span>' },
+            { type: 'blank' },
+            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: 'cryptokit.exe verify /file:report.pdf' },
+            { type: 'out', html: '<span class="terminal-value">A3F5C8D2E1B4A7F9C2D5E8A1B4C7D0E3...</span>' },
+            { type: 'out', html: '<span class="terminal-success">[OK] File integrity verified!</span>' },
+            { type: 'blank' },
+            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: '<span class="terminal-cursor"></span>' }
+        ]
+    }
+};
+
+function renderTerminal(os) {
+    const body  = document.getElementById('terminalBody');
+    const title = document.getElementById('terminalTitle');
+    if (!body || !title) return;
+
+    const data = TERM_COMMANDS[os];
+    title.textContent = data.title;
+
+    let html = '';
+    data.lines.forEach((line, i) => {
+        // stagger the fade-in animation
+        const delay = `style="animation-delay:${i * 0.05}s"`;
+        if (line.type === 'blank') {
+            html += `<div class="terminal-line" ${delay}>&nbsp;</div>`;
+        } else if (line.type === 'cmd') {
+            html += `<div class="terminal-line" ${delay}><span class="terminal-prompt">${line.prompt}</span> <span class="terminal-cmd">${line.cmd}</span></div>`;
+        } else if (line.type === 'out') {
+            html += `<div class="terminal-line" ${delay}>${line.html}</div>`;
+        }
+    });
+    body.innerHTML = html;
+}
 
 function switchTermOS(os) {
-    terminalOS = os;
-
-    // Update button states
-    document.getElementById('osMac').classList.toggle('active', os === 'mac');
-    document.getElementById('osWin').classList.toggle('active', os === 'win');
-
-    // Update terminal title
-    var title = document.getElementById('terminalTitle');
-    if (os === 'mac') {
-        title.textContent = 'cryptokit ~ zsh';
-    } else {
-        title.textContent = 'C:\\cryptokit> cmd';
-    }
-
-    // Update the terminal lines
-    termLines = (os === 'mac') ? macTermLines : winTermLines;
-
-    // Restart terminal animation
-    termBody.innerHTML = '';
-    lineIdx = 0;
-    addTermLine();
+    const macBtn = document.getElementById('osMac');
+    const winBtn = document.getElementById('osWin');
+    if (macBtn) macBtn.classList.toggle('active', os === 'mac');
+    if (winBtn) winBtn.classList.toggle('active', os === 'win');
+    renderTerminal(os);
 }
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    renderTerminal('mac');
+});
+
 
 
 /* ═══════════════════════════════════════════════════════

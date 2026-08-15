@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="normal">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet Our Team - CryptoKit</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Backgrounds -->
+    <div class="bg-shapes">
+        <div class="bg-shape bg-shape-1"></div>
+        <div class="bg-shape bg-shape-2"></div>
+        <div class="bg-shape bg-shape-3"></div>
+    </div>
+    <canvas id="team-particle-canvas"></canvas>
+
+    <!-- Simple Back Navbar -->
+    <nav class="team-page-nav">
+        <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">
+                <svg viewBox="0 0 40 40" width="28" height="28" fill="none">
+                    <rect x="2" y="2" width="36" height="36" rx="8" stroke="currentColor" stroke-width="2.5"/>
+                    <path d="M20 8L20 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="12" y="14" width="16" height="18" rx="3" stroke="currentColor" stroke-width="2.5"/>
+                    <circle cx="20" cy="23" r="3" stroke="currentColor" stroke-width="2"/>
+                    <path d="M20 26L20 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <span class="nav-logo-text">CryptoKit</span>
+        </a>
+
+        <a href="index.html" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Home</span>
+        </a>
+    </nav>
+
+
+    <!-- ═══════════════════════════════════
+         CINEMATIC INTRO SECTION
+    ═══════════════════════════════════ -->
+    <section class="team-intro">
+
+        <!-- Animated Grid Background -->
+        <div class="tp-grid"></div>
+
+        <!-- Animated Radial Glow -->
+        <div class="tp-glow-orb tp-orb-1"></div>
+        <div class="tp-glow-orb tp-orb-2"></div>
+        <div class="tp-glow-orb tp-orb-3"></div>
+
+        <!-- Hero Content -->
+        <div class="tp-hero">
+            <div class="tp-badge">
+                <span class="tp-badge-dot"></span>
+                THE PEOPLE BEHIND THE MAGIC
+            </div>
+
+            <h1 class="tp-hero-title">
+                <span class="tp-word">Meet</span>
+                <span class="tp-word">The</span>
+                <span class="tp-word tp-gradient">Team</span>
+            </h1>
+
+            <p class="tp-hero-subtitle">
+                Four passionate minds. One shared vision.
+                <br/>
+                Building the future of open-source cryptography.
+            </p>
+
+            <div class="tp-scroll-hint">
+                <div class="tp-mouse">
+                    <div class="tp-scroll-dot"></div>
+                </div>
+                <span>Scroll to meet us</span>
+            </div>
+        </div>
+
+        <!-- Floating decorative elements -->
+        <div class="tp-float tp-float-1">{ }</div>
+        <div class="tp-float tp-float-2">&lt;/&gt;</div>
+        <div class="tp-float tp-float-3">#!</div>
+        <div class="tp-float tp-float-4">@</div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════
+         TEAM MEMBERS SHOWCASE
+    ═══════════════════════════════════ -->
+    <section class="tp-members-section">
+
+        <div class="tp-section-header">
+            <div class="tp-section-line"></div>
+            <h2 class="tp-section-title">The <span class="tp-gradient">Builders</span></h2>
+            <p class="tp-section-desc">Get to know the individuals shaping CryptoKit</p>
+        </div>
+
+        <!-- Member Cards -->
+        <div class="tp-members">
+
+            <!-- ═══ Member 1 ═══ -->
+            <div class="tp-member" data-member="1">
+                <div class="tp-member-number">01</div>
+
+                <div class="tp-member-content">
+                    <div class="tp-member-photo-side">
+                        <div class="tp-photo-decor tp-decor-tl"></div>
+                        <div class="tp-photo-decor tp-decor-br"></div>
+                        <div class="tp-photo-wrap">
+                            <div class="tp-photo-glow"></div>
+                            <img
+                                src="images/Ashish.png"
+                                alt="Ashish Kumawat"
+                                class="tp-photo"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                            />
+                            <div class="tp-photo-fallback" style="display:none;">AK</div>
+                        </div>
+                    </div>
+
+                    <div class="tp-member-info-side">
+                        <div class="tp-member-role">Algorithm Architect</div>
+                        <h3 class="tp-member-name">Ashish Kumawat</h3>
+                        <div class="tp-member-tagline">"Elegant algorithms, powerful solutions"</div>
+                        <p class="tp-member-bio">
+                            Designs and optimizes the core algorithms that power the platform's tools
+                            and features. Passionate about creating efficient, elegant solutions to
+                            complex cryptographic challenges.
+                        </p>
+
+                        <div class="tp-member-skills">
+                            <span class="tp-skill">Algorithm Design</span>
+                            <span class="tp-skill">Optimization</span>
+                            <span class="tp-skill">Problem Solving</span>
+                        </div>
+
+                        <div class="tp-member-socials">
+                            <a href="https://github.com/AshishKumawat04" target="_blank" class="tp-social">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="https://www.linkedin.com/in/ashish-kumawat-96a95b322" target="_blank" class="tp-social">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="https://instagram.com/" target="_blank" class="tp-social">
+                                <i class="fab fa-instagram"></i> Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ═══ Member 2 ═══ -->
+            <div class="tp-member reversed" data-member="2">
+                <div class="tp-member-number">02</div>
+
+                <div class="tp-member-content">
+                    <div class="tp-member-photo-side">
+                        <div class="tp-photo-decor tp-decor-tl"></div>
+                        <div class="tp-photo-decor tp-decor-br"></div>
+                        <div class="tp-photo-wrap">
+                            <div class="tp-photo-glow"></div>
+                            <img
+                                src="images/Sadanand.jpeg"
+                                alt="Sadanand Kumawat"
+                                class="tp-photo"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                            />
+                            <div class="tp-photo-fallback" style="display:none;">SK</div>
+                        </div>
+                    </div>
+
+                    <div class="tp-member-info-side">
+                        <div class="tp-member-role">Backend Engineer</div>
+                        <h3 class="tp-member-name">Sadanand Kumawat</h3>
+                        <div class="tp-member-tagline">"Building the invisible foundations"</div>
+                        <p class="tp-member-bio">
+                            Develops and maintains the server-side logic, APIs, and core application
+                            functionality. Ensures every request is handled with speed, security,
+                            and reliability.
+                        </p>
+
+                        <div class="tp-member-skills">
+                            <span class="tp-skill">API Development</span>
+                            <span class="tp-skill">Server Architecture</span>
+                            <span class="tp-skill">System Design</span>
+                        </div>
+
+                        <div class="tp-member-socials">
+                            <a href="https://github.com/Sadanand1754" target="_blank" class="tp-social">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="https://linkedin.com/in/" target="_blank" class="tp-social">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="https://instagram.com/" target="_blank" class="tp-social">
+                                <i class="fab fa-instagram"></i> Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ═══ Member 3 ═══ -->
+            <div class="tp-member" data-member="3">
+                <div class="tp-member-number">03</div>
+
+                <div class="tp-member-content">
+                    <div class="tp-member-photo-side">
+                        <div class="tp-photo-decor tp-decor-tl"></div>
+                        <div class="tp-photo-decor tp-decor-br"></div>
+                        <div class="tp-photo-wrap">
+                            <div class="tp-photo-glow"></div>
+                            <img
+                                src="images/Narendra.jpeg"
+                                alt="Narendra Kumar"
+                                class="tp-photo"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                            />
+                            <div class="tp-photo-fallback" style="display:none;">NK</div>
+                        </div>
+                    </div>
+
+                    <div class="tp-member-info-side">
+                        <div class="tp-member-role">Security &amp; Database Engineer</div>
+                        <h3 class="tp-member-name">Narendra Kumar</h3>
+                        <div class="tp-member-tagline">"Guarding data, one byte at a time"</div>
+                        <p class="tp-member-bio">
+                            Ensures data security, manages database architecture, and maintains
+                            system integrity. Every layer of defense is thoughtfully designed
+                            and rigorously tested.
+                        </p>
+
+                        <div class="tp-member-skills">
+                            <span class="tp-skill">Security Auditing</span>
+                            <span class="tp-skill">Database Design</span>
+                            <span class="tp-skill">Data Integrity</span>
+                        </div>
+
+                        <div class="tp-member-socials">
+                            <a href="https://github.com/" target="_blank" class="tp-social">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="https://www.linkedin.com/in/narendra-kumar-0924/" target="_blank" class="tp-social">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="https://instagram.com/" target="_blank" class="tp-social">
+                                <i class="fab fa-instagram"></i> Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ═══ Member 4 ═══ -->
+            <div class="tp-member reversed" data-member="4">
+                <div class="tp-member-number">04</div>
+
+                <div class="tp-member-content">
+                    <div class="tp-member-photo-side">
+                        <div class="tp-photo-decor tp-decor-tl"></div>
+                        <div class="tp-photo-decor tp-decor-br"></div>
+                        <div class="tp-photo-wrap">
+                            <div class="tp-photo-glow"></div>
+                            <img
+                                src="images/Profile Photo.jpeg"
+                                alt="Dev Choudhary"
+                                class="tp-photo"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                            />
+                            <div class="tp-photo-fallback" style="display:none;">DC</div>
+                        </div>
+                    </div>
+
+                    <div class="tp-member-info-side">
+                        <div class="tp-member-role">Frontend Engineer</div>
+                        <h3 class="tp-member-name">Dev Choudhary</h3>
+                        <div class="tp-member-tagline">"Where pixels meet purpose"</div>
+                        <p class="tp-member-bio">
+                            Builds responsive user interfaces and assists in implementing and
+                            refining algorithm logic. Passionate about crafting delightful user
+                            experiences that just work.
+                        </p>
+
+                        <div class="tp-member-skills">
+                            <span class="tp-skill">UI/UX Design</span>
+                            <span class="tp-skill">Frontend Dev</span>
+                            <span class="tp-skill">Animation</span>
+                        </div>
+
+                        <div class="tp-member-socials">
+                            <a href="https://github.com/dev44choudhary-debug" target="_blank" class="tp-social">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="https://linkedin.com/in/dev-choudhary-2006june" target="_blank" class="tp-social">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="https://instagram.com/devgadwal2006" target="_blank" class="tp-social">
+                                <i class="fab fa-instagram"></i> Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Bottom CTA -->
+        <div class="tp-cta">
+            <h3>Ready to explore what we built?</h3>
+            <a href="index.html#tools" class="btn-primary">
+                <i class="fas fa-rocket"></i> Check Out Our Tools
+            </a>
+        </div>
+
+    </section>
+
+
+    <script src="team.js"></script>
+</body>
+</html>

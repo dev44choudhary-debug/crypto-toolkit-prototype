@@ -40,7 +40,6 @@
     ═══════════════════════════════════ -->
     <nav class="navbar" id="navbar">
 
-        <!-- CHANGE 1: SVG Logo -->
         <a href="#home" class="nav-logo">
             <div class="nav-logo-icon">
                 <svg viewBox="0 0 40 40" width="28" height="28" fill="none">
@@ -57,15 +56,14 @@
         <ul class="nav-links">
             <li><a href="#tools">Tools</a></li>
             <li><a href="#how">How it Works</a></li>
-            <li><a href="#team">Team</a></li>
+            <li><a href="team.html">Team</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#feedback">Feedback</a></li>
             <li><a href="#" onclick="event.preventDefault();toggleChat();">Assistant</a></li>
         </ul>
 
         <div class="nav-actions">
-
-            <!-- CHANGE 2: Mode Dropdown -->
+            <!-- Mode Dropdown -->
             <div class="mode-selector" id="modeSelector">
                 <button class="mode-btn" onclick="toggleModeDropdown()">
                     <span id="modeIcon">☀️</span>
@@ -105,10 +103,10 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <a href="#tools" onclick="toggleMenu()">🔧 Tools</a>
-        <a href="#how" onclick="toggleMenu()">📖 How it Works</a>
-        <a href="#team" onclick="toggleMenu()">👥 Team</a>
-        <a href="#about" onclick="toggleMenu()">ℹ️ About</a>
+        <a href="#tools"    onclick="toggleMenu()">🔧 Tools</a>
+        <a href="#how"      onclick="toggleMenu()">📖 How it Works</a>
+        <a href="team.html" onclick="toggleMenu()">👥 Team</a>
+        <a href="#about"    onclick="toggleMenu()">ℹ️ About</a>
         <a href="#feedback" onclick="toggleMenu()">💬 Feedback</a>
         <a href="#" onclick="event.preventDefault();toggleMenu();toggleChat();">🤖 Assistant</a>
         <a href="#" onclick="event.preventDefault();toggleMenu();mobileThemeSwitch();">🔄 Switch Theme</a>
@@ -140,8 +138,8 @@
                 </p>
 
                 <div class="hero-buttons">
-                    <a href="#tools" class="btn-primary">
-                        <i class="fas fa-rocket"></i> Explore Tools
+                    <a href="team.html" class="btn-primary">
+                        <i class="fas fa-users"></i> Our Team
                     </a>
                     <a href="#demo" class="btn-secondary">
                         <i class="fas fa-play"></i> Live Demo
@@ -156,7 +154,7 @@
                 </div>
             </div>
 
-            <!-- CHANGE 3: Hero Terminal with OS Switcher -->
+            <!-- Hero Terminal with OS Switcher -->
             <div class="hero-terminal">
                 <div class="terminal-header">
                     <div class="terminal-dots">
@@ -188,6 +186,7 @@
     ═══════════════════════════════════ -->
     <section class="live-demo" id="demo">
         <div class="demo-container fade-up">
+
             <div class="demo-header">
                 <h2>⚡ Try It <span class="gradient-text">Right Now</span></h2>
                 <p>No sign up needed — experience the tools instantly</p>
@@ -200,14 +199,21 @@
             </div>
 
             <div class="demo-input-area">
-                <textarea class="demo-input" id="demoInput" placeholder="Type anything here to see it in action..." oninput="runDemo()"></textarea>
+                <textarea
+                    class="demo-input"
+                    id="demoInput"
+                    placeholder="Type anything here to see it in action..."
+                    oninput="runDemo()"
+                ></textarea>
                 <div class="demo-controls">
                     <select class="demo-select" id="demoAlgo" onchange="runDemo()">
                         <option value="sha256">SHA-256</option>
                         <option value="sha512">SHA-512</option>
                         <option value="md5">MD5 (weak)</option>
                     </select>
-                    <button class="btn-primary" onclick="runDemo()" style="padding:10px 18px;font-size:13px;">Generate</button>
+                    <button class="btn-primary" onclick="runDemo()" style="padding:10px 18px;font-size:13px;">
+                        Generate
+                    </button>
                 </div>
             </div>
 
@@ -219,63 +225,118 @@
 
 
     <!-- ═══════════════════════════════════
-         TOOLS SECTION (CHANGE 4: New Icons)
+         TOOLS SECTION
     ═══════════════════════════════════ -->
     <section class="tools-section" id="tools">
         <div class="tools-header fade-up">
             <div class="section-badge">🔧 Our Tools</div>
-            <h2 class="section-title">Powerful <span class="gradient-text">Cryptography Tools</span></h2>
-            <p class="section-subtitle">Everything you need for data security in one place. Professional grade, completely free.</p>
+            <h2 class="section-title">
+                Powerful <span class="gradient-text">Cryptography Tools</span>
+            </h2>
+            <p class="section-subtitle">
+                Everything you need for data security in one place.
+                Professional grade, completely free.
+            </p>
         </div>
 
         <div class="tools-grid">
+
+            <!-- Tool 1: RSA -->
             <a href="#" class="tool-card fade-up" id="tool-rsa">
                 <div class="tool-icon purple"><i class="fas fa-key"></i></div>
                 <div class="tool-name">RSA Key Generator</div>
-                <div class="tool-desc">Generate secure RSA key pairs with configurable sizes. Analyze key strength and export in PEM format.</div>
-                <div class="tool-tags"><span class="tag">RSA-2048</span><span class="tag">RSA-4096</span><span class="tag">PEM</span></div>
+                <div class="tool-desc">
+                    Generate secure RSA key pairs with configurable sizes.
+                    Analyze key strength and export in PEM format.
+                </div>
+                <div class="tool-tags">
+                    <span class="tag">RSA-2048</span>
+                    <span class="tag">RSA-4096</span>
+                    <span class="tag">PEM</span>
+                </div>
                 <div class="tool-cta">Try Now <i class="fas fa-arrow-right"></i></div>
             </a>
 
+            <!-- Tool 2: File Integrity -->
             <a href="#" class="tool-card fade-up" id="tool-integrity">
                 <div class="tool-icon blue"><i class="fas fa-fingerprint"></i></div>
                 <div class="tool-name">File Integrity Checker</div>
-                <div class="tool-desc">Verify file authenticity by generating and comparing cryptographic hashes. Detect any tampering instantly.</div>
-                <div class="tool-tags"><span class="tag">SHA-256</span><span class="tag">SHA-512</span><span class="tag">MD5</span></div>
+                <div class="tool-desc">
+                    Verify file authenticity by generating and comparing
+                    cryptographic hashes. Detect any tampering instantly.
+                </div>
+                <div class="tool-tags">
+                    <span class="tag">SHA-256</span>
+                    <span class="tag">SHA-512</span>
+                    <span class="tag">MD5</span>
+                </div>
                 <div class="tool-cta">Try Now <i class="fas fa-arrow-right"></i></div>
             </a>
 
+            <!-- Tool 3: Hash Generator -->
             <a href="#" class="tool-card fade-up" id="tool-hash">
                 <div class="tool-icon green"><i class="fas fa-barcode"></i></div>
                 <div class="tool-name">Hash Generator</div>
-                <div class="tool-desc">Generate cryptographic hashes for text and files using multiple algorithms simultaneously.</div>
-                <div class="tool-tags"><span class="tag">MD5</span><span class="tag">SHA-1</span><span class="tag">BLAKE2</span></div>
+                <div class="tool-desc">
+                    Generate cryptographic hashes for text and files
+                    using multiple algorithms simultaneously.
+                </div>
+                <div class="tool-tags">
+                    <span class="tag">MD5</span>
+                    <span class="tag">SHA-1</span>
+                    <span class="tag">BLAKE2</span>
+                </div>
                 <div class="tool-cta">Try Now <i class="fas fa-arrow-right"></i></div>
             </a>
 
+            <!-- Tool 4: Encrypt/Decrypt -->
             <a href="#" class="tool-card fade-up" id="tool-encrypt">
                 <div class="tool-icon red"><i class="fas fa-user-lock"></i></div>
                 <div class="tool-name">Text Encrypt / Decrypt</div>
-                <div class="tool-desc">Encrypt and decrypt messages using AES-256 or RSA. Secure your sensitive information with one click.</div>
-                <div class="tool-tags"><span class="tag">AES-256</span><span class="tag">RSA</span><span class="tag">CBC</span></div>
+                <div class="tool-desc">
+                    Encrypt and decrypt messages using AES-256 or RSA.
+                    Secure your sensitive information with one click.
+                </div>
+                <div class="tool-tags">
+                    <span class="tag">AES-256</span>
+                    <span class="tag">RSA</span>
+                    <span class="tag">CBC</span>
+                </div>
                 <div class="tool-cta">Try Now <i class="fas fa-arrow-right"></i></div>
             </a>
 
+            <!-- Tool 5: Digital Signature -->
             <a href="#" class="tool-card fade-up" id="tool-signature">
                 <div class="tool-icon yellow"><i class="fas fa-file-contract"></i></div>
                 <div class="tool-name">Digital Signature</div>
-                <div class="tool-desc">Sign and verify documents digitally. Ensure authenticity and non-repudiation of your data.</div>
-                <div class="tool-tags"><span class="tag">RSA-PSS</span><span class="tag">ECDSA</span><span class="tag">Verify</span></div>
+                <div class="tool-desc">
+                    Sign and verify documents digitally. Ensure
+                    authenticity and non-repudiation of your data.
+                </div>
+                <div class="tool-tags">
+                    <span class="tag">RSA-PSS</span>
+                    <span class="tag">ECDSA</span>
+                    <span class="tag">Verify</span>
+                </div>
                 <div class="tool-cta">Try Now <i class="fas fa-arrow-right"></i></div>
             </a>
 
+            <!-- Tool 6: Password -->
             <a href="#" class="tool-card fade-up" id="tool-password">
                 <div class="tool-icon pink"><i class="fas fa-unlock-keyhole"></i></div>
                 <div class="tool-name">Password Tools</div>
-                <div class="tool-desc">Generate cryptographically secure passwords and analyze strength with entropy calculations.</div>
-                <div class="tool-tags"><span class="tag">Entropy</span><span class="tag">CSPRNG</span><span class="tag">Strength</span></div>
+                <div class="tool-desc">
+                    Generate cryptographically secure passwords and
+                    analyze strength with entropy calculations.
+                </div>
+                <div class="tool-tags">
+                    <span class="tag">Entropy</span>
+                    <span class="tag">CSPRNG</span>
+                    <span class="tag">Strength</span>
+                </div>
                 <div class="tool-cta">Try Now <i class="fas fa-arrow-right"></i></div>
             </a>
+
         </div>
     </section>
 
@@ -285,26 +346,72 @@
     ═══════════════════════════════════ -->
     <section class="why-section" id="about">
         <div class="why-container">
+
+            <!-- Left Content -->
             <div class="why-content fade-up">
                 <div class="section-badge">✨ Why CryptoKit</div>
-                <h2 class="section-title">Built for <span class="gradient-text">Security First</span></h2>
-                <p class="section-subtitle" style="margin-bottom:28px;">Designed with privacy and security as the top priority — not an afterthought.</p>
+                <h2 class="section-title">
+                    Built for <span class="gradient-text">Security First</span>
+                </h2>
+                <p class="section-subtitle" style="margin-bottom:28px;">
+                    Designed with privacy and security as the top priority — not an afterthought.
+                </p>
                 <ul class="why-list">
-                    <li><div class="check"><i class="fas fa-check"></i></div><span>Your files and keys are <strong>never stored</strong> on our servers</span></li>
-                    <li><div class="check"><i class="fas fa-check"></i></div><span>Many operations run <strong>client-side</strong> for maximum privacy</span></li>
-                    <li><div class="check"><i class="fas fa-check"></i></div><span>All algorithms follow <strong>NIST &amp; OWASP</strong> recommendations</span></li>
-                    <li><div class="check"><i class="fas fa-check"></i></div><span>Full source code on <strong>GitHub</strong> — audit it yourself</span></li>
-                    <li><div class="check"><i class="fas fa-check"></i></div><span>Weak algorithm <strong>warnings built-in</strong> to guide best practices</span></li>
+                    <li>
+                        <div class="check"><i class="fas fa-check"></i></div>
+                        <span>Your files and keys are <strong>never stored</strong> on our servers</span>
+                    </li>
+                    <li>
+                        <div class="check"><i class="fas fa-check"></i></div>
+                        <span>Many operations run <strong>client-side</strong> for maximum privacy</span>
+                    </li>
+                    <li>
+                        <div class="check"><i class="fas fa-check"></i></div>
+                        <span>All algorithms follow <strong>NIST &amp; OWASP</strong> recommendations</span>
+                    </li>
+                    <li>
+                        <div class="check"><i class="fas fa-check"></i></div>
+                        <span>Full source code on <strong>GitHub</strong> — audit it yourself</span>
+                    </li>
+                    <li>
+                        <div class="check"><i class="fas fa-check"></i></div>
+                        <span>Weak algorithm <strong>warnings built-in</strong> to guide best practices</span>
+                    </li>
                 </ul>
             </div>
 
+            <!-- Right Feature Cards -->
             <div class="why-features fade-up">
-                <div class="feature-card"><div class="feature-icon">🛡️</div><div class="feature-title">Secure by Design</div><div class="feature-desc">Industry-standard crypto implementations only</div></div>
-                <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Lightning Fast</div><div class="feature-desc">Results in milliseconds, no waiting</div></div>
-                <div class="feature-card"><div class="feature-icon">🔒</div><div class="feature-title">Privacy First</div><div class="feature-desc">Zero data retention policy, always</div></div>
-                <div class="feature-card"><div class="feature-icon">📖</div><div class="feature-title">Open Source</div><div class="feature-desc">MIT licensed. Fork, audit, contribute</div></div>
-                <div class="feature-card"><div class="feature-icon">🌐</div><div class="feature-title">No Install</div><div class="feature-desc">100% browser-based, any device</div></div>
-                <div class="feature-card"><div class="feature-icon">🆓</div><div class="feature-title">Free Forever</div><div class="feature-desc">No premium tiers. No hidden charges.</div></div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-title">Secure by Design</div>
+                    <div class="feature-desc">Industry-standard crypto implementations only</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Lightning Fast</div>
+                    <div class="feature-desc">Results in milliseconds, no waiting</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-title">Privacy First</div>
+                    <div class="feature-desc">Zero data retention policy, always</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📖</div>
+                    <div class="feature-title">Open Source</div>
+                    <div class="feature-desc">MIT licensed. Fork, audit, contribute</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <div class="feature-title">No Install</div>
+                    <div class="feature-desc">100% browser-based, any device</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🆓</div>
+                    <div class="feature-title">Free Forever</div>
+                    <div class="feature-desc">No premium tiers. No hidden charges.</div>
+                </div>
             </div>
         </div>
     </section>
@@ -326,14 +433,18 @@
                 <div class="step-title">Choose Your Tool</div>
                 <div class="step-desc">Browse our cryptographic tools and pick the right one</div>
             </div>
-            <div class="step-connector fade-up"><i class="fas fa-chevron-right"></i></div>
+            <div class="step-connector fade-up">
+                <i class="fas fa-chevron-right"></i>
+            </div>
             <div class="step-card fade-up">
                 <div class="step-number">2</div>
                 <div class="step-icon">📥</div>
                 <div class="step-title">Input Your Data</div>
                 <div class="step-desc">Enter text, upload a file, or paste your keys</div>
             </div>
-            <div class="step-connector fade-up"><i class="fas fa-chevron-right"></i></div>
+            <div class="step-connector fade-up">
+                <i class="fas fa-chevron-right"></i>
+            </div>
             <div class="step-card fade-up">
                 <div class="step-number">3</div>
                 <div class="step-icon">📤</div>
@@ -349,270 +460,98 @@
     ═══════════════════════════════════ -->
     <section class="stats-section">
         <div class="stats-container">
-            <div class="stat-card fade-up"><div class="stat-icon">🔧</div><span class="stat-number" data-target="12">0</span><div class="stat-label">Tools Available</div></div>
-            <div class="stat-card fade-up"><div class="stat-icon">⚡</div><span class="stat-number" data-target="50" data-suffix="K+">0</span><div class="stat-label">Operations Done</div></div>
-            <div class="stat-card fade-up"><div class="stat-icon">🔒</div><span class="stat-number" data-target="256" data-suffix="-bit">0</span><div class="stat-label">Max Encryption</div></div>
-            <div class="stat-card fade-up"><div class="stat-icon">🗄️</div><span class="stat-number" data-target="0" data-suffix=" Files">0</span><div class="stat-label">Data Stored</div></div>
+            <div class="stat-card fade-up">
+                <div class="stat-icon">🔧</div>
+                <span class="stat-number" data-target="12">0</span>
+                <div class="stat-label">Tools Available</div>
+            </div>
+            <div class="stat-card fade-up">
+                <div class="stat-icon">⚡</div>
+                <span class="stat-number" data-target="50" data-suffix="K+">0</span>
+                <div class="stat-label">Operations Done</div>
+            </div>
+            <div class="stat-card fade-up">
+                <div class="stat-icon">🔒</div>
+                <span class="stat-number" data-target="256" data-suffix="-bit">0</span>
+                <div class="stat-label">Max Encryption</div>
+            </div>
+            <div class="stat-card fade-up">
+                <div class="stat-icon">🗄️</div>
+                <span class="stat-number" data-target="0" data-suffix=" Files">0</span>
+                <div class="stat-label">Data Stored</div>
+            </div>
         </div>
     </section>
 
 
-   <!-- ═══════════════════════════════════
-     MEET OUR TEAM
-═══════════════════════════════════ -->
-<section class="team-section" id="team">
-    <div class="team-header fade-up">
-        <div class="section-badge">👥 Our Team</div>
-        <h2 class="section-title"> Place where hackers meets the <span class="gradient-text">Developers</span></h2>
-        <p class="section-subtitle" style="margin:0 auto;">
-            The passionate minds behind CryptoKit
-        </p>
-    </div>
-
-    <div class="team-grid">
-
-        <!-- ───--------------------------------------------------------- Member 1 -------------------------------------------------─── -->
-        <div class="team-card fade-up">
-            <!-- Colored top banner -->
-            <div class="team-card-banner"></div>
-
-            <!-- Profile Photo -->
-            <div class="team-photo-wrap">
-                <div class="team-photo-ring">
-                    <div class="team-photo-inner">
-                        
-                        <img
-                            src="images/Ashish.png"
-                            alt="Ashish Kumawat"
-                            class="team-photo"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                        />
-                        <span class="team-photo-letter" style="display:none;">AK</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info -->
-            <div class="team-info">
-                <h3 class="team-name">Ashish Kumawat</h3>
-                <span class="team-role-badge">
-                    <span class="team-role-dot"></span>
-                    Algorithm Architect and Solution Designer
-                </span>
-                <p class="team-bio">
-                    Designs and optimizes the core algorithms that power the platform's tools and features.
-                </p>
-            </div>
-
-            <!-- Divider -->
-            <div class="team-divider"></div>
-
-            <!-- Social Links -->
-            <div class="team-social">
-                <a href="https://github.com/AshishKumawat04" class="team-social-btn" title="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://www.linkedin.com/in/ashish-kumawat-96a95b322" class="team-social-btn" title="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://instagram.com/" class="team-social-btn" title="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </div>
-
-            <div class="team-glow"></div>
-        </div>
-
-<!---------------------------------------------------------- ─── Member 2 ───-------------------------------------------------------- -->
-        <div class="team-card fade-up">
-            <div class="team-card-banner"></div>
-
-            <div class="team-photo-wrap">
-                <div class="team-photo-ring">
-                    <div class="team-photo-inner">
-                        <img
-                            src="images/Sadanand.jpeg"
-                            alt="Sadanand Kumawat"
-                            class="team-photo"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                        />
-                        <span class="team-photo-letter" style="display:none;">S</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="team-info">
-                <h3 class="team-name">Sadanand Kumawat</h3>
-                <span class="team-role-badge">
-                    <span class="team-role-dot"></span>
-                    Backend Engineer
-                </span>
-                <p class="team-bio">
-                    Develops and maintains the server-side logic, APIs, and application functionality.
-                </p>
-            </div>
-
-            <div class="team-divider"></div>
-
-            <div class="team-social">
-                <a href="https://github.com/Sadanand1754" class="team-social-btn" title="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://linkedin.com/in/" class="team-social-btn" title="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://instagram.com/" class="team-social-btn" title="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </div>
-
-            <div class="team-glow"></div>
-        </div>
-
-
-<!---------------------------------------------------------------- ─── Member 3 ─── ----------------------------------------------------->
-        <div class="team-card fade-up">
-            <div class="team-card-banner"></div>
-
-            <div class="team-photo-wrap">
-                <div class="team-photo-ring">
-                    <div class="team-photo-inner">
-                       
-                        <img
-                            src="images/Narendra.jpeg"
-                            alt="Narendra Kumar"
-                            class="team-photo"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                        />
-                        <span class="team-photo-letter" style="display:none;">N</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="team-info">
-                <h3 class="team-name">Narendra Kumar</h3>
-                <span class="team-role-badge">
-                    <span class="team-role-dot"></span>
-                    Security &amp; Database Engineer
-                </span>
-                <p class="team-bio">
-                    Ensures data security, manages database architecture,
-                    and maintains system integrity.
-                </p>
-            </div>
-
-            <div class="team-divider"></div>
-
-            <div class="team-social">
-                <a href="https://github.com/" class="team-social-btn" title="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://www.linkedin.com/in/narendra-kumar-0924/" class="team-social-btn" title="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://instagram.com/" class="team-social-btn" title="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </div>
-
-            <div class="team-glow"></div>
-        </div>
-
-
-<!--------------------------------------------------------- ─── Member 4 ─── ------------------------------------------------------------>
-        <div class="team-card fade-up">
-            <div class="team-card-banner"></div>
-
-            <div class="team-photo-wrap">
-                <div class="team-photo-ring">
-                    <div class="team-photo-inner">
-                        <img
-                            src="images/Profile Photo.jpeg"
-                            alt="Dev Choudhary"
-                            class="team-photo"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                        />
-                        <span class="team-photo-letter" style="display:none;">P</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="team-info">
-                <h3 class="team-name">Dev Choudhary</h3>
-                <span class="team-role-badge">
-                    <span class="team-role-dot"></span>
-                    Frontend Engineer
-                </span>
-                <p class="team-bio">
-                    Builds responsive user interfaces and assists in implementing and refining algorithm logic.
-                </p>
-            </div>
-
-            <div class="team-divider"></div>
-
-            <div class="team-social">
-                <a href="https://github.com/dev44choudhary-debug" class="team-social-btn" title="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://linkedin.com/in/dev-choudhary-2006june" class="team-social-btn" title="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://instagram.com/devgadwal2006" class="team-social-btn" title="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </div>
-
-            <div class="team-glow"></div>
-        </div>
-
-    </div>
-</section>
-
 
     <!-- ═══════════════════════════════════
-         CHANGE 5: FEEDBACK & REVIEWS
+         FEEDBACK & REVIEWS
     ═══════════════════════════════════ -->
     <section class="feedback-section" id="feedback">
+
         <div class="feedback-header fade-up">
             <div class="section-badge">💬 Feedback</div>
             <h2 class="section-title">What People <span class="gradient-text">Say</span></h2>
             <p class="section-subtitle" style="margin:0 auto;">Reviews from our community</p>
         </div>
 
-        <!-- Reviews -->
+        <!-- Community Reviews -->
         <div class="reviews-grid">
             <div class="review-card fade-up">
                 <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"CryptoKit is exactly what I needed. Fast, free, and privacy-focused. The hash generator is incredibly useful for my workflow."</p>
+                <p class="review-text">
+                    "CryptoKit is exactly what I needed. Fast, free, and privacy-focused.
+                    The hash generator is incredibly useful for my workflow."
+                </p>
                 <div class="review-author">
                     <div class="review-avatar">D</div>
-                    <div><div class="review-name">David Kim</div><div class="review-role">Security Engineer</div></div>
+                    <div>
+                        <div class="review-name">David Kim</div>
+                        <div class="review-role">Security Engineer</div>
+                    </div>
                 </div>
             </div>
+
             <div class="review-card fade-up">
                 <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"The hacker mode is incredible! Love the Matrix aesthetic. Finally a crypto toolkit that doesn't look boring."</p>
+                <p class="review-text">
+                    "The hacker mode is incredible! Love the Matrix aesthetic.
+                    Finally a crypto toolkit that doesn't look boring."
+                </p>
                 <div class="review-author">
                     <div class="review-avatar">E</div>
-                    <div><div class="review-name">Emma Wilson</div><div class="review-role">CS Student</div></div>
+                    <div>
+                        <div class="review-name">Emma Wilson</div>
+                        <div class="review-role">CS Student</div>
+                    </div>
                 </div>
             </div>
+
             <div class="review-card fade-up">
                 <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Open source and zero data storage is a game changer. I recommend CryptoKit to all my developer colleagues."</p>
+                <p class="review-text">
+                    "Open source and zero data storage is a game changer.
+                    I recommend CryptoKit to all my developer colleagues."
+                </p>
                 <div class="review-author">
                     <div class="review-avatar">R</div>
-                    <div><div class="review-name">Raj Sharma</div><div class="review-role">Full Stack Dev</div></div>
+                    <div>
+                        <div class="review-name">Raj Sharma</div>
+                        <div class="review-role">Full Stack Dev</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Feedback Form -->
         <div class="feedback-form-wrapper fade-up" id="feedbackFormWrapper">
-            <h3 class="feedback-form-title">Share Your <span class="gradient-text">Feedback</span></h3>
+            <h3 class="feedback-form-title">
+                Share Your <span class="gradient-text">Feedback</span>
+            </h3>
             <form class="feedback-form" id="feedbackForm" onsubmit="return submitFeedback(event)">
                 <div class="feedback-row">
-                    <input type="text" class="feedback-input" id="fbName" placeholder="Your Name" required>
+                    <input type="text"  class="feedback-input" id="fbName" placeholder="Your Name"  required>
                     <input type="email" class="feedback-input" placeholder="Your Email" required>
                 </div>
                 <div class="feedback-rating" id="feedbackRating">
@@ -623,12 +562,18 @@
                     <span class="rating-star" onclick="setRating(4)">☆</span>
                     <span class="rating-star" onclick="setRating(5)">☆</span>
                 </div>
-                <textarea class="feedback-textarea" placeholder="Tell us what you think..." rows="4" required></textarea>
+                <textarea
+                    class="feedback-textarea"
+                    placeholder="Tell us what you think..."
+                    rows="4"
+                    required
+                ></textarea>
                 <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">
                     <i class="fas fa-paper-plane"></i> Submit Feedback
                 </button>
             </form>
         </div>
+
     </section>
 
 
@@ -641,8 +586,12 @@
             <h2>Ready to <span class="gradient-text">Secure Your Data?</span></h2>
             <p>Join thousands of developers and security professionals who trust CryptoKit.</p>
             <div class="cta-buttons">
-                <a href="#tools" class="btn-primary"><i class="fas fa-rocket"></i> Start Using Tools</a>
-                <a href="#" class="btn-secondary"><i class="fab fa-github"></i> View on GitHub</a>
+                <a href="#tools" class="btn-primary">
+                    <i class="fas fa-rocket"></i> Start Using Tools
+                </a>
+                <a href="#" class="btn-secondary">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
             </div>
         </div>
     </section>
@@ -654,6 +603,8 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-top">
+
+                <!-- Brand -->
                 <div class="footer-brand">
                     <a href="#home" class="nav-logo">
                         <div class="nav-logo-icon">
@@ -676,6 +627,7 @@
                     </div>
                 </div>
 
+                <!-- Tools Column -->
                 <div class="footer-col">
                     <h4>Tools</h4>
                     <ul>
@@ -687,6 +639,7 @@
                     </ul>
                 </div>
 
+                <!-- Resources Column -->
                 <div class="footer-col">
                     <h4>Resources</h4>
                     <ul>
@@ -697,16 +650,18 @@
                     </ul>
                 </div>
 
+                <!-- Company Column -->
                 <div class="footer-col">
                     <h4>Company</h4>
                     <ul>
-                        <li><a href="#team">Meet the Team</a></li>
+                        <li><a href="team.html">Meet the Team</a></li>
                         <li><a href="#feedback">Feedback</a></li>
                         <li><a href="#">Privacy Policy</a></li>
                         <li><a href="#">Terms</a></li>
                         <li><a href="#">Contact</a></li>
                     </ul>
                 </div>
+
             </div>
 
             <div class="footer-bottom">
@@ -730,14 +685,19 @@
 
 
     <!-- ═══════════════════════════════════
-         AI ASSISTANT
+         AI ASSISTANT — FLOATING BUTTON
     ═══════════════════════════════════ -->
     <button class="ai-fab" id="aiFab" onclick="toggleChat()" title="Ask CryptoBot">
         <span id="fabIcon">🤖</span>
     </button>
 
+
+    <!-- ═══════════════════════════════════
+         AI ASSISTANT — CHAT WINDOW
+    ═══════════════════════════════════ -->
     <div class="ai-chat-window" id="aiChatWindow">
-        <!-- Header -->
+
+        <!-- Chat Header -->
         <div class="ai-chat-header">
             <div class="ai-header-info">
                 <div class="ai-avatar" id="aiAvatar">🤖</div>
@@ -750,8 +710,12 @@
                 </div>
             </div>
             <div class="ai-header-actions">
-                <button class="ai-header-btn" onclick="clearChat()" title="Clear"><i class="fas fa-trash-alt"></i></button>
-                <button class="ai-header-btn" onclick="toggleChat()" title="Close"><i class="fas fa-times"></i></button>
+                <button class="ai-header-btn" onclick="clearChat()" title="Clear">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <button class="ai-header-btn" onclick="toggleChat()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
 
@@ -766,17 +730,24 @@
             </div>
         </div>
 
-        <!-- Messages -->
+        <!-- Messages Area -->
         <div class="ai-messages" id="aiMessages"></div>
 
-        <!-- Input -->
+        <!-- Input Area -->
         <div class="ai-input-area">
-            <textarea class="ai-input" id="aiInput" placeholder="Ask me anything about cryptography..." rows="1"
+            <textarea
+                class="ai-input"
+                id="aiInput"
+                placeholder="Ask me anything about cryptography..."
+                rows="1"
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
-                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px';">
-            </textarea>
-            <button class="ai-send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px';"
+            ></textarea>
+            <button class="ai-send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
+
     </div>
 
 
