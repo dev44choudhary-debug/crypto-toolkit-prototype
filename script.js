@@ -449,11 +449,17 @@ function clearChat() {
 
 // Update AI Theme
 function updateAiTheme(isH) {
-    document.getElementById('fabIcon').textContent = isH ? '👾' : '🤖';
-    document.getElementById('aiAvatar').textContent = isH ? '👾' : '🤖';
-    document.getElementById('aiName').textContent = isH ? 'GHOST' : 'CryptoBot';
-    document.getElementById('aiStatusText').textContent = isH ? 'ONLINE · SECURE' : 'Online · Ready';
-    document.querySelector('.ai-input').placeholder = isH
+    var fabIcon = document.getElementById('fabIcon');
+    var aiAvatar = document.getElementById('aiAvatar');
+    var aiName = document.getElementById('aiName');
+    var aiStatus = document.getElementById('aiStatusText');
+    var aiInput = document.querySelector('.ai-input');
+
+    if (fabIcon) fabIcon.textContent = isH ? '👾' : '🤖';
+    if (aiAvatar) aiAvatar.textContent = isH ? '👾' : '🤖';
+    if (aiName) aiName.textContent = isH ? 'GHOST' : 'CryptoBot';
+    if (aiStatus) aiStatus.textContent = isH ? 'ONLINE · SECURE' : 'Online · Ready';
+    if (aiInput) aiInput.placeholder = isH
         ? '> TYPE QUERY OR /help...'
         : 'Ask me anything about cryptography...';
 }
@@ -541,6 +547,9 @@ var columns = Math.floor(mCanvas.width / fontSize);
 var drops = [];
 for (var i = 0; i < columns; i++) drops[i] = 1;
 
+// Multiple colors for hacker mode matrix (dominantly green + rare accents)
+var matrixColors = ['#00FF41', '#00FF41', '#00FF41', '#00FF41', '#00FF41', '#39FF14', '#39FF14', '#CCFF00', '#00E5FF'];
+
 var mAnimId;
 
 function drawMatrix() {
@@ -552,7 +561,12 @@ function drawMatrix() {
 
     for (var i = 0; i < drops.length; i++) {
         var ch = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-        mCtx.fillStyle = (drops[i] * fontSize < 50) ? '#FFFFFF' : '#00FF41';
+        // White at head, colored trail
+        if (drops[i] * fontSize < 50) {
+            mCtx.fillStyle = '#FFFFFF';
+        } else {
+            mCtx.fillStyle = matrixColors[Math.floor(Math.random() * matrixColors.length)];
+        }
         mCtx.fillText(ch, i * fontSize, drops[i] * fontSize);
 
         if (drops[i] * fontSize > mCanvas.height && Math.random() > 0.975) {
@@ -578,7 +592,7 @@ window.addEventListener('resize', function() {
    TERMINAL ANIMATION
 ═══════════════════════════════════════════════════════ */
 
-var termLines = [
+var macTermLines = [
     { type: 'prompt',  text: 'cryptokit hash --algo SHA-256 --input "Hello"' },
     { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
     { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
@@ -597,6 +611,26 @@ var termLines = [
     { type: 'cursor',  text: '' }
 ];
 
+var winTermLines = [
+    { type: 'prompt',  text: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello"' },
+    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
+    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
+    { type: 'success', text: '[OK] Hash generated in 2ms' },
+    { type: 'blank',   text: '' },
+    { type: 'prompt',  text: 'cryptokit.exe rsa /generate /bits:2048' },
+    { type: 'success', text: '[...] Generating RSA-2048 key pair...' },
+    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
+    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
+    { type: 'success', text: '[OK] Keys generated in 180ms' },
+    { type: 'blank',   text: '' },
+    { type: 'prompt',  text: 'cryptokit.exe verify /file:report.pdf' },
+    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
+    { type: 'success', text: '[OK] File integrity verified!' },
+    { type: 'blank',   text: '' },
+    { type: 'cursor',  text: '' }
+];
+
+var termLines = macTermLines;
 var termBody = document.getElementById('terminalBody');
 var lineIdx = 0;
 
@@ -641,7 +675,38 @@ setTimeout(addTermLine, 800);
 
 
 /* ═══════════════════════════════════════════════════════
-   THEME TOGGLE
+   TERMINAL OS SWITCHER (Mac / Windows)
+═══════════════════════════════════════════════════════ */
+
+var terminalOS = 'mac';
+
+function switchTermOS(os) {
+    terminalOS = os;
+
+    // Update button states
+    document.getElementById('osMac').classList.toggle('active', os === 'mac');
+    document.getElementById('osWin').classList.toggle('active', os === 'win');
+
+    // Update terminal title
+    var title = document.getElementById('terminalTitle');
+    if (os === 'mac') {
+        title.textContent = 'cryptokit ~ zsh';
+    } else {
+        title.textContent = 'C:\\cryptokit> cmd';
+    }
+
+    // Update the terminal lines
+    termLines = (os === 'mac') ? macTermLines : winTermLines;
+
+    // Restart terminal animation
+    termBody.innerHTML = '';
+    lineIdx = 0;
+    addTermLine();
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   THEME TOGGLE - BOOT MESSAGES
 ═══════════════════════════════════════════════════════ */
 
 var hackerBoot = [
@@ -687,43 +752,112 @@ function showTransition(msgs, callback) {
     nextLine();
 }
 
-function toggleTheme() {
-    var isNormal = (currentTheme === 'normal');
-    var bootMsgs = isNormal ? hackerBoot : normalBoot;
 
+/* ═══════════════════════════════════════════════════════
+   ⭐ MODE DROPDOWN SELECTOR (SINGLE CLEAN VERSION)
+═══════════════════════════════════════════════════════ */
+
+function toggleModeDropdown() {
+    var dropdown = document.getElementById('modeDropdown');
+    var arrow = document.getElementById('modeArrow');
+    if (dropdown) dropdown.classList.toggle('open');
+    if (arrow) arrow.classList.toggle('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    var selector = document.getElementById('modeSelector');
+    if (selector && !selector.contains(e.target)) {
+        var dd = document.getElementById('modeDropdown');
+        var ar = document.getElementById('modeArrow');
+        if (dd) dd.classList.remove('open');
+        if (ar) ar.classList.remove('open');
+    }
+});
+
+// Mobile theme quick switch
+function mobileThemeSwitch() {
+    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
+    selectMode(newMode);
+}
+
+// MAIN MODE SELECTOR FUNCTION
+function selectMode(mode) {
+
+    // Step 1: Close the dropdown
+    var dd = document.getElementById('modeDropdown');
+    var ar = document.getElementById('modeArrow');
+    if (dd) dd.classList.remove('open');
+    if (ar) ar.classList.remove('open');
+
+    // Step 2: Skip if already in this mode
+    if (mode === currentTheme) return;
+
+    // Step 3: Pick the right boot messages
+    var isGoingHacker = (mode === 'hacker');
+    var bootMsgs = isGoingHacker ? hackerBoot : normalBoot;
+
+    // Step 4: Show transition overlay, then switch everything
     showTransition(bootMsgs, function() {
-        if (isNormal) {
-            // Switch to Hacker Mode
+
+        if (isGoingHacker) {
+            // ── SWITCH TO HACKER ──
             currentTheme = 'hacker';
             document.documentElement.setAttribute('data-theme', 'hacker');
+            localStorage.setItem('cryptokit-theme', 'hacker');
 
-            // Stop particles, start matrix
+            // Stop normal particles
             cancelAnimationFrame(pAnimId);
             pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+            // Start matrix rain
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
             columns = Math.floor(mCanvas.width / fontSize);
             drops = [];
             for (var i = 0; i < columns; i++) drops[i] = 1;
             drawMatrix();
 
-            document.getElementById('themeLabel').textContent = 'Hacker';
+            // Update dropdown UI
+            var mi = document.getElementById('modeIcon');
+            var ml = document.getElementById('modeLabel');
+            var cn = document.getElementById('checkNormal');
+            var ch = document.getElementById('checkHacker');
+            if (mi) mi.textContent = '💀';
+            if (ml) ml.textContent = 'Hacker';
+            if (cn) cn.style.display = 'none';
+            if (ch) ch.style.display = 'inline';
+
+            // Update AI assistant
             updateAiTheme(true);
 
         } else {
-            // Switch to Normal Mode
+            // ── SWITCH TO NORMAL ──
             currentTheme = 'normal';
             document.documentElement.setAttribute('data-theme', 'normal');
+            localStorage.setItem('cryptokit-theme', 'normal');
 
-            // Stop matrix, start particles
+            // Stop matrix rain
             cancelAnimationFrame(mAnimId);
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
+
+            // Start normal particles
             animateParticles();
 
-            document.getElementById('themeLabel').textContent = 'Normal';
+            // Update dropdown UI
+            var mi2 = document.getElementById('modeIcon');
+            var ml2 = document.getElementById('modeLabel');
+            var cn2 = document.getElementById('checkNormal');
+            var ch2 = document.getElementById('checkHacker');
+            if (mi2) mi2.textContent = '☀️';
+            if (ml2) ml2.textContent = 'Normal';
+            if (cn2) cn2.style.display = 'inline';
+            if (ch2) ch2.style.display = 'none';
+
+            // Update AI assistant
             updateAiTheme(false);
         }
 
-        // Refresh chat if open
+        // Refresh AI chat if it was open
         if (chatOpen && msgCount > 0) {
             document.getElementById('aiMessages').innerHTML = '';
             msgCount = 0;
@@ -732,6 +866,11 @@ function toggleTheme() {
     });
 }
 
+// Keep toggleTheme as a wrapper (for backwards compatibility)
+function toggleTheme() {
+    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
+    selectMode(newMode);
+}
 
 
 /* ═══════════════════════════════════════════════════════
@@ -951,126 +1090,9 @@ for (var i = 0; i < statContainers.length; i++) {
     statsObserver.observe(statContainers[i]);
 }
 
-/* ═══════════════════════════════════════════════════════
-   CHANGE 2: MODE DROPDOWN SELECTOR
-═══════════════════════════════════════════════════════ */
-
-function toggleModeDropdown() {
-    var dropdown = document.getElementById('modeDropdown');
-    var arrow = document.getElementById('modeArrow');
-    dropdown.classList.toggle('open');
-    arrow.classList.toggle('open');
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-    var selector = document.getElementById('modeSelector');
-    if (selector && !selector.contains(e.target)) {
-        document.getElementById('modeDropdown').classList.remove('open');
-        document.getElementById('modeArrow').classList.remove('open');
-    }
-});
-
-function selectMode(mode) {
-    // Close dropdown
-    document.getElementById('modeDropdown').classList.remove('open');
-    document.getElementById('modeArrow').classList.remove('open');
-
-    // Don't switch if already in same mode
-    if (mode === currentTheme) return;
-
-    // Update checkmarks
-    if (mode === 'normal') {
-        document.getElementById('checkNormal').style.display = 'inline';
-        document.getElementById('checkHacker').style.display = 'none';
-        document.getElementById('modeIcon').textContent = '☀️';
-        document.getElementById('modeLabel').textContent = 'Normal';
-    } else {
-        document.getElementById('checkNormal').style.display = 'none';
-        document.getElementById('checkHacker').style.display = 'inline';
-        document.getElementById('modeIcon').textContent = '💀';
-        document.getElementById('modeLabel').textContent = 'Hacker';
-    }
-
-    // Trigger the existing theme toggle
-    toggleTheme();
-}
-
 
 /* ═══════════════════════════════════════════════════════
-   CHANGE 3: TERMINAL OS SWITCHER (Mac / Windows)
-═══════════════════════════════════════════════════════ */
-
-var terminalOS = 'mac';
-
-var macTermLines = [
-    { type: 'prompt',  text: 'cryptokit hash --algo SHA-256 --input "Hello"' },
-    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
-    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
-    { type: 'success', text: '✅ Hash generated in 2ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit rsa --generate --bits 2048' },
-    { type: 'success', text: '⚙  Generating RSA-2048 key pair...' },
-    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
-    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
-    { type: 'success', text: '✅ Keys generated in 180ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit verify --file report.pdf' },
-    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
-    { type: 'success', text: '✅ File integrity verified!' },
-    { type: 'blank',   text: '' },
-    { type: 'cursor',  text: '' }
-];
-
-var winTermLines = [
-    { type: 'prompt',  text: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello"' },
-    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
-    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
-    { type: 'success', text: '[OK] Hash generated in 2ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit.exe rsa /generate /bits:2048' },
-    { type: 'success', text: '[...] Generating RSA-2048 key pair...' },
-    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
-    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
-    { type: 'success', text: '[OK] Keys generated in 180ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit.exe verify /file:report.pdf' },
-    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
-    { type: 'success', text: '[OK] File integrity verified!' },
-    { type: 'blank',   text: '' },
-    { type: 'cursor',  text: '' }
-];
-
-function switchTermOS(os) {
-    terminalOS = os;
-
-    // Update button states
-    document.getElementById('osMac').classList.toggle('active', os === 'mac');
-    document.getElementById('osWin').classList.toggle('active', os === 'win');
-
-    // Update terminal title
-    var title = document.getElementById('terminalTitle');
-    if (os === 'mac') {
-        title.textContent = 'cryptokit ~ zsh';
-    } else {
-        title.textContent = 'C:\\cryptokit> cmd';
-    }
-
-    // Update the terminal lines reference used by the animation
-    termLines = (os === 'mac') ? macTermLines : winTermLines;
-
-    // Restart terminal animation
-    termBody.innerHTML = '';
-    lineIdx = 0;
-    addTermLine();
-}
-
-// Override the original termLines with mac by default
-termLines = macTermLines;
-
-
-/* ═══════════════════════════════════════════════════════
-   CHANGE 5: FEEDBACK FORM FUNCTIONS
+   FEEDBACK FORM FUNCTIONS
 ═══════════════════════════════════════════════════════ */
 
 var currentRating = 0;
@@ -1115,175 +1137,16 @@ function submitFeedback(event) {
     return false;
 }
 
-/* ═══════════════════════════════════════════════════════
-   FIXED: selectMode + toggleTheme + mobileThemeSwitch
-═══════════════════════════════════════════════════════ */
-
-function mobileThemeSwitch() {
-    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
-    selectMode(newMode);
-}
-
-function selectMode(mode) {
-
-    // Step 1: Close the dropdown
-    var dd = document.getElementById('modeDropdown');
-    var ar = document.getElementById('modeArrow');
-    if (dd) dd.classList.remove('open');
-    if (ar) ar.classList.remove('open');
-
-    // Step 2: Skip if already in this mode
-    if (mode === currentTheme) return;
-
-    // Step 3: Pick the right boot messages
-    var isGoingHacker = (mode === 'hacker');
-    var bootMsgs = isGoingHacker ? hackerBoot : normalBoot;
-
-    // Step 4: Show transition overlay then switch everything
-    showTransition(bootMsgs, function() {
-
-        if (isGoingHacker) {
-            // ── SWITCH TO HACKER ──
-            currentTheme = 'hacker';
-            document.documentElement.setAttribute('data-theme', 'hacker');
-
-            // Stop normal particles
-            cancelAnimationFrame(pAnimId);
-            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-
-            // Start matrix rain
-            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
-            columns = Math.floor(mCanvas.width / fontSize);
-            drops = [];
-            for (var i = 0; i < columns; i++) drops[i] = 1;
-            drawMatrix();
-
-            // Update dropdown UI to show Hacker is selected
-            document.getElementById('modeIcon').textContent = '💀';
-            document.getElementById('modeLabel').textContent = 'Hacker';
-            document.getElementById('checkNormal').style.display = 'none';
-            document.getElementById('checkHacker').style.display = 'inline';
-
-            // Update AI assistant
-            updateAiTheme(true);
-
-        } else {
-            // ── SWITCH TO NORMAL ──
-            currentTheme = 'normal';
-            document.documentElement.setAttribute('data-theme', 'normal');
-
-            // Stop matrix rain
-            cancelAnimationFrame(mAnimId);
-            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
-
-            // Start normal particles
-            animateParticles();
-
-            // Update dropdown UI to show Normal is selected
-            document.getElementById('modeIcon').textContent = '☀️';
-            document.getElementById('modeLabel').textContent = 'Normal';
-            document.getElementById('checkNormal').style.display = 'inline';
-            document.getElementById('checkHacker').style.display = 'none';
-
-            // Update AI assistant
-            updateAiTheme(false);
-        }
-
-        // Refresh AI chat if it was open
-        if (chatOpen && msgCount > 0) {
-            document.getElementById('aiMessages').innerHTML = '';
-            msgCount = 0;
-            showWelcome();
-        }
-    });
-}
 
 /* ═══════════════════════════════════════════════════════
-   FIXED: selectMode + toggleTheme + mobileThemeSwitch
+   🚀 LOAD SAVED THEME ON PAGE LOAD
 ═══════════════════════════════════════════════════════ */
 
-function mobileThemeSwitch() {
-    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
-    selectMode(newMode);
-}
-
-function selectMode(mode) {
-
-    // Step 1: Close the dropdown
-    var dd = document.getElementById('modeDropdown');
-    var ar = document.getElementById('modeArrow');
-    if (dd) dd.classList.remove('open');
-    if (ar) ar.classList.remove('open');
-
-    // Step 2: Skip if already in this mode
-    if (mode === currentTheme) return;
-
-    // Step 3: Pick the right boot messages
-    var isGoingHacker = (mode === 'hacker');
-    var bootMsgs = isGoingHacker ? hackerBoot : normalBoot;
-
-    // Step 4: Show transition overlay then switch everything
-    showTransition(bootMsgs, function() {
-
-        if (isGoingHacker) {
-            // ── SWITCH TO HACKER ──
-            currentTheme = 'hacker';
-            document.documentElement.setAttribute('data-theme', 'hacker');
-
-            // Stop normal particles
-            cancelAnimationFrame(pAnimId);
-            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-
-            // Start matrix rain
-            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
-            columns = Math.floor(mCanvas.width / fontSize);
-            drops = [];
-            for (var i = 0; i < columns; i++) drops[i] = 1;
-            drawMatrix();
-
-            // Update dropdown UI to show Hacker is selected
-            document.getElementById('modeIcon').textContent = '💀';
-            document.getElementById('modeLabel').textContent = 'Hacker';
-            document.getElementById('checkNormal').style.display = 'none';
-            document.getElementById('checkHacker').style.display = 'inline';
-
-            // Update AI assistant
-            updateAiTheme(true);
-
-        } else {
-            // ── SWITCH TO NORMAL ──
-            currentTheme = 'normal';
-            document.documentElement.setAttribute('data-theme', 'normal');
-
-            // Stop matrix rain
-            cancelAnimationFrame(mAnimId);
-            mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
-
-            // Start normal particles
-            animateParticles();
-
-            // Update dropdown UI to show Normal is selected
-            document.getElementById('modeIcon').textContent = '☀️';
-            document.getElementById('modeLabel').textContent = 'Normal';
-            document.getElementById('checkNormal').style.display = 'inline';
-            document.getElementById('checkHacker').style.display = 'none';
-
-            // Update AI assistant
-            updateAiTheme(false);
-        }
-
-        // Refresh AI chat if it was open
-        if (chatOpen && msgCount > 0) {
-            document.getElementById('aiMessages').innerHTML = '';
-            msgCount = 0;
-            showWelcome();
-        }
-    });
-}
-
-// Keep toggleTheme as a wrapper (used by nothing now but safe to keep)
-function toggleTheme() {
-    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
-    selectMode(newMode);
-}
-
+window.addEventListener('DOMContentLoaded', function() {
+    var savedTheme = localStorage.getItem('cryptokit-theme');
+    if (savedTheme && savedTheme !== currentTheme) {
+        // Silently apply saved theme without transition overlay
+        currentTheme = (savedTheme === 'hacker') ? 'normal' : 'hacker'; // Trick selectMode to switch
+        selectMode(savedTheme);
+    }
+});

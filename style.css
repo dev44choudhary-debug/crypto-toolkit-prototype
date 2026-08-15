@@ -2563,3 +2563,746 @@ a {
         display: none;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   💀 HACKER MODE - COMPLETE THEME OVERRIDE
+   Only applies when <html data-theme="hacker">
+   ═══════════════════════════════════════════════════════════ */
+
+html[data-theme="hacker"] {
+  /* ===== HACKER COLOR PALETTE ===== */
+  --green-bright: #00FF41;
+  --green-neon: #39FF14;
+  --green-lime: #CCFF00;
+  --green-dark: #2D5F2D;
+  --green-glow: rgba(0, 255, 65, 0.4);
+  --accent-red: #FF3131;
+  --accent-amber: #FFB800;
+  --accent-yellow: #FFEA00;
+  --accent-cyan: #00E5FF;
+  --accent-magenta: #FF10F0;
+  --accent-purple: #B026FF;
+  --accent-orange: #FF8C00;
+  --hacker-bg: #030503;
+  --hacker-panel: #0A140A;
+  --hacker-terminal: #0D1B0D;
+}
+
+html[data-theme="hacker"] body {
+  background: var(--hacker-bg) !important;
+  color: var(--green-bright) !important;
+  font-family: 'JetBrains Mono', 'Share Tech Mono', monospace !important;
+}
+
+/* ═══════════════════════════════════
+   🌐 BACKGROUND LAYERS (Hacker Mode)
+   ═══════════════════════════════════ */
+
+/* Animated Grid */
+html[data-theme="hacker"] body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 255, 65, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: 0;
+  animation: hk-grid-move 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes hk-grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+/* Radial Glow + Vignette */
+html[data-theme="hacker"] body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(0, 229, 255, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 16, 240, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 1;
+  pointer-events: none;
+  animation: hk-glow-pulse 8s ease-in-out infinite;
+}
+
+@keyframes hk-glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Scanlines Overlay */
+html[data-theme="hacker"] .scanlines {
+  display: block !important;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0.25) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Matrix rain (canvas) full visibility in hacker mode */
+html[data-theme="hacker"] #matrix-canvas {
+  opacity: 0.35 !important;
+  z-index: 2 !important;
+}
+
+html[data-theme="hacker"] #particle-canvas {
+  opacity: 0.4 !important;
+  z-index: 3 !important;
+}
+
+/* ═══════════════════════════════════
+   ⚡ MOVING SCAN LINE
+   ═══════════════════════════════════ */
+html[data-theme="hacker"]::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: linear-gradient(90deg, transparent, var(--green-bright), transparent);
+  z-index: 9997;
+  animation: hk-scan 6s linear infinite;
+  pointer-events: none;
+  opacity: 0.6;
+  box-shadow: 0 0 20px var(--green-bright);
+}
+
+@keyframes hk-scan {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100vh); }
+}
+
+/* ═══════════════════════════════════
+   💥 SCREEN GLITCH BARS
+   ═══════════════════════════════════ */
+html[data-theme="hacker"]::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  top: 30%;
+  width: 100%;
+  height: 3px;
+  background: var(--accent-magenta);
+  z-index: 9996;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 15px var(--accent-magenta);
+  animation: hk-screen-glitch 3s infinite;
+}
+
+@keyframes hk-screen-glitch {
+  0%, 85%, 100% { opacity: 0; top: -10px; }
+  86% { opacity: 1; top: 25%; }
+  87% { opacity: 0.8; top: 25%; transform: scaleX(0.98); }
+  88% { opacity: 0; }
+  92% { opacity: 1; top: 65%; background: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-cyan); }
+  93% { opacity: 0; }
+}
+
+/* ═══════════════════════════════════
+   🎨 NAVBAR (Hacker)
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .navbar {
+  background: rgba(5, 10, 5, 0.7) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 65, 0.2) !important;
+  box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+}
+
+html[data-theme="hacker"] .nav-logo,
+html[data-theme="hacker"] .nav-logo-text {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 10px var(--green-bright);
+  animation: hk-logo-tear 3s infinite;
+}
+
+html[data-theme="hacker"] .nav-logo-icon {
+  color: var(--green-bright) !important;
+  border-color: var(--green-bright) !important;
+  box-shadow: 0 0 15px var(--green-glow);
+  background: rgba(0, 255, 65, 0.05);
+}
+
+/* 🌈 Nav Links - each gets a different color */
+html[data-theme="hacker"] .nav-links li:nth-child(1) a { color: var(--green-bright) !important; }
+html[data-theme="hacker"] .nav-links li:nth-child(2) a { color: var(--accent-cyan) !important; }
+html[data-theme="hacker"] .nav-links li:nth-child(3) a { color: var(--accent-amber) !important; }
+html[data-theme="hacker"] .nav-links li:nth-child(4) a { color: var(--accent-magenta) !important; }
+html[data-theme="hacker"] .nav-links li:nth-child(5) a { color: var(--accent-orange) !important; }
+html[data-theme="hacker"] .nav-links li:nth-child(6) a { color: var(--accent-purple) !important; }
+
+html[data-theme="hacker"] .nav-links a:hover {
+  text-shadow: 0 0 15px currentColor;
+  transform: translateY(-2px);
+}
+
+/* Mode selector */
+html[data-theme="hacker"] .mode-btn {
+  background: rgba(255, 16, 240, 0.08) !important;
+  border-color: var(--accent-magenta) !important;
+  color: var(--accent-magenta) !important;
+  text-shadow: 0 0 8px var(--accent-magenta);
+}
+
+/* Login button */
+html[data-theme="hacker"] .btn-nav-login {
+  color: #FFFFFF !important;
+  border-color: var(--accent-cyan) !important;
+}
+html[data-theme="hacker"] .btn-nav-login:hover {
+  color: var(--accent-cyan) !important;
+}
+
+/* CTA Get Started */
+html[data-theme="hacker"] .btn-nav-cta,
+html[data-theme="hacker"] .btn-primary {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 20px var(--green-glow) !important;
+  border: none !important;
+}
+
+html[data-theme="hacker"] .btn-nav-cta:hover,
+html[data-theme="hacker"] .btn-primary:hover {
+  background: var(--green-lime) !important;
+  box-shadow: 0 0 30px var(--green-lime) !important;
+  transform: translateY(-2px);
+}
+
+html[data-theme="hacker"] .btn-secondary {
+  background: rgba(0, 229, 255, 0.05) !important;
+  border: 2px solid var(--accent-cyan) !important;
+  color: var(--accent-cyan) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+html[data-theme="hacker"] .btn-secondary:hover {
+  background: var(--accent-cyan) !important;
+  color: #000 !important;
+  box-shadow: 0 0 30px var(--accent-cyan) !important;
+}
+
+/* ═══════════════════════════════════
+   🎯 HERO BADGE
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .hero-badge {
+  border: 1px solid var(--accent-amber) !important;
+  color: var(--accent-amber) !important;
+  background: rgba(255, 184, 0, 0.08) !important;
+  text-shadow: 0 0 8px var(--accent-amber);
+  backdrop-filter: blur(5px);
+}
+
+html[data-theme="hacker"] .hero-badge .dot {
+  background: var(--green-bright) !important;
+  box-shadow: 0 0 10px var(--green-bright);
+}
+
+/* ═══════════════════════════════════
+   💥💥💥 HERO TITLE - TEARING EFFECT 💥💥💥
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .hero-title {
+  position: relative;
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 20px var(--green-glow);
+  animation: hk-master-shake 2s infinite;
+}
+
+@keyframes hk-master-shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 1px); }
+  20% { transform: translate(2px, -1px); }
+  30% { transform: translate(-1px, 0); }
+  40% { transform: translate(1px, 1px); }
+  50% { transform: translate(0, 0); }
+  60% { transform: translate(-2px, -1px); }
+  70% { transform: translate(1px, 2px); }
+  80% { transform: translate(-1px, -1px); }
+}
+
+/* TOP SLICE - Cyan rips left */
+html[data-theme="hacker"] .hero-title.glitch::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 20px var(--accent-cyan);
+  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%);
+  animation: hk-tear-top 2.5s infinite;
+  background: var(--hacker-bg);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* BOTTOM SLICE - Magenta rips right */
+html[data-theme="hacker"] .hero-title.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  color: var(--accent-magenta);
+  text-shadow: 0 0 20px var(--accent-magenta);
+  overflow: hidden;
+  clip-path: polygon(0 75%, 100% 75%, 100% 100%, 0 100%);
+  animation: hk-tear-bottom 2.5s infinite;
+  background: var(--hacker-bg);
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes hk-tear-top {
+  0%, 70%, 100% { 
+    transform: translateX(0);
+    clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%);
+  }
+  72% { transform: translateX(-50px); clip-path: polygon(0 0, 100% 0, 100% 15%, 0 15%); }
+  74% { transform: translateX(60px); clip-path: polygon(0 5%, 100% 5%, 100% 30%, 0 30%); }
+  76% { transform: translateX(-80px); clip-path: polygon(0 10%, 100% 10%, 100% 40%, 0 40%); }
+  78% { transform: translateX(40px); clip-path: polygon(0 0, 100% 0, 100% 20%, 0 20%); }
+  80% { transform: translateX(-30px); clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%); }
+  82% { transform: translateX(70px); clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%); }
+  84% { transform: translateX(0); }
+}
+
+@keyframes hk-tear-bottom {
+  0%, 70%, 100% { 
+    transform: translateX(0);
+    clip-path: polygon(0 75%, 100% 75%, 100% 100%, 0 100%);
+  }
+  72% { transform: translateX(60px); clip-path: polygon(0 80%, 100% 80%, 100% 100%, 0 100%); }
+  74% { transform: translateX(-70px); clip-path: polygon(0 70%, 100% 70%, 100% 95%, 0 95%); }
+  76% { transform: translateX(50px); clip-path: polygon(0 85%, 100% 85%, 100% 100%, 0 100%); }
+  78% { transform: translateX(-40px); clip-path: polygon(0 65%, 100% 65%, 100% 90%, 0 90%); }
+  80% { transform: translateX(80px); clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%); }
+  82% { transform: translateX(-30px); clip-path: polygon(0 75%, 100% 75%, 100% 100%, 0 100%); }
+  84% { transform: translateX(0); }
+}
+
+/* Gradient text inside title */
+html[data-theme="hacker"] .hero-title .gradient-text,
+html[data-theme="hacker"] .gradient-text {
+  background: linear-gradient(135deg, 
+    var(--green-bright) 0%, 
+    var(--green-neon) 40%,
+    var(--green-lime) 70%,
+    var(--accent-yellow) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  filter: drop-shadow(0 0 10px var(--green-glow));
+}
+
+/* ═══════════════════════════════════
+   💥 LOGO TEAR (Continuous)
+   ═══════════════════════════════════ */
+@keyframes hk-logo-tear {
+  0%, 80%, 100% { 
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+    text-shadow: 0 0 10px var(--green-bright);
+  }
+  81% { 
+    transform: translate(-8px, -2px);
+    clip-path: inset(0 0 60% 0);
+    text-shadow: 4px 0 var(--accent-red), -4px 0 var(--accent-cyan), 0 0 15px var(--green-bright);
+  }
+  83% { 
+    transform: translate(10px, 3px);
+    clip-path: inset(50% 0 0 0);
+    filter: blur(1px);
+    text-shadow: -5px 0 var(--accent-magenta), 5px 0 var(--accent-yellow), 0 0 15px var(--green-bright);
+  }
+  85% { 
+    transform: translate(-6px, 1px);
+    clip-path: inset(20% 0 40% 0);
+    text-shadow: 3px 0 var(--accent-red), -3px 0 var(--accent-cyan), 0 0 15px var(--green-bright);
+  }
+  87% { 
+    transform: translate(4px, -3px);
+    clip-path: inset(60% 0 10% 0);
+    filter: hue-rotate(180deg);
+  }
+  89% { 
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ═══════════════════════════════════
+   📝 HERO SUBTITLE + KEYWORD GLITCH
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .hero-subtitle {
+  color: #B8FFB8 !important;
+  text-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
+}
+
+/* Trust items - multi color */
+html[data-theme="hacker"] .trust-item:nth-child(1) { color: var(--green-bright) !important; }
+html[data-theme="hacker"] .trust-item:nth-child(2) { color: var(--accent-cyan) !important; }
+html[data-theme="hacker"] .trust-item:nth-child(3) { color: var(--accent-amber) !important; }
+html[data-theme="hacker"] .trust-item:nth-child(4) { color: var(--accent-magenta) !important; }
+
+html[data-theme="hacker"] .trust-item i {
+  color: currentColor !important;
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* ═══════════════════════════════════
+   🖥️ HERO TERMINAL (Hacker)
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .hero-terminal {
+  background: rgba(13, 27, 13, 0.95) !important;
+  border: 1px solid var(--green-bright) !important;
+  box-shadow: 
+    0 0 40px var(--green-glow), 
+    inset 0 0 30px rgba(0,0,0,0.6), 
+    0 0 100px rgba(0, 255, 65, 0.1) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="hacker"] .terminal-header {
+  border-bottom: 1px solid var(--green-dark) !important;
+  background: rgba(0,0,0,0.6) !important;
+}
+
+html[data-theme="hacker"] .terminal-title {
+  color: var(--accent-cyan) !important;
+}
+
+html[data-theme="hacker"] .terminal-dot.red { box-shadow: 0 0 8px var(--accent-red); }
+html[data-theme="hacker"] .terminal-dot.yellow { box-shadow: 0 0 8px var(--accent-amber); }
+html[data-theme="hacker"] .terminal-dot.green { box-shadow: 0 0 8px var(--green-bright); }
+
+html[data-theme="hacker"] .terminal-body {
+  color: var(--green-bright) !important;
+}
+
+html[data-theme="hacker"] .os-btn {
+  color: var(--green-bright) !important;
+}
+html[data-theme="hacker"] .os-btn.active {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 10px var(--green-glow);
+}
+
+/* ═══════════════════════════════════
+   🔧 TOOL CARDS (Hacker)
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .tool-card {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="hacker"] .tool-card:hover {
+  border-color: var(--green-bright) !important;
+  box-shadow: 0 0 30px var(--green-glow) !important;
+  transform: translateY(-5px);
+}
+
+html[data-theme="hacker"] .tool-name {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 8px var(--green-glow);
+}
+
+html[data-theme="hacker"] .tool-desc {
+  color: #B8FFB8 !important;
+}
+
+html[data-theme="hacker"] .tool-icon.purple { background: var(--accent-purple) !important; box-shadow: 0 0 20px var(--accent-purple); }
+html[data-theme="hacker"] .tool-icon.blue { background: var(--accent-cyan) !important; color: #000 !important; box-shadow: 0 0 20px var(--accent-cyan); }
+html[data-theme="hacker"] .tool-icon.green { background: var(--green-bright) !important; color: #000 !important; box-shadow: 0 0 20px var(--green-glow); }
+html[data-theme="hacker"] .tool-icon.red { background: var(--accent-red) !important; box-shadow: 0 0 20px var(--accent-red); }
+html[data-theme="hacker"] .tool-icon.yellow { background: var(--accent-amber) !important; color: #000 !important; box-shadow: 0 0 20px var(--accent-amber); }
+html[data-theme="hacker"] .tool-icon.pink { background: var(--accent-magenta) !important; box-shadow: 0 0 20px var(--accent-magenta); }
+
+html[data-theme="hacker"] .tag {
+  background: rgba(0, 255, 65, 0.1) !important;
+  color: var(--green-bright) !important;
+  border: 1px solid var(--green-dark);
+}
+
+html[data-theme="hacker"] .tool-cta {
+  color: var(--accent-cyan) !important;
+}
+
+/* ═══════════════════════════════════
+   📊 SECTIONS - Titles & Text
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .section-title {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 15px var(--green-glow);
+}
+
+html[data-theme="hacker"] .section-subtitle {
+  color: #B8FFB8 !important;
+}
+
+html[data-theme="hacker"] .section-badge {
+  background: rgba(255, 184, 0, 0.08) !important;
+  color: var(--accent-amber) !important;
+  border: 1px solid var(--accent-amber) !important;
+  text-shadow: 0 0 8px var(--accent-amber);
+}
+
+/* Feature cards */
+html[data-theme="hacker"] .feature-card {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+}
+
+html[data-theme="hacker"] .feature-card:hover {
+  border-color: var(--green-bright) !important;
+  box-shadow: 0 0 20px var(--green-glow) !important;
+}
+
+html[data-theme="hacker"] .feature-title {
+  color: var(--green-bright) !important;
+}
+
+html[data-theme="hacker"] .feature-desc {
+  color: #B8FFB8 !important;
+}
+
+/* Why list */
+html[data-theme="hacker"] .why-list li {
+  color: #B8FFB8 !important;
+}
+
+html[data-theme="hacker"] .why-list .check {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 10px var(--green-glow);
+}
+
+/* Steps */
+html[data-theme="hacker"] .step-card {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+}
+
+html[data-theme="hacker"] .step-number {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 20px var(--green-glow);
+}
+
+html[data-theme="hacker"] .step-title {
+  color: var(--green-bright) !important;
+}
+
+html[data-theme="hacker"] .step-desc {
+  color: #B8FFB8 !important;
+}
+
+/* Stats */
+html[data-theme="hacker"] .stat-card {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+}
+
+html[data-theme="hacker"] .stat-number {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 15px var(--green-glow);
+}
+
+html[data-theme="hacker"] .stat-label {
+  color: #B8FFB8 !important;
+}
+
+/* ═══════════════════════════════════
+   👥 TEAM CARDS
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .team-card {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme="hacker"] .team-card:hover {
+  border-color: var(--green-bright) !important;
+  box-shadow: 0 0 30px var(--green-glow) !important;
+}
+
+html[data-theme="hacker"] .team-name {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 8px var(--green-glow);
+}
+
+html[data-theme="hacker"] .team-role-badge {
+  background: rgba(0, 229, 255, 0.1) !important;
+  color: var(--accent-cyan) !important;
+  border: 1px solid var(--accent-cyan);
+}
+
+html[data-theme="hacker"] .team-bio {
+  color: #B8FFB8 !important;
+}
+
+html[data-theme="hacker"] .team-social-btn {
+  background: rgba(0, 255, 65, 0.1) !important;
+  color: var(--green-bright) !important;
+  border: 1px solid var(--green-dark);
+}
+
+html[data-theme="hacker"] .team-social-btn:hover {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 15px var(--green-glow);
+}
+
+/* ═══════════════════════════════════
+   💬 REVIEWS & FEEDBACK
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .review-card {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid rgba(0, 255, 65, 0.3) !important;
+}
+
+html[data-theme="hacker"] .review-text {
+  color: #B8FFB8 !important;
+}
+
+html[data-theme="hacker"] .review-name {
+  color: var(--green-bright) !important;
+}
+
+html[data-theme="hacker"] .review-role {
+  color: var(--accent-cyan) !important;
+}
+
+html[data-theme="hacker"] .review-avatar {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 15px var(--green-glow);
+}
+
+html[data-theme="hacker"] .feedback-form-wrapper {
+  background: rgba(13, 27, 13, 0.6) !important;
+  border: 1px solid var(--green-bright) !important;
+  box-shadow: 0 0 30px var(--green-glow);
+}
+
+html[data-theme="hacker"] .feedback-input,
+html[data-theme="hacker"] .feedback-textarea {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid var(--green-dark) !important;
+  color: var(--green-bright) !important;
+}
+
+html[data-theme="hacker"] .feedback-input:focus,
+html[data-theme="hacker"] .feedback-textarea:focus {
+  border-color: var(--green-bright) !important;
+  box-shadow: 0 0 10px var(--green-glow);
+}
+
+/* ═══════════════════════════════════
+   🎬 CTA SECTION
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .cta-container {
+  background: rgba(13, 27, 13, 0.8) !important;
+  border: 1px solid var(--green-bright) !important;
+  box-shadow: 0 0 50px var(--green-glow);
+}
+
+html[data-theme="hacker"] .cta-container h2 {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 15px var(--green-glow);
+}
+
+html[data-theme="hacker"] .cta-container p {
+  color: #B8FFB8 !important;
+}
+
+/* ═══════════════════════════════════
+   🦶 FOOTER
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .footer {
+  background: rgba(3, 5, 3, 0.95) !important;
+  border-top: 1px solid var(--green-dark) !important;
+}
+
+html[data-theme="hacker"] .footer h4 {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 5px var(--green-glow);
+}
+
+html[data-theme="hacker"] .footer a {
+  color: #B8FFB8 !important;
+}
+
+html[data-theme="hacker"] .footer a:hover {
+  color: var(--green-bright) !important;
+  text-shadow: 0 0 8px var(--green-bright);
+}
+
+html[data-theme="hacker"] .social-btn {
+  background: rgba(0, 255, 65, 0.1) !important;
+  color: var(--green-bright) !important;
+  border: 1px solid var(--green-dark);
+}
+
+html[data-theme="hacker"] .social-btn:hover {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 15px var(--green-glow);
+}
+
+/* ═══════════════════════════════════
+   💡 SCROLL TO TOP & AI FAB
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .scroll-top,
+html[data-theme="hacker"] .ai-fab {
+  background: var(--green-bright) !important;
+  color: #000 !important;
+  box-shadow: 0 0 20px var(--green-glow) !important;
+}
+
+html[data-theme="hacker"] .scroll-top:hover,
+html[data-theme="hacker"] .ai-fab:hover {
+  background: var(--green-lime) !important;
+  box-shadow: 0 0 30px var(--green-lime) !important;
+}
+
+/* ═══════════════════════════════════
+   🤖 AI CHAT WINDOW
+   ═══════════════════════════════════ */
+html[data-theme="hacker"] .ai-chat-window {
+  background: rgba(13, 27, 13, 0.98) !important;
+  border: 1px solid var(--green-bright) !important;
+  box-shadow: 0 0 40px var(--green-glow) !important;
+}
+
+html[data-theme="hacker"] .ai-chat-header {
+  background: rgba(0, 0, 0, 0.6) !important;
+  border-bottom: 1px solid var(--green-dark) !important;
+}
+
+html[data-theme="hacker"] .ai-name {
+  color: var(--green-bright) !important;
+}
+
+html[data-theme="hacker"] .ai-input {
+  background: rgba(0, 0, 0, 0.4) !important;
+  color: var(--green-bright) !important;
+  border: 1px solid var(--green-dark) !important;
+}
