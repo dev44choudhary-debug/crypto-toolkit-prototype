@@ -1,62 +1,65 @@
 /* ═══════════════════════════════════════════════════════
-   CRYPTOKIT — DEVELOPER TERMINAL ENGINE
+   CRYPTOKIT — DEVELOPER TERMINAL ENGINE v2.0
    Full terminal emulator with CMD / PowerShell / Bash
+   Enhanced input handling, responsive, more commands
 ═══════════════════════════════════════════════════════ */
 
 'use strict';
 
 /* ── STATE ─────────────────────────────────────────── */
 const STATE = {
-    shell:        'powershell',   // 'cmd' | 'powershell' | 'bash'
-    history:      [],             // command history array
-    historyIndex: -1,             // current history pointer
-    lastOutput:   '',             // last output text for copy
-    busy:         false,          // is a command running?
-    acIndex:      -1,             // autocomplete selection index
+    shell:         'powershell',
+    history:       [],
+    historyIndex:  -1,
+    lastOutput:    '',
+    busy:          false,
+    acIndex:       -1,
+    rsaKeyPair:    null,
+    lastEncrypted: '',
 };
 
 /* ── SHELL CONFIG ───────────────────────────────────── */
 const SHELLS = {
     powershell: {
-        label:      'Windows PowerShell',
-        prompt:     'PS C:\\CryptoKit>',
-        promptClass:'t-prompt-ps',
-        chromeTitle:'Windows PowerShell — CryptoKit Developer Terminal',
-        engineLabel:'PowerShell',
+        label:       'Windows PowerShell',
+        prompt:      'PS C:\\CryptoKit>',
+        promptClass: 't-prompt-ps',
+        chromeTitle: 'Windows PowerShell — CryptoKit Developer Terminal',
+        engineLabel: 'PowerShell',
         bootLines: [
             { text: 'Windows PowerShell', cls: 't-white' },
             { text: 'Copyright (C) Microsoft Corporation. All rights reserved.', cls: 't-muted' },
             { text: '', cls: 'blank' },
-            { text: 'CryptoKit Crypto Engine v1.0.0 loaded ✔', cls: 't-success' },
+            { text: 'CryptoKit Crypto Engine v2.0.0 loaded ✔', cls: 't-success' },
             { text: 'WebCrypto API  : Available ✔', cls: 't-success' },
             { text: 'Type  help  to see all available commands.', cls: 't-info' },
             { text: '', cls: 'blank' },
         ],
     },
     cmd: {
-        label:      'Command Prompt',
-        prompt:     'C:\\CryptoKit>',
-        promptClass:'t-prompt-cmd',
-        chromeTitle:'Command Prompt — CryptoKit Developer Terminal',
-        engineLabel:'CMD',
+        label:       'Command Prompt',
+        prompt:      'C:\\CryptoKit>',
+        promptClass: 't-prompt-cmd',
+        chromeTitle: 'Command Prompt — CryptoKit Developer Terminal',
+        engineLabel: 'CMD',
         bootLines: [
-            { text: 'Microsoft Windows [Version 10.0.22621]', cls: 't-white' },
+            { text: 'Microsoft Windows [Version 10.0.22631]', cls: 't-white' },
             { text: '(c) Microsoft Corporation. All rights reserved.', cls: 't-muted' },
             { text: '', cls: 'blank' },
-            { text: 'CryptoKit Crypto Engine v1.0.0 loaded', cls: 't-success' },
+            { text: 'CryptoKit Crypto Engine v2.0.0 loaded ✔', cls: 't-success' },
             { text: 'Type  help  to see all available commands.', cls: 't-info' },
             { text: '', cls: 'blank' },
         ],
     },
     bash: {
-        label:      'Bash / Zsh',
-        prompt:     'cryptokit@dev:~$',
-        promptClass:'t-prompt-bash',
-        chromeTitle:'Bash — CryptoKit Developer Terminal',
-        engineLabel:'Bash / Zsh',
+        label:       'Bash / Zsh',
+        prompt:      'cryptokit@dev:~$',
+        promptClass: 't-prompt-bash',
+        chromeTitle: 'Bash — CryptoKit Developer Terminal',
+        engineLabel: 'Bash / Zsh',
         bootLines: [
             { text: 'CryptoKit Terminal  [bash 5.2.0]', cls: 't-success' },
-            { text: 'WebCrypto API: available ✔', cls: 't-success' },
+            { text: 'WebCrypto Engine v2.0.0 | All systems online ✔', cls: 't-success' },
             { text: '# Type  help  to list all commands', cls: 't-comment' },
             { text: '', cls: 'blank' },
         ],
@@ -66,164 +69,137 @@ const SHELLS = {
 /* ── QUICK COMMANDS PER SHELL ───────────────────────── */
 const QUICK_CMDS = {
     powershell: [
-        { icon:'🔑', name:'Get-FileHash SHA256', desc:'Hash a file',          cmd:'Get-FileHash .\\file.txt -Algorithm SHA256' },
-        { icon:'🔐', name:'openssl genrsa',       desc:'Generate RSA key',     cmd:'openssl genrsa -out private.pem 2048' },
-        { icon:'🔑', name:'Generate Password',    desc:'Secure password',      cmd:'cryptokit passwd --generate --length 16 --strong' },
-        { icon:'✅', name:'Check Password',       desc:'Strength check',       cmd:'cryptokit passwd --check "MyPassword123"' },
-        { icon:'📄', name:'Base64 Encode',        desc:'Encode string',        cmd:'cryptokit encode --base64 "hello world"' },
-        { icon:'🔒', name:'AES Encrypt',          desc:'Encrypt text',         cmd:'cryptokit aes --encrypt "secret" --key "password"' },
-        { icon:'ℹ️',  name:'System Info',          desc:'Engine details',       cmd:'cryptokit --info' },
-        { icon:'❓', name:'Help',                  desc:'All commands',         cmd:'help' },
+        { icon: '🔑', name: 'SHA-256 Hash',         desc: 'Hash text with SHA-256',          cmd: 'cryptokit hash --algo sha256 "Type your text here"' },
+        { icon: '#️⃣', name: 'All Hashes',            desc: 'All algorithms at once',          cmd: 'cryptokit hash --all "Type your text here"' },
+        { icon: '🔐', name: 'RSA 2048 Key',          desc: 'Generate RSA-2048 pair',          cmd: 'cryptokit rsa --generate --bits 2048' },
+        { icon: '🔐', name: 'RSA 4096 Key',          desc: 'Generate RSA-4096 pair',          cmd: 'cryptokit rsa --generate --bits 4096' },
+        { icon: '🔑', name: 'Password 16 chars',     desc: 'Strong random password',          cmd: 'cryptokit passwd --generate --length 16 --strong' },
+        { icon: '🔑', name: 'Password 32 chars',     desc: 'Extra strong password',           cmd: 'cryptokit passwd --generate --length 32 --strong' },
+        { icon: '📝', name: 'Passphrase',            desc: 'Easy to remember passphrase',     cmd: 'cryptokit passwd --generate --passphrase' },
+        { icon: '✅', name: 'Check Password',        desc: 'Analyze password strength',       cmd: 'cryptokit passwd --check "Type your password here"' },
+        { icon: '📄', name: 'Base64 Encode',         desc: 'Encode any text to Base64',       cmd: 'cryptokit encode --base64 "Type your sentence here"' },
+        { icon: '📄', name: 'Base64 Decode',         desc: 'Decode Base64 to text',           cmd: 'cryptokit decode --base64 "paste base64 here"' },
+        { icon: '🔒', name: 'AES Encrypt',           desc: 'Encrypt text with AES-256',       cmd: 'cryptokit aes --encrypt "Your secret message here" --key "your-password"' },
+        { icon: '🔓', name: 'AES Decrypt',           desc: 'Decrypt AES ciphertext',          cmd: 'cryptokit aes --decrypt "paste-ciphertext" --key "your-password"' },
+        { icon: '🔀', name: 'Random Hex',            desc: 'Random hex string',               cmd: 'cryptokit random --hex 32' },
+        { icon: '🔀', name: 'Random Base64',         desc: 'Random base64 string',            cmd: 'cryptokit random --base64 32' },
+        { icon: '🔢', name: 'UUID Generator',        desc: 'Generate UUID v4',                cmd: 'cryptokit uuid' },
+        { icon: '📊', name: 'Hash Compare',          desc: 'Compare two hashes',              cmd: 'cryptokit hash --compare "hash1" "hash2"' },
+        { icon: '🔤', name: 'ROT13 Encode',          desc: 'ROT13 cipher',                    cmd: 'cryptokit rot13 "Type your text here"' },
+        { icon: '🔤', name: 'Hex Encode',            desc: 'Text to hexadecimal',             cmd: 'cryptokit hex --encode "Type your text here"' },
+        { icon: '🔤', name: 'Hex Decode',            desc: 'Hexadecimal to text',             cmd: 'cryptokit hex --decode "paste hex here"' },
+        { icon: '📏', name: 'Char Count',            desc: 'Count characters and words',      cmd: 'cryptokit count "Type your sentence here"' },
+        { icon: 'ℹ️', name: 'System Info',           desc: 'Engine details',                  cmd: 'cryptokit --info' },
+        { icon: '❓', name: 'Help',                  desc: 'All available commands',           cmd: 'help' },
     ],
     cmd: [
-        { icon:'#️⃣', name:'certutil MD5',         desc:'MD5 hash file',        cmd:'certutil -hashfile document.txt MD5' },
-        { icon:'#️⃣', name:'certutil SHA256',       desc:'SHA256 hash file',     cmd:'certutil -hashfile document.txt SHA256' },
-        { icon:'📄', name:'certutil encode',       desc:'Base64 encode file',   cmd:'certutil -encode input.txt output.b64' },
-        { icon:'🔐', name:'openssl genrsa',        desc:'Generate RSA key',     cmd:'openssl genrsa -out private.pem 2048' },
-        { icon:'🔑', name:'Generate Password',     desc:'Secure password',      cmd:'cryptokit passwd --generate --length 16 --strong' },
-        { icon:'✅', name:'Check Password',        desc:'Strength check',       cmd:'cryptokit passwd --check "MyPassword123"' },
-        { icon:'ℹ️',  name:'System Info',           desc:'Engine details',       cmd:'cryptokit --info' },
-        { icon:'❓', name:'Help',                   desc:'All commands',         cmd:'help' },
+        { icon: '#️⃣', name: 'certutil SHA256',       desc: 'SHA256 hash file',                cmd: 'certutil -hashfile document.txt SHA256' },
+        { icon: '#️⃣', name: 'certutil MD5',          desc: 'MD5 hash file',                   cmd: 'certutil -hashfile document.txt MD5' },
+        { icon: '#️⃣', name: 'certutil SHA512',       desc: 'SHA512 hash file',                cmd: 'certutil -hashfile document.txt SHA512' },
+        { icon: '📄', name: 'certutil encode',       desc: 'Base64 encode file',              cmd: 'certutil -encode input.txt output.b64' },
+        { icon: '🔑', name: 'SHA-256 Hash',          desc: 'Hash text with SHA-256',          cmd: 'cryptokit hash --algo sha256 "Type your text here"' },
+        { icon: '#️⃣', name: 'All Hashes',            desc: 'All algorithms at once',          cmd: 'cryptokit hash --all "Type your text here"' },
+        { icon: '🔐', name: 'RSA Key 2048',          desc: 'Generate RSA-2048',               cmd: 'openssl genrsa -out private.pem 2048' },
+        { icon: '🔑', name: 'Password Gen',          desc: 'Secure password',                 cmd: 'cryptokit passwd --generate --length 16 --strong' },
+        { icon: '✅', name: 'Check Password',        desc: 'Strength check',                  cmd: 'cryptokit passwd --check "Type your password here"' },
+        { icon: '📄', name: 'Base64 Encode',         desc: 'Encode text',                     cmd: 'cryptokit encode --base64 "Type your sentence here"' },
+        { icon: '🔒', name: 'AES Encrypt',           desc: 'Encrypt text',                    cmd: 'cryptokit aes --encrypt "Your secret message here" --key "your-password"' },
+        { icon: '🔀', name: 'Random Hex',            desc: 'Random hex string',               cmd: 'cryptokit random --hex 32' },
+        { icon: '🔢', name: 'UUID',                  desc: 'Generate UUID',                   cmd: 'cryptokit uuid' },
+        { icon: '🔤', name: 'ROT13',                 desc: 'ROT13 cipher',                    cmd: 'cryptokit rot13 "Type your text here"' },
+        { icon: 'ℹ️', name: 'System Info',           desc: 'Engine details',                  cmd: 'cryptokit --info' },
+        { icon: '❓', name: 'Help',                  desc: 'All commands',                    cmd: 'help' },
     ],
     bash: [
-        { icon:'#️⃣', name:'shasum SHA256',         desc:'Hash a file',          cmd:'shasum -a 256 file.txt' },
-        { icon:'#️⃣', name:'shasum SHA512',         desc:'SHA512 hash',          cmd:'shasum -a 512 file.txt' },
-        { icon:'🔐', name:'openssl genrsa',        desc:'Generate RSA key',     cmd:'openssl genrsa -out private.pem 2048' },
-        { icon:'🔑', name:'openssl rand',           desc:'Random password',      cmd:'openssl rand -base64 20' },
-        { icon:'✅', name:'Check Password',        desc:'Strength check',       cmd:'cryptokit passwd --check "MyPassword123"' },
-        { icon:'📄', name:'Base64 Encode',         desc:'Encode string',        cmd:'echo -n "hello world" | base64' },
-        { icon:'📄', name:'Base64 Decode',         desc:'Decode string',        cmd:'echo -n "aGVsbG8gd29ybGQ=" | base64 --decode' },
-        { icon:'❓', name:'Help',                   desc:'All commands',         cmd:'help' },
+        { icon: '#️⃣', name: 'shasum SHA256',         desc: 'Hash a file',                     cmd: 'shasum -a 256 file.txt' },
+        { icon: '#️⃣', name: 'shasum SHA512',         desc: 'SHA512 hash',                     cmd: 'shasum -a 512 file.txt' },
+        { icon: '🔐', name: 'openssl genrsa',        desc: 'Generate RSA key',                cmd: 'openssl genrsa -out private.pem 2048' },
+        { icon: '🔑', name: 'openssl rand b64',      desc: 'Random base64',                   cmd: 'openssl rand -base64 20' },
+        { icon: '🔑', name: 'openssl rand hex',      desc: 'Random hex',                      cmd: 'openssl rand -hex 32' },
+        { icon: '🔑', name: 'SHA-256 Hash',          desc: 'Hash text',                       cmd: 'cryptokit hash --algo sha256 "Type your text here"' },
+        { icon: '#️⃣', name: 'All Hashes',            desc: 'All algorithms',                  cmd: 'cryptokit hash --all "Type your text here"' },
+        { icon: '✅', name: 'Check Password',        desc: 'Strength check',                  cmd: 'cryptokit passwd --check "Type your password here"' },
+        { icon: '🔑', name: 'Password Gen',          desc: 'Secure password',                 cmd: 'cryptokit passwd --generate --length 20 --strong' },
+        { icon: '📄', name: 'Base64 Encode',         desc: 'Encode string',                   cmd: 'echo -n "Type your sentence here" | base64' },
+        { icon: '📄', name: 'Base64 Decode',         desc: 'Decode string',                   cmd: 'echo -n "aGVsbG8gd29ybGQ=" | base64 --decode' },
+        { icon: '🔒', name: 'AES Encrypt',           desc: 'Encrypt text',                    cmd: 'cryptokit aes --encrypt "Your secret message here" --key "your-password"' },
+        { icon: '🔀', name: 'Random Hex',            desc: 'Random hex',                      cmd: 'cryptokit random --hex 32' },
+        { icon: '🔢', name: 'UUID',                  desc: 'Generate UUID',                   cmd: 'cryptokit uuid' },
+        { icon: '🔤', name: 'ROT13',                 desc: 'ROT13 cipher',                    cmd: 'cryptokit rot13 "Type your text here"' },
+        { icon: '📏', name: 'Char Count',            desc: 'Count chars and words',           cmd: 'cryptokit count "Type your sentence here"' },
+        { icon: '❓', name: 'Help',                  desc: 'All commands',                    cmd: 'help' },
     ],
 };
 
-/* ── ALL AVAILABLE COMMANDS ─────────────────────────── */
-const COMMANDS = {
-
-    /* ─── HELP ─────────────────────────────────── */
-    help: {
-        desc: 'List all available commands',
-        run:  () => cmdHelp(),
-    },
-
-    clear: {
-        desc: 'Clear the terminal screen',
-        run:  () => clearTerminal(),
-    },
-
-    cls: {
-        desc: 'Clear the terminal screen (CMD alias)',
-        run:  () => clearTerminal(),
-    },
-
-    /* ─── INFO ─────────────────────────────────── */
-    'cryptokit --info': {
-        desc: 'Show engine information',
-        run:  () => cmdInfo(),
-    },
-
-    'cryptokit --version': {
-        desc: 'Show version',
-        run:  () => cmdVersion(),
-    },
-
-    history: {
-        desc: 'Show command history',
-        run:  () => cmdHistory(),
-    },
-
-    /* ─── HASHING ──────────────────────────────── */
-    // PowerShell / openssl style
-    'Get-FileHash': {
-        desc: 'Hash a file or string — PowerShell style',
-        run:  (raw) => cmdHash(raw),
-    },
-    'certutil': {
-        desc: 'Hash a file — Windows CMD certutil',
-        run:  (raw) => cmdCertutil(raw),
-    },
-    'shasum': {
-        desc: 'Hash a file or string — Unix/Mac style',
-        run:  (raw) => cmdShasum(raw),
-    },
-    'md5': {
-        desc: 'MD5 hash — Mac style',
-        run:  (raw) => cmdMd5(raw),
-    },
-
-    /* ─── RSA ──────────────────────────────────── */
-    'openssl': {
-        desc: 'OpenSSL commands — RSA, encrypt, decrypt',
-        run:  (raw) => cmdOpenssl(raw),
-    },
-
-    /* ─── CRYPTOKIT UNIVERSAL ──────────────────── */
-    'cryptokit': {
-        desc: 'CryptoKit unified command',
-        run:  (raw) => cmdCryptokit(raw),
-    },
-
-    /* ─── BASE64 ───────────────────────────────── */
-    'echo': {
-        desc: 'Echo with pipe to base64 — Bash style',
-        run:  (raw) => cmdEcho(raw),
-    },
-
-};
-
-/* ─── AUTOCOMPLETE SUGGESTIONS ──────────────────────── */
+/* ── AUTOCOMPLETE SUGGESTIONS ───────────────────────── */
 const AC_SUGGESTIONS = [
-    // cryptokit
-    { cmd: 'cryptokit hash --algo sha256 "text"',        desc: 'SHA-256 hash of text' },
-    { cmd: 'cryptokit hash --algo sha512 "text"',        desc: 'SHA-512 hash of text' },
-    { cmd: 'cryptokit hash --algo md5 "text"',           desc: 'MD5 hash of text' },
-    { cmd: 'cryptokit hash --algo sha1 "text"',          desc: 'SHA-1 hash of text' },
-    { cmd: 'cryptokit hash --all "text"',                desc: 'All hashes at once' },
-    { cmd: 'cryptokit hash --compare "h1" "h2"',        desc: 'Compare two hashes' },
-    { cmd: 'cryptokit rsa --generate',                   desc: 'Generate RSA-2048 key pair' },
-    { cmd: 'cryptokit rsa --generate --bits 4096',       desc: 'Generate RSA-4096 key pair' },
-    { cmd: 'cryptokit rsa --analyze',                    desc: 'Analyze an RSA key' },
-    { cmd: 'cryptokit passwd --generate',                desc: 'Generate secure password' },
-    { cmd: 'cryptokit passwd --generate --length 20 --strong', desc: 'Strong 20-char password' },
-    { cmd: 'cryptokit passwd --generate --no-symbols',   desc: 'Password without symbols' },
-    { cmd: 'cryptokit passwd --generate --passphrase',   desc: 'Generate passphrase' },
-    { cmd: 'cryptokit passwd --check "password"',        desc: 'Check password strength' },
-    { cmd: 'cryptokit encode --base64 "text"',           desc: 'Base64 encode string' },
-    { cmd: 'cryptokit decode --base64 "text"',           desc: 'Base64 decode string' },
-    { cmd: 'cryptokit aes --encrypt "msg" --key "pass"', desc: 'AES-256 encrypt message' },
-    { cmd: 'cryptokit aes --decrypt "cipher" --key "pass"', desc: 'AES-256 decrypt' },
-    { cmd: 'cryptokit --info',                           desc: 'Show system info' },
-    { cmd: 'cryptokit --version',                        desc: 'Show version' },
-    // openssl
-    { cmd: 'openssl genrsa -out private.pem 2048',       desc: 'Generate RSA-2048 private key' },
-    { cmd: 'openssl genrsa -out private.pem 4096',       desc: 'Generate RSA-4096 private key' },
-    { cmd: 'openssl rsa -in private.pem -pubout -out public.pem', desc: 'Extract public key' },
-    { cmd: 'openssl rsa -in private.pem -text -noout',   desc: 'View RSA key details' },
-    { cmd: 'openssl rand -base64 20',                    desc: 'Generate random base64 string' },
-    { cmd: 'openssl rand -hex 32',                       desc: 'Generate random hex string' },
-    // powershell
-    { cmd: 'Get-FileHash .\\file.txt -Algorithm SHA256', desc: 'SHA-256 hash (PowerShell)' },
-    { cmd: 'Get-FileHash .\\file.txt -Algorithm MD5',    desc: 'MD5 hash (PowerShell)' },
-    { cmd: 'Get-FileHash .\\file.txt -Algorithm SHA512', desc: 'SHA-512 hash (PowerShell)' },
-    // certutil
-    { cmd: 'certutil -hashfile document.txt SHA256',     desc: 'SHA-256 hash (CMD certutil)' },
-    { cmd: 'certutil -hashfile document.txt MD5',        desc: 'MD5 hash (CMD certutil)' },
-    { cmd: 'certutil -hashfile document.txt SHA512',     desc: 'SHA-512 hash (CMD certutil)' },
-    { cmd: 'certutil -encode input.txt output.b64',      desc: 'Base64 encode file (CMD)' },
-    { cmd: 'certutil -decode input.b64 output.txt',      desc: 'Base64 decode file (CMD)' },
-    // shasum
-    { cmd: 'shasum -a 256 file.txt',                     desc: 'SHA-256 hash (Unix)' },
-    { cmd: 'shasum -a 512 file.txt',                     desc: 'SHA-512 hash (Unix)' },
-    { cmd: 'shasum -a 1 file.txt',                       desc: 'SHA-1 hash (Unix)' },
-    { cmd: 'md5 file.txt',                               desc: 'MD5 hash (macOS)' },
-    // echo
-    { cmd: 'echo -n "hello world" | base64',             desc: 'Base64 encode (bash)' },
-    { cmd: 'echo -n "aGVsbG8=" | base64 --decode',       desc: 'Base64 decode (bash)' },
-    // utils
-    { cmd: 'help',     desc: 'Show all commands' },
-    { cmd: 'clear',    desc: 'Clear terminal' },
-    { cmd: 'cls',      desc: 'Clear terminal (CMD)' },
-    { cmd: 'history',  desc: 'Show command history' },
+    { cmd: 'cryptokit hash --algo sha256 "text"',                 desc: 'SHA-256 hash' },
+    { cmd: 'cryptokit hash --algo sha512 "text"',                 desc: 'SHA-512 hash' },
+    { cmd: 'cryptokit hash --algo sha384 "text"',                 desc: 'SHA-384 hash' },
+    { cmd: 'cryptokit hash --algo sha1 "text"',                   desc: 'SHA-1 hash' },
+    { cmd: 'cryptokit hash --algo md5 "text"',                    desc: 'MD5 hash' },
+    { cmd: 'cryptokit hash --all "text"',                         desc: 'All algorithms at once' },
+    { cmd: 'cryptokit hash --compare "hash1" "hash2"',           desc: 'Compare two hashes' },
+    { cmd: 'cryptokit rsa --generate',                            desc: 'Generate RSA-2048' },
+    { cmd: 'cryptokit rsa --generate --bits 4096',                desc: 'Generate RSA-4096' },
+    { cmd: 'cryptokit rsa --generate --bits 1024',                desc: 'Generate RSA-1024 (weak)' },
+    { cmd: 'cryptokit rsa --analyze',                             desc: 'RSA key analysis guide' },
+    { cmd: 'cryptokit passwd --generate',                         desc: 'Random password' },
+    { cmd: 'cryptokit passwd --generate --length 20 --strong',    desc: 'Strong 20-char password' },
+    { cmd: 'cryptokit passwd --generate --length 32 --strong',    desc: 'Extra strong 32-char' },
+    { cmd: 'cryptokit passwd --generate --no-symbols',            desc: 'Password without symbols' },
+    { cmd: 'cryptokit passwd --generate --no-numbers',            desc: 'Password without numbers' },
+    { cmd: 'cryptokit passwd --generate --passphrase',            desc: 'Memorable passphrase' },
+    { cmd: 'cryptokit passwd --generate --passphrase --words 6',  desc: '6-word passphrase' },
+    { cmd: 'cryptokit passwd --check "password"',                 desc: 'Check password strength' },
+    { cmd: 'cryptokit passwd --check "password" --verbose',       desc: 'Detailed strength check' },
+    { cmd: 'cryptokit encode --base64 "your sentence"',           desc: 'Base64 encode text' },
+    { cmd: 'cryptokit decode --base64 "base64string"',            desc: 'Base64 decode text' },
+    { cmd: 'cryptokit aes --encrypt "message" --key "password"',  desc: 'AES-256 encrypt' },
+    { cmd: 'cryptokit aes --decrypt "cipher" --key "password"',   desc: 'AES-256 decrypt' },
+    { cmd: 'cryptokit random --hex 32',                           desc: 'Random hex string' },
+    { cmd: 'cryptokit random --base64 32',                        desc: 'Random base64 string' },
+    { cmd: 'cryptokit random --bytes 16',                         desc: 'Random decimal bytes' },
+    { cmd: 'cryptokit uuid',                                      desc: 'Generate UUID v4' },
+    { cmd: 'cryptokit rot13 "text"',                              desc: 'ROT13 cipher' },
+    { cmd: 'cryptokit hex --encode "text"',                       desc: 'Text to hex' },
+    { cmd: 'cryptokit hex --decode "hex"',                        desc: 'Hex to text' },
+    { cmd: 'cryptokit count "text"',                              desc: 'Character & word count' },
+    { cmd: 'cryptokit reverse "text"',                            desc: 'Reverse a string' },
+    { cmd: 'cryptokit morse --encode "text"',                     desc: 'Text to Morse code' },
+    { cmd: 'cryptokit morse --decode "morse"',                    desc: 'Morse code to text' },
+    { cmd: 'cryptokit caesar --shift 3 "text"',                   desc: 'Caesar cipher' },
+    { cmd: 'cryptokit --info',                                    desc: 'System info' },
+    { cmd: 'cryptokit --version',                                 desc: 'Version info' },
+    { cmd: 'openssl genrsa -out private.pem 2048',                desc: 'Generate RSA (OpenSSL)' },
+    { cmd: 'openssl genrsa -out private.pem 4096',                desc: 'Generate RSA-4096' },
+    { cmd: 'openssl rsa -in private.pem -pubout',                 desc: 'Extract public key' },
+    { cmd: 'openssl rsa -in private.pem -text -noout',            desc: 'View key details' },
+    { cmd: 'openssl rand -base64 20',                             desc: 'Random base64' },
+    { cmd: 'openssl rand -hex 32',                                desc: 'Random hex' },
+    { cmd: 'Get-FileHash .\\file.txt -Algorithm SHA256',          desc: 'PowerShell hash' },
+    { cmd: 'Get-FileHash .\\file.txt -Algorithm MD5',             desc: 'PowerShell MD5' },
+    { cmd: 'Get-FileHash .\\file.txt -Algorithm SHA512',          desc: 'PowerShell SHA512' },
+    { cmd: 'certutil -hashfile document.txt SHA256',              desc: 'CMD hash' },
+    { cmd: 'certutil -hashfile document.txt MD5',                 desc: 'CMD MD5' },
+    { cmd: 'certutil -hashfile document.txt SHA512',              desc: 'CMD SHA512' },
+    { cmd: 'certutil -encode input.txt output.b64',               desc: 'CMD Base64 encode' },
+    { cmd: 'certutil -decode input.b64 output.txt',               desc: 'CMD Base64 decode' },
+    { cmd: 'shasum -a 256 file.txt',                              desc: 'Unix SHA-256' },
+    { cmd: 'shasum -a 512 file.txt',                              desc: 'Unix SHA-512' },
+    { cmd: 'shasum -a 1 file.txt',                                desc: 'Unix SHA-1' },
+    { cmd: 'md5 file.txt',                                        desc: 'macOS MD5' },
+    { cmd: 'echo -n "text" | base64',                             desc: 'Bash base64 encode' },
+    { cmd: 'echo -n "b64" | base64 --decode',                    desc: 'Bash base64 decode' },
+    { cmd: 'help',                                                desc: 'Show all commands' },
+    { cmd: 'clear',                                               desc: 'Clear terminal' },
+    { cmd: 'cls',                                                 desc: 'Clear (CMD)' },
+    { cmd: 'history',                                             desc: 'Command history' },
+    { cmd: 'date',                                                desc: 'Current date & time' },
+    { cmd: 'whoami',                                              desc: 'Current user' },
+    { cmd: 'uname',                                               desc: 'System information' },
+    { cmd: 'uptime',                                              desc: 'Session uptime' },
+    { cmd: 'neofetch',                                            desc: 'System overview' },
 ];
 
 /* ── REFERENCE PANEL DATA ───────────────────────────── */
@@ -231,56 +207,73 @@ const REF_GROUPS = [
     {
         icon: 'fas fa-hashtag', title: 'Hashing',
         items: [
-            { syn: 'cryptokit hash --algo sha256 "text"', desc: 'SHA-256 hash' },
-            { syn: 'cryptokit hash --all "text"',          desc: 'All algorithms' },
-            { syn: 'Get-FileHash file -Algorithm SHA256',  desc: 'PowerShell hash' },
-            { syn: 'certutil -hashfile file SHA256',       desc: 'CMD hash' },
-            { syn: 'shasum -a 256 file.txt',               desc: 'Bash hash' },
-            { syn: 'md5 file.txt',                         desc: 'Mac MD5' },
+            { syn: 'cryptokit hash --algo sha256 "your text"',    desc: 'SHA-256 hash' },
+            { syn: 'cryptokit hash --algo sha512 "your text"',    desc: 'SHA-512 hash' },
+            { syn: 'cryptokit hash --algo md5 "your text"',       desc: 'MD5 hash (weak)' },
+            { syn: 'cryptokit hash --all "your text"',            desc: 'All algorithms' },
+            { syn: 'cryptokit hash --compare "h1" "h2"',         desc: 'Compare hashes' },
         ],
     },
     {
         icon: 'fas fa-key', title: 'RSA Keys',
         items: [
-            { syn: 'cryptokit rsa --generate',              desc: 'RSA-2048 key pair' },
-            { syn: 'cryptokit rsa --generate --bits 4096',  desc: 'RSA-4096 key pair' },
-            { syn: 'openssl genrsa -out private.pem 2048',  desc: 'OpenSSL RSA key' },
-            { syn: 'openssl rsa -in priv.pem -pubout',      desc: 'Extract public key' },
-            { syn: 'openssl rsa -in priv.pem -text',        desc: 'View key details' },
+            { syn: 'cryptokit rsa --generate',                    desc: 'RSA-2048 key pair' },
+            { syn: 'cryptokit rsa --generate --bits 4096',        desc: 'RSA-4096 key pair' },
+            { syn: 'openssl genrsa -out private.pem 2048',        desc: 'OpenSSL RSA key' },
+            { syn: 'openssl rsa -in priv.pem -pubout',            desc: 'Extract public key' },
+            { syn: 'cryptokit rsa --analyze',                     desc: 'Key security guide' },
         ],
     },
     {
         icon: 'fas fa-lock', title: 'Passwords',
         items: [
-            { syn: 'cryptokit passwd --generate --length 16', desc: 'Generate password' },
-            { syn: 'cryptokit passwd --generate --strong',     desc: 'Strong password' },
-            { syn: 'cryptokit passwd --generate --passphrase', desc: 'Generate passphrase' },
-            { syn: 'cryptokit passwd --check "pass"',          desc: 'Check strength' },
-            { syn: 'openssl rand -base64 20',                  desc: 'Random base64' },
+            { syn: 'cryptokit passwd --generate --length 16',     desc: 'Generate password' },
+            { syn: 'cryptokit passwd --generate --strong',        desc: 'Strong password' },
+            { syn: 'cryptokit passwd --generate --passphrase',    desc: 'Passphrase' },
+            { syn: 'cryptokit passwd --check "your password"',    desc: 'Check strength' },
+            { syn: 'openssl rand -base64 20',                     desc: 'Random base64' },
         ],
     },
     {
         icon: 'fas fa-code', title: 'Encoding',
         items: [
-            { syn: 'cryptokit encode --base64 "text"',           desc: 'Base64 encode' },
-            { syn: 'cryptokit decode --base64 "dGV4dA=="',       desc: 'Base64 decode' },
-            { syn: 'echo -n "text" | base64',                    desc: 'Bash encode' },
-            { syn: 'certutil -encode input.txt out.b64',         desc: 'CMD encode' },
+            { syn: 'cryptokit encode --base64 "any sentence"',    desc: 'Base64 encode' },
+            { syn: 'cryptokit decode --base64 "b64 string"',      desc: 'Base64 decode' },
+            { syn: 'cryptokit hex --encode "text"',                desc: 'Text to hex' },
+            { syn: 'cryptokit hex --decode "hex string"',          desc: 'Hex to text' },
+            { syn: 'cryptokit rot13 "your text"',                  desc: 'ROT13 cipher' },
+            { syn: 'cryptokit morse --encode "text"',              desc: 'Morse encode' },
+            { syn: 'cryptokit caesar --shift 3 "text"',            desc: 'Caesar cipher' },
         ],
     },
     {
         icon: 'fas fa-shield-alt', title: 'Encryption',
         items: [
-            { syn: 'cryptokit aes --encrypt "msg" --key "k"', desc: 'AES-256 encrypt' },
-            { syn: 'cryptokit aes --decrypt "enc" --key "k"', desc: 'AES-256 decrypt' },
-            { syn: 'cryptokit rsa --encrypt "msg"',            desc: 'RSA encrypt' },
+            { syn: 'cryptokit aes --encrypt "msg" --key "pass"',  desc: 'AES-256 encrypt' },
+            { syn: 'cryptokit aes --decrypt "enc" --key "pass"',  desc: 'AES-256 decrypt' },
+        ],
+    },
+    {
+        icon: 'fas fa-random', title: 'Random & Utils',
+        items: [
+            { syn: 'cryptokit random --hex 32',                    desc: 'Random hex string' },
+            { syn: 'cryptokit random --base64 32',                 desc: 'Random base64' },
+            { syn: 'cryptokit uuid',                               desc: 'UUID v4 generator' },
+            { syn: 'cryptokit count "text"',                       desc: 'Char/word counter' },
+            { syn: 'cryptokit reverse "text"',                     desc: 'Reverse string' },
+            { syn: 'date',                                         desc: 'Current date/time' },
+            { syn: 'whoami',                                       desc: 'Current user' },
+            { syn: 'neofetch',                                     desc: 'System overview' },
         ],
     },
 ];
 
+
 /* ═══════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════ */
+const SESSION_START = Date.now();
+
 document.addEventListener('DOMContentLoaded', () => {
     initMatrix();
     bootTerminal();
@@ -292,13 +285,14 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── MATRIX CANVAS ─────────────────────────────────── */
 function initMatrix() {
     const canvas = document.getElementById('matrixCanvas');
-    const ctx    = canvas.getContext('2d');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const chars  = '0123456789ABCDEF';
-    const cols   = Math.floor(canvas.width / 18);
-    const drops  = Array(cols).fill(1);
+    const chars = '0123456789ABCDEFabcdef{}[]<>/\\|=+-*&%$#@!';
+    const cols  = Math.floor(canvas.width / 18);
+    const drops = Array(cols).fill(1);
 
     setInterval(() => {
         ctx.fillStyle = 'rgba(0,0,0,0.05)';
@@ -323,23 +317,17 @@ function initMatrix() {
 function bootTerminal() {
     const shell = SHELLS[STATE.shell];
     updateShellUI();
-
     const out = document.getElementById('terminalOutput');
     out.innerHTML = '';
-
-    let delay = 0;
+    let dl = 0;
     shell.bootLines.forEach(line => {
         setTimeout(() => {
-            if (line.cls === 'blank') {
-                appendBlank();
-            } else {
-                appendLine(line.text, line.cls);
-            }
-        }, delay);
-        delay += 60;
+            if (line.cls === 'blank') appendBlank();
+            else appendLine(line.text, line.cls);
+        }, dl);
+        dl += 55;
     });
-
-    setTimeout(() => focusInput(), delay + 100);
+    setTimeout(() => focusInput(), dl + 100);
 }
 
 /* ── SWITCH SHELL ───────────────────────────────────── */
@@ -347,33 +335,34 @@ function switchShell(shell) {
     if (STATE.shell === shell) return;
     STATE.shell       = shell;
     STATE.historyIndex = -1;
-
-    // Update shell buttons
     document.querySelectorAll('.shell-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`shell${capitalize(shell)}`).classList.add('active');
-
+    const id = 'shell' + shell.charAt(0).toUpperCase() + shell.slice(1);
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.add('active');
     clearTerminal(false);
     bootTerminal();
     buildSidebar();
     document.getElementById('engineShellLabel').textContent = SHELLS[shell].engineLabel;
 }
 
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 /* ── UPDATE SHELL UI ────────────────────────────────── */
 function updateShellUI() {
     const shell = SHELLS[STATE.shell];
-    document.getElementById('chromeTitle').textContent   = shell.chromeTitle;
-    document.getElementById('terminalPrompt').textContent = shell.prompt;
-    document.getElementById('terminalPrompt').className  = `terminal-prompt ${shell.promptClass}`;
-    document.getElementById('engineShellLabel').textContent = shell.engineLabel;
+    const prompt = document.getElementById('terminalPrompt');
+    const chrome = document.getElementById('chromeTitle');
+    const engine = document.getElementById('engineShellLabel');
+    if (chrome) chrome.textContent = shell.chromeTitle;
+    if (prompt) {
+        prompt.textContent = shell.prompt;
+        prompt.className   = `terminal-prompt ${shell.promptClass}`;
+    }
+    if (engine) engine.textContent = shell.engineLabel;
 }
 
 /* ── BUILD SIDEBAR ──────────────────────────────────── */
 function buildSidebar() {
     const list = document.getElementById('quickCmdList');
+    if (!list) return;
     list.innerHTML = '';
     QUICK_CMDS[STATE.shell].forEach(item => {
         const el = document.createElement('div');
@@ -381,10 +370,9 @@ function buildSidebar() {
         el.innerHTML = `
             <span class="cmd-item-icon">${item.icon}</span>
             <div class="cmd-item-info">
-                <span class="cmd-item-name">${item.name}</span>
-                <span class="cmd-item-desc">${item.desc}</span>
-            </div>
-        `;
+                <span class="cmd-item-name">${escapeHtml(item.name)}</span>
+                <span class="cmd-item-desc">${escapeHtml(item.desc)}</span>
+            </div>`;
         el.onclick = () => {
             document.getElementById('terminalInput').value = item.cmd;
             focusInput();
@@ -397,43 +385,43 @@ function buildSidebar() {
 /* ── BUILD REF PANEL ────────────────────────────────── */
 function buildRefPanel() {
     const acc = document.getElementById('refAccordion');
+    if (!acc) return;
     acc.innerHTML = '';
     REF_GROUPS.forEach((group, gi) => {
         const div = document.createElement('div');
         div.className = 'ref-group';
         div.innerHTML = `
             <div class="ref-group-header" onclick="toggleRefGroup(${gi})">
-                <span><i class="${group.icon}"></i>${group.title}</span>
+                <span><i class="${group.icon}"></i> ${group.title}</span>
                 <i class="fas fa-chevron-right ref-arrow"></i>
             </div>
             <div class="ref-group-body">
                 ${group.items.map(it => `
-                    <div class="ref-cmd-item" onclick="injectCommand('${it.syn.replace(/'/g,"\\'")}')">
+                    <div class="ref-cmd-item" onclick="injectCommand(\`${it.syn.replace(/`/g,"\\`")}\`)">
                         <span class="ref-cmd-syntax">${escapeHtml(it.syn)}</span>
                         <span class="ref-cmd-desc">${it.desc}</span>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+                    </div>`).join('')}
+            </div>`;
         acc.appendChild(div);
     });
 }
 
 function toggleRefGroup(index) {
-    const groups = document.querySelectorAll('.ref-group');
-    groups[index].classList.toggle('open');
+    document.querySelectorAll('.ref-group').forEach((g, i) => {
+        if (i === index) g.classList.toggle('open');
+    });
 }
 
-/* ── INIT INPUT LISTENERS ───────────────────────────── */
+/* ── INPUT LISTENERS ────────────────────────────────── */
 function initInputListeners() {
     const input = document.getElementById('terminalInput');
+    if (!input) return;
 
     input.addEventListener('keydown', e => {
-        // Enter
         if (e.key === 'Enter') {
             e.preventDefault();
             const acBox = document.getElementById('autocompleteBox');
-            if (acBox.style.display === 'block' && STATE.acIndex >= 0) {
+            if (acBox && acBox.style.display === 'block' && STATE.acIndex >= 0) {
                 const items = acBox.querySelectorAll('.ac-item');
                 if (items[STATE.acIndex]) {
                     input.value = items[STATE.acIndex].dataset.cmd;
@@ -444,55 +432,29 @@ function initInputListeners() {
             runCommand();
             return;
         }
-
-        // Arrow Up — history
         if (e.key === 'ArrowUp') {
             e.preventDefault();
             const acBox = document.getElementById('autocompleteBox');
-            if (acBox.style.display === 'block') {
-                navigateAC(-1); return;
-            }
+            if (acBox && acBox.style.display === 'block') { navigateAC(-1); return; }
             navigateHistory(1);
             return;
         }
-
-        // Arrow Down — history
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             const acBox = document.getElementById('autocompleteBox');
-            if (acBox.style.display === 'block') {
-                navigateAC(1); return;
-            }
+            if (acBox && acBox.style.display === 'block') { navigateAC(1); return; }
             navigateHistory(-1);
             return;
         }
-
-        // Tab — autocomplete
         if (e.key === 'Tab') {
             e.preventDefault();
             const acBox = document.getElementById('autocompleteBox');
-            if (acBox.style.display === 'block') {
-                navigateAC(1);
-            } else {
-                showAutocomplete(input.value);
-            }
+            if (acBox && acBox.style.display === 'block') navigateAC(1);
+            else showAutocomplete(input.value);
             return;
         }
-
-        // Escape
-        if (e.key === 'Escape') {
-            hideAutocomplete();
-            return;
-        }
-
-        // Ctrl+L — clear
-        if (e.key === 'l' && e.ctrlKey) {
-            e.preventDefault();
-            clearTerminal();
-            return;
-        }
-
-        // Ctrl+C
+        if (e.key === 'Escape') { hideAutocomplete(); return; }
+        if (e.key === 'l' && e.ctrlKey) { e.preventDefault(); clearTerminal(); return; }
         if (e.key === 'c' && e.ctrlKey && !e.shiftKey) {
             if (STATE.busy) {
                 STATE.busy = false;
@@ -504,86 +466,66 @@ function initInputListeners() {
 
     input.addEventListener('input', () => {
         const val = input.value.trim();
-        if (val.length > 0) {
-            showAutocomplete(val);
-        } else {
-            hideAutocomplete();
-        }
+        if (val.length > 0) showAutocomplete(val);
+        else hideAutocomplete();
     });
 
-    // Click outside to close autocomplete
     document.addEventListener('click', e => {
-        if (!e.target.closest('#autocompleteBox') && !e.target.closest('#terminalInput')) {
+        if (!e.target.closest('#autocompleteBox') && !e.target.closest('#terminalInput'))
             hideAutocomplete();
-        }
     });
 
-    // Click terminal area to focus input
-    document.getElementById('terminalOutput').addEventListener('click', () => focusInput());
+    const termOut = document.getElementById('terminalOutput');
+    if (termOut) termOut.addEventListener('click', () => focusInput());
 }
 
-/* ── HISTORY NAVIGATION ─────────────────────────────── */
+/* ── HISTORY ────────────────────────────────────────── */
 function navigateHistory(dir) {
     const input = document.getElementById('terminalInput');
-    if (STATE.history.length === 0) return;
-
-    STATE.historyIndex = Math.max(-1,
-        Math.min(STATE.history.length - 1, STATE.historyIndex + dir));
-
-    if (STATE.historyIndex === -1) {
-        input.value = '';
-    } else {
-        input.value = STATE.history[STATE.history.length - 1 - STATE.historyIndex];
-    }
+    if (!STATE.history.length) return;
+    STATE.historyIndex = Math.max(-1, Math.min(STATE.history.length - 1, STATE.historyIndex + dir));
+    input.value = STATE.historyIndex === -1 ? '' : STATE.history[STATE.history.length - 1 - STATE.historyIndex];
 }
 
 /* ── AUTOCOMPLETE ───────────────────────────────────── */
 function showAutocomplete(query) {
     const box   = document.getElementById('autocompleteBox');
     const input = document.getElementById('terminalInput');
-    const lq    = query.toLowerCase();
-
+    if (!box || !input) return;
+    const lq = query.toLowerCase();
     const matches = AC_SUGGESTIONS.filter(s =>
-        s.cmd.toLowerCase().includes(lq) ||
-        s.desc.toLowerCase().includes(lq)
+        s.cmd.toLowerCase().includes(lq) || s.desc.toLowerCase().includes(lq)
     ).slice(0, 10);
 
-    if (matches.length === 0) {
-        hideAutocomplete();
-        return;
-    }
+    if (!matches.length) { hideAutocomplete(); return; }
 
     box.innerHTML = matches.map((m, i) => `
         <div class="ac-item" data-cmd="${escapeHtml(m.cmd)}" data-index="${i}"
-             onclick="selectAC('${m.cmd.replace(/'/g,"\\'")}')">
+             onclick="selectAC(\`${m.cmd.replace(/`/g,'\\`')}\`)">
             <span class="ac-cmd">${escapeHtml(m.cmd)}</span>
             <span class="ac-desc">${escapeHtml(m.desc)}</span>
-        </div>
-    `).join('');
+        </div>`).join('');
 
-    // Position below input
     const rect = input.getBoundingClientRect();
-    box.style.left    = rect.left + 'px';
-    box.style.bottom  = (window.innerHeight - rect.top + 6) + 'px';
+    box.style.left   = rect.left + 'px';
+    box.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
     box.style.display = 'block';
     STATE.acIndex = -1;
 }
 
 function hideAutocomplete() {
-    document.getElementById('autocompleteBox').style.display = 'none';
+    const box = document.getElementById('autocompleteBox');
+    if (box) box.style.display = 'none';
     STATE.acIndex = -1;
 }
 
 function navigateAC(dir) {
     const box   = document.getElementById('autocompleteBox');
-    const items = box.querySelectorAll('.ac-item');
+    const items = box ? box.querySelectorAll('.ac-item') : [];
     if (!items.length) return;
-
     STATE.acIndex = (STATE.acIndex + dir + items.length) % items.length;
     items.forEach((it, i) => it.classList.toggle('active', i === STATE.acIndex));
-
-    const input = document.getElementById('terminalInput');
-    input.value = items[STATE.acIndex].dataset.cmd;
+    document.getElementById('terminalInput').value = items[STATE.acIndex].dataset.cmd;
 }
 
 function selectAC(cmd) {
@@ -595,72 +537,79 @@ function selectAC(cmd) {
 /* ── RUN COMMAND ────────────────────────────────────── */
 function runCommand() {
     if (STATE.busy) return;
-
     const input = document.getElementById('terminalInput');
     const raw   = input.value.trim();
     if (!raw) return;
 
-    // Add to history
     STATE.history.push(raw);
     STATE.historyIndex = -1;
     input.value = '';
     hideAutocomplete();
     updateHistoryUI();
-
-    // Echo command
     echoCommand(raw);
-
-    // Execute
     executeCommand(raw);
 }
 
 /* ── ECHO COMMAND ───────────────────────────────────── */
 function echoCommand(raw) {
-    const shell    = SHELLS[STATE.shell];
-    const out      = document.getElementById('terminalOutput');
-    const line     = document.createElement('span');
+    const shell = SHELLS[STATE.shell];
+    const out   = document.getElementById('terminalOutput');
+    const line  = document.createElement('span');
     line.className = 'output-line line-cmd-echo';
-
     const parts = tokenize(raw);
     let html = `<span class="${shell.promptClass}">${escapeHtml(shell.prompt)}&nbsp;</span>`;
     parts.forEach((p, i) => {
-        if (i === 0) {
-            html += `<span class="t-cmd">${escapeHtml(p)}</span>`;
-        } else if (p.startsWith('--') || p.startsWith('-')) {
-            html += `&nbsp;<span class="t-flag">${escapeHtml(p)}</span>`;
-        } else if (p.startsWith('"') || p.startsWith("'")) {
-            html += `&nbsp;<span class="t-value">${escapeHtml(p)}</span>`;
-        } else {
-            html += `&nbsp;<span class="t-string">${escapeHtml(p)}</span>`;
-        }
+        if (i === 0) html += `<span class="t-cmd">${escapeHtml(p)}</span>`;
+        else if (p.startsWith('--') || p.startsWith('-')) html += `&nbsp;<span class="t-flag">${escapeHtml(p)}</span>`;
+        else if (p.startsWith('"') || p.startsWith("'")) html += `&nbsp;<span class="t-value">${escapeHtml(p)}</span>`;
+        else html += `&nbsp;<span class="t-string">${escapeHtml(p)}</span>`;
     });
-
     line.innerHTML = html;
     out.appendChild(line);
     scrollBottom();
 }
 
-/* ── TOKENIZE RAW COMMAND ───────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   TOKENIZER — Handles full sentences in quotes
+═══════════════════════════════════════════════════════ */
 function tokenize(raw) {
     const tokens = [];
     const regex  = /"([^"]*?)"|'([^']*?)'|(\S+)/g;
-    let   match;
-    while ((match = regex.exec(raw)) !== null) {
-        if (match[1] !== undefined)      tokens.push(`"${match[1]}"`);
-        else if (match[2] !== undefined) tokens.push(`'${match[2]}'`);
-        else                             tokens.push(match[3]);
+    let   m;
+    while ((m = regex.exec(raw)) !== null) {
+        if (m[1] !== undefined)      tokens.push(`"${m[1]}"`);
+        else if (m[2] !== undefined) tokens.push(`'${m[2]}'`);
+        else                         tokens.push(m[3]);
     }
     return tokens;
 }
 
-/* ── PARSE FLAGS FROM RAW ───────────────────────────── */
+/* ── EXTRACT ALL QUOTED STRINGS ─────────────────────── */
+function extractAllQuoted(raw) {
+    const results = [];
+    const regex   = /"([^"]*?)"|'([^']*?)'/g;
+    let   m;
+    while ((m = regex.exec(raw)) !== null) {
+        results.push(m[1] !== undefined ? m[1] : m[2]);
+    }
+    return results;
+}
+
+/* ── EXTRACT FIRST QUOTED STRING ────────────────────── */
+function extractQuoted(raw) {
+    const all = extractAllQuoted(raw);
+    return all.length > 0 ? all[0] : null;
+}
+
+/* ── PARSE FLAGS ────────────────────────────────────── */
 function parseFlags(raw) {
     const flags  = {};
     const tokens = tokenize(raw);
     for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (t.startsWith('--')) {
-            const key = t.slice(2);
+            const key  = t.slice(2);
             const next = tokens[i + 1];
             if (next && !next.startsWith('-')) {
                 flags[key] = next.replace(/^["']|["']$/g, '');
@@ -669,7 +618,7 @@ function parseFlags(raw) {
                 flags[key] = true;
             }
         } else if (t.startsWith('-') && t.length === 2) {
-            const key = t.slice(1);
+            const key  = t.slice(1);
             const next = tokens[i + 1];
             if (next && !next.startsWith('-')) {
                 flags[key] = next.replace(/^["']|["']$/g, '');
@@ -682,37 +631,39 @@ function parseFlags(raw) {
     return flags;
 }
 
-/* ── EXTRACT QUOTED STRING ──────────────────────────── */
-function extractQuoted(raw) {
-    const m = raw.match(/"([^"]*?)"|'([^']*?)'/);
-    return m ? (m[1] !== undefined ? m[1] : m[2]) : null;
-}
 
-/* ── EXECUTE COMMAND ────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   EXECUTE COMMAND — MAIN ROUTER
+═══════════════════════════════════════════════════════ */
 function executeCommand(raw) {
-    const lower = raw.toLowerCase();
+    const lower = raw.toLowerCase().trim();
     const first = tokenize(raw)[0]?.toLowerCase();
 
-    // Exact matches first
-    if (lower === 'help')    { cmdHelp();    return; }
+    // Simple exact commands
+    if (lower === 'help')               { cmdHelp();     return; }
     if (lower === 'clear' || lower === 'cls') { clearTerminal(); return; }
-    if (lower === 'history') { cmdHistory(); return; }
-    if (lower === 'cryptokit --info')    { cmdInfo();    return; }
-    if (lower === 'cryptokit --version') { cmdVersion(); return; }
+    if (lower === 'history')            { cmdHistory();  return; }
+    if (lower === 'date')               { cmdDate();     return; }
+    if (lower === 'whoami')             { cmdWhoami();   return; }
+    if (lower === 'uname' || lower === 'uname -a') { cmdUname(); return; }
+    if (lower === 'uptime')             { cmdUptime();   return; }
+    if (lower === 'neofetch')           { cmdNeofetch(); return; }
+    if (lower === 'pwd')                { cmdPwd();      return; }
+    if (lower === 'hostname')           { cmdHostname(); return; }
 
     // Route by first token
     switch (first) {
-        case 'cryptokit': cmdCryptokit(raw); break;
-        case 'openssl':   cmdOpenssl(raw);   break;
+        case 'cryptokit':    cmdCryptokit(raw); break;
+        case 'openssl':      cmdOpenssl(raw);   break;
         case 'get-filehash': cmdGetFileHash(raw); break;
-        case 'certutil':  cmdCertutil(raw);  break;
-        case 'shasum':    cmdShasum(raw);    break;
-        case 'md5':       cmdMd5(raw);       break;
-        case 'echo':      cmdEcho(raw);      break;
-        default:
-            cmdUnknown(raw);
+        case 'certutil':     cmdCertutil(raw);  break;
+        case 'shasum':       cmdShasum(raw);    break;
+        case 'md5':          cmdMd5(raw);       break;
+        case 'echo':         cmdEcho(raw);      break;
+        default:             cmdUnknown(raw);
     }
 }
+
 
 /* ═══════════════════════════════════════════════════════
    COMMAND IMPLEMENTATIONS
@@ -721,169 +672,260 @@ function executeCommand(raw) {
 /* ── HELP ───────────────────────────────────────────── */
 function cmdHelp() {
     const lines = [
-        { t: '┌──────────────────────────────────────────────────────┐', c: 't-muted' },
-        { t: '│        CryptoKit Developer Terminal — Help            │', c: 't-accent' },
-        { t: '└──────────────────────────────────────────────────────┘', c: 't-muted' },
         { t: '', c: 'blank' },
-        { t: '── HASHING ────────────────────────────────────────────', c: 't-muted' },
-        { t: '  cryptokit hash --algo <alg> "text"   Hash a string', c: 't-white' },
-        { t: '  cryptokit hash --all "text"           All algorithms', c: 't-white' },
-        { t: '  cryptokit hash --compare "h1" "h2"   Compare hashes', c: 't-white' },
-        { t: '  Get-FileHash .\\file -Algorithm SHA256 (PowerShell)', c: 't-white' },
-        { t: '  certutil -hashfile file SHA256         (CMD)', c: 't-white' },
-        { t: '  shasum -a 256 file.txt                 (Bash)', c: 't-white' },
-        { t: '  md5 file.txt                           (macOS)', c: 't-white' },
+        { t: '  ╔══════════════════════════════════════════════════════════╗', c: 't-accent' },
+        { t: '  ║        CryptoKit Developer Terminal v2.0 — Help         ║', c: 't-accent' },
+        { t: '  ╚══════════════════════════════════════════════════════════╝', c: 't-accent' },
         { t: '', c: 'blank' },
-        { t: '── RSA KEYS ───────────────────────────────────────────', c: 't-muted' },
-        { t: '  cryptokit rsa --generate               RSA-2048 pair', c: 't-white' },
-        { t: '  cryptokit rsa --generate --bits 4096   RSA-4096 pair', c: 't-white' },
-        { t: '  openssl genrsa -out private.pem 2048   OpenSSL key', c: 't-white' },
-        { t: '  openssl rsa -in priv.pem -pubout       Extract pub key', c: 't-white' },
-        { t: '  openssl rsa -in priv.pem -text         View key info', c: 't-white' },
+        { t: '  ── HASHING ─────────────────────────────────────────────────', c: 't-muted' },
+        { t: '  cryptokit hash --algo <alg> "your text here"     Hash a string', c: 't-white' },
+        { t: '  cryptokit hash --all "your text here"             All algorithms', c: 't-white' },
+        { t: '  cryptokit hash --compare "hash1" "hash2"         Compare hashes', c: 't-white' },
+        { t: '  Algos: sha256, sha512, sha384, sha1, md5', c: 't-muted' },
         { t: '', c: 'blank' },
-        { t: '── PASSWORDS ──────────────────────────────────────────', c: 't-muted' },
-        { t: '  cryptokit passwd --generate             Random password', c: 't-white' },
-        { t: '  cryptokit passwd --generate --length 20 Custom length', c: 't-white' },
-        { t: '  cryptokit passwd --generate --strong    Strong mode', c: 't-white' },
-        { t: '  cryptokit passwd --generate --passphrase Passphrase', c: 't-white' },
-        { t: '  cryptokit passwd --check "password"     Strength check', c: 't-white' },
-        { t: '  openssl rand -base64 20                 Random (OpenSSL)', c: 't-white' },
+        { t: '  ── RSA KEYS ────────────────────────────────────────────────', c: 't-muted' },
+        { t: '  cryptokit rsa --generate                          RSA-2048 pair', c: 't-white' },
+        { t: '  cryptokit rsa --generate --bits 4096              RSA-4096 pair', c: 't-white' },
+        { t: '  cryptokit rsa --analyze                           Security guide', c: 't-white' },
+        { t: '  openssl genrsa -out private.pem 2048              OpenSSL RSA', c: 't-white' },
         { t: '', c: 'blank' },
-        { t: '── ENCODING & ENCRYPTION ──────────────────────────────', c: 't-muted' },
-        { t: '  cryptokit encode --base64 "text"        Encode', c: 't-white' },
-        { t: '  cryptokit decode --base64 "b64"         Decode', c: 't-white' },
-        { t: '  cryptokit aes --encrypt "msg" --key "k" AES-256', c: 't-white' },
-        { t: '  cryptokit aes --decrypt "enc" --key "k" AES decrypt', c: 't-white' },
-        { t: '  echo -n "text" | base64                 Bash encode', c: 't-white' },
-        { t: '  certutil -encode input.txt out.b64       CMD encode', c: 't-white' },
+        { t: '  ── PASSWORDS ───────────────────────────────────────────────', c: 't-muted' },
+        { t: '  cryptokit passwd --generate                       Random password', c: 't-white' },
+        { t: '  cryptokit passwd --generate --length 20 --strong  Custom length', c: 't-white' },
+        { t: '  cryptokit passwd --generate --passphrase          Word passphrase', c: 't-white' },
+        { t: '  cryptokit passwd --check "your password here"     Strength check', c: 't-white' },
         { t: '', c: 'blank' },
-        { t: '── UTILS ──────────────────────────────────────────────', c: 't-muted' },
-        { t: '  help              This menu', c: 't-white' },
-        { t: '  clear / cls       Clear terminal', c: 't-white' },
-        { t: '  history           Command history', c: 't-white' },
-        { t: '  cryptokit --info  Engine information', c: 't-white' },
+        { t: '  ── ENCODING & CIPHERS ──────────────────────────────────────', c: 't-muted' },
+        { t: '  cryptokit encode --base64 "your sentence here"   Base64 encode', c: 't-white' },
+        { t: '  cryptokit decode --base64 "base64 string here"   Base64 decode', c: 't-white' },
+        { t: '  cryptokit hex --encode "your text"                Text → Hex', c: 't-white' },
+        { t: '  cryptokit hex --decode "hex string"               Hex → Text', c: 't-white' },
+        { t: '  cryptokit rot13 "your text"                       ROT13 cipher', c: 't-white' },
+        { t: '  cryptokit caesar --shift 3 "your text"            Caesar cipher', c: 't-white' },
+        { t: '  cryptokit morse --encode "your text"              Morse code', c: 't-white' },
+        { t: '  cryptokit morse --decode "-- --- .-. ... ."       Morse decode', c: 't-white' },
         { t: '', c: 'blank' },
-        { t: 'Tip: Press Tab for autocomplete, ↑↓ for history', c: 't-info' },
+        { t: '  ── ENCRYPTION ──────────────────────────────────────────────', c: 't-muted' },
+        { t: '  cryptokit aes --encrypt "message" --key "pass"   AES-256-GCM', c: 't-white' },
+        { t: '  cryptokit aes --decrypt "cipher" --key "pass"    AES decrypt', c: 't-white' },
+        { t: '', c: 'blank' },
+        { t: '  ── RANDOM & UTILITIES ──────────────────────────────────────', c: 't-muted' },
+        { t: '  cryptokit random --hex 32                         Random hex', c: 't-white' },
+        { t: '  cryptokit random --base64 32                      Random base64', c: 't-white' },
+        { t: '  cryptokit uuid                                    UUID v4', c: 't-white' },
+        { t: '  cryptokit count "your text"                       Char/word count', c: 't-white' },
+        { t: '  cryptokit reverse "your text"                     Reverse string', c: 't-white' },
+        { t: '  openssl rand -hex 32                              OpenSSL random', c: 't-white' },
+        { t: '', c: 'blank' },
+        { t: '  ── SYSTEM ────────────────────────────────────────────────', c: 't-muted' },
+        { t: '  help / clear / cls / history                      Basics', c: 't-white' },
+        { t: '  cryptokit --info / --version                      Engine info', c: 't-white' },
+        { t: '  date / whoami / uname / uptime / neofetch         System', c: 't-white' },
+        { t: '', c: 'blank' },
+        { t: '  💡 Tip: Put your text inside double quotes "like this"', c: 't-info' },
+        { t: '  💡 Tip: Press Tab for autocomplete, ↑↓ for history', c: 't-info' },
         { t: '', c: 'blank' },
     ];
     printLines(lines);
 }
 
-/* ── INFO ───────────────────────────────────────────── */
+/* ── INFO / VERSION ─────────────────────────────────── */
 function cmdInfo() {
     const shell = SHELLS[STATE.shell];
     printLines([
         { t: '', c: 'blank' },
-        { t: '  CryptoKit Developer Terminal', c: 't-accent' },
-        { t: '  ─────────────────────────────────────────', c: 't-muted' },
-        { t: `  Version      : v1.0.0`, c: 't-white' },
+        { t: '  ╔══════════════════════════════════════════╗', c: 't-accent' },
+        { t: '  ║    CryptoKit Developer Terminal v2.0      ║', c: 't-accent' },
+        { t: '  ╚══════════════════════════════════════════╝', c: 't-accent' },
         { t: `  Shell Mode   : ${shell.label}`, c: 't-white' },
         { t: `  Engine       : WebCrypto API (W3C Standard)`, c: 't-white' },
-        { t: `  Algorithms   : SHA-1, SHA-256, SHA-384, SHA-512, MD5`, c: 't-white' },
+        { t: `  Hash Algos   : MD5, SHA-1, SHA-256, SHA-384, SHA-512`, c: 't-white' },
         { t: `  RSA Support  : 1024, 2048, 4096 bits`, c: 't-white' },
-        { t: `  AES Support  : AES-256-GCM, AES-256-CBC`, c: 't-white' },
-        { t: `  Storage      : None — all client-side`, c: 't-success' },
+        { t: `  AES Support  : AES-256-GCM (PBKDF2 key derivation)`, c: 't-white' },
+        { t: `  Ciphers      : ROT13, Caesar, Morse, Hex, Base64`, c: 't-white' },
+        { t: `  Storage      : None — 100% client-side`, c: 't-success' },
         { t: `  License      : MIT Open Source`, c: 't-white' },
-        { t: `  Browser      : ${navigator.userAgent.split(' ').pop()}`, c: 't-white' },
+        { t: `  Platform     : ${navigator.platform}`, c: 't-white' },
+        { t: `  User Agent   : ${navigator.userAgent.substring(0, 60)}...`, c: 't-muted' },
         { t: '', c: 'blank' },
     ]);
 }
 
-/* ── VERSION ────────────────────────────────────────── */
 function cmdVersion() {
     printLines([
         { t: '', c: 'blank' },
-        { t: '  CryptoKit v1.0.0', c: 't-success' },
-        { t: '  Developer Terminal Module v1.0.0', c: 't-white' },
+        { t: '  CryptoKit v2.0.0', c: 't-success' },
+        { t: '  Developer Terminal Module v2.0.0', c: 't-white' },
+        { t: '  WebCrypto Engine: Available ✔', c: 't-success' },
         { t: '', c: 'blank' },
     ]);
 }
 
-/* ── HISTORY CMD ────────────────────────────────────── */
+/* ── HISTORY ────────────────────────────────────────── */
 function cmdHistory() {
-    if (STATE.history.length === 0) {
-        printLines([{ t: '  No commands in history yet.', c: 't-muted' }]);
-        appendBlank();
+    if (!STATE.history.length) {
+        printLines([{ t: '  No commands in history yet.', c: 't-muted' }, { t: '', c: 'blank' }]);
         return;
     }
     const lines = [{ t: '', c: 'blank' }];
     STATE.history.forEach((cmd, i) => {
-        lines.push({ t: `  ${String(i + 1).padStart(3)}  ${cmd}`, c: 't-white' });
+        lines.push({ t: `  ${String(i + 1).padStart(4)}  ${cmd}`, c: 't-white' });
     });
     lines.push({ t: '', c: 'blank' });
     printLines(lines);
 }
 
-/* ── CRYPTOKIT UNIVERSAL ────────────────────────────── */
+/* ── SYSTEM COMMANDS ────────────────────────────────── */
+function cmdDate() {
+    const now = new Date();
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  ${now.toString()}`, c: 't-white' },
+        { t: `  ISO: ${now.toISOString()}`, c: 't-muted' },
+        { t: `  Timestamp: ${now.getTime()}`, c: 't-muted' },
+        { t: '', c: 'blank' },
+    ]);
+}
+
+function cmdWhoami() {
+    printLines([
+        { t: '', c: 'blank' },
+        { t: '  cryptokit-user@developer-terminal', c: 't-success' },
+        { t: '  Role: Developer | Mode: Terminal', c: 't-muted' },
+        { t: '', c: 'blank' },
+    ]);
+}
+
+function cmdUname() {
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  CryptoKit DevTerminal 2.0.0 ${navigator.platform} WebCrypto`, c: 't-white' },
+        { t: `  Platform: ${navigator.platform}`, c: 't-muted' },
+        { t: `  Language: ${navigator.language}`, c: 't-muted' },
+        { t: '', c: 'blank' },
+    ]);
+}
+
+function cmdUptime() {
+    const elapsed = Date.now() - SESSION_START;
+    const sec     = Math.floor(elapsed / 1000);
+    const min     = Math.floor(sec / 60);
+    const hr      = Math.floor(min / 60);
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  Session uptime: ${hr}h ${min % 60}m ${sec % 60}s`, c: 't-white' },
+        { t: `  Commands executed: ${STATE.history.length}`, c: 't-muted' },
+        { t: '', c: 'blank' },
+    ]);
+}
+
+function cmdPwd() {
+    const paths = { powershell: 'C:\\CryptoKit', cmd: 'C:\\CryptoKit', bash: '/home/cryptokit' };
+    printLines([{ t: '', c: 'blank' }, { t: `  ${paths[STATE.shell]}`, c: 't-white' }, { t: '', c: 'blank' }]);
+}
+
+function cmdHostname() {
+    printLines([{ t: '', c: 'blank' }, { t: '  cryptokit-dev-terminal', c: 't-white' }, { t: '', c: 'blank' }]);
+}
+
+function cmdNeofetch() {
+    printLines([
+        { t: '', c: 'blank' },
+        { t: '         ╔═══════════╗          cryptokit-user@dev-terminal', c: 't-accent' },
+        { t: '         ║  CRYPTO   ║          ─────────────────────────────', c: 't-accent' },
+        { t: '         ║   KIT     ║          OS       : CryptoKit DevOS 2.0', c: 't-white' },
+        { t: '         ║  v2.0.0   ║          Kernel   : WebCrypto API', c: 't-white' },
+        { t: '         ╚═══════════╝          Shell    : ' + SHELLS[STATE.shell].label, c: 't-white' },
+        { t: `                                Uptime   : ${Math.floor((Date.now()-SESSION_START)/1000)}s`, c: 't-white' },
+        { t: `                                Commands : ${STATE.history.length}`, c: 't-white' },
+        { t: `                                Platform : ${navigator.platform}`, c: 't-white' },
+        { t: `                                Language : ${navigator.language}`, c: 't-white' },
+        { t: `                                Terminal : CryptoKit Dev Terminal`, c: 't-white' },
+        { t: '                                Engine   : WebCrypto + CSPRNG', c: 't-white' },
+        { t: '', c: 'blank' },
+        { t: '         ███ ███ ███ ███ ███ ███ ███ ███', c: 't-accent' },
+        { t: '', c: 'blank' },
+    ]);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CRYPTOKIT UNIVERSAL ROUTER
+═══════════════════════════════════════════════════════ */
 function cmdCryptokit(raw) {
     const tokens = tokenize(raw);
-    const sub    = tokens[1];
+    const sub    = tokens[1]?.toLowerCase();
 
     if (!sub) {
         printLines([
             { t: '', c: 'blank' },
             { t: '  Usage: cryptokit <command> [options]', c: 't-warning' },
-            { t: '  Type  help  for a full command list.', c: 't-info' },
+            { t: '  Type  help  for full command list.', c: 't-info' },
             { t: '', c: 'blank' },
         ]);
         return;
     }
 
-    switch (sub.toLowerCase()) {
-        case 'hash':   cmdCryptokitHash(raw);   break;
-        case 'rsa':    cmdCryptokitRSA(raw);    break;
-        case 'passwd': cmdCryptokitPasswd(raw); break;
-        case 'encode': cmdCryptokitEncode(raw); break;
-        case 'decode': cmdCryptokitDecode(raw); break;
-        case 'aes':    cmdCryptokitAES(raw);    break;
-        case '--info':    cmdInfo();    break;
-        case '--version': cmdVersion(); break;
+    switch (sub) {
+        case 'hash':     cmdCryptokitHash(raw);   break;
+        case 'rsa':      cmdCryptokitRSA(raw);    break;
+        case 'passwd':   cmdCryptokitPasswd(raw);  break;
+        case 'encode':   cmdCryptokitEncode(raw);  break;
+        case 'decode':   cmdCryptokitDecode(raw);  break;
+        case 'aes':      cmdCryptokitAES(raw);     break;
+        case 'random':   cmdCryptokitRandom(raw);  break;
+        case 'uuid':     cmdUUID();                break;
+        case 'rot13':    cmdROT13(raw);            break;
+        case 'hex':      cmdHex(raw);              break;
+        case 'count':    cmdCount(raw);            break;
+        case 'reverse':  cmdReverse(raw);          break;
+        case 'morse':    cmdMorse(raw);            break;
+        case 'caesar':   cmdCaesar(raw);           break;
+        case '--info':   cmdInfo();                break;
+        case '--version':cmdVersion();             break;
         default:
             printLines([
                 { t: '', c: 'blank' },
                 { t: `  Unknown subcommand: ${sub}`, c: 't-error' },
-                { t: '  Type  help  for a full command list.', c: 't-info' },
+                { t: '  Type  help  for full command list.', c: 't-info' },
                 { t: '', c: 'blank' },
             ]);
     }
 }
 
-/* ── CRYPTOKIT HASH ─────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   HASHING — Supports full sentences
+═══════════════════════════════════════════════════════ */
 function cmdCryptokitHash(raw) {
     const flags = parseFlags(raw);
-    const algo  = (flags.algo || 'sha256').toLowerCase();
     const text  = extractQuoted(raw);
 
     // --compare mode
     if (flags.compare !== undefined) {
-        const tokens = tokenize(raw);
-        const quoted = [];
-        tokens.forEach(t => {
-            if ((t.startsWith('"') || t.startsWith("'")) && t !== '"' && t !== "'") {
-                quoted.push(t.replace(/^["']|["']$/g, ''));
-            }
-        });
-        if (quoted.length < 2) {
+        const allQ = extractAllQuoted(raw);
+        if (allQ.length < 2) {
             printError('Usage: cryptokit hash --compare "hash1" "hash2"');
             return;
         }
-        const match = quoted[0].toLowerCase() === quoted[1].toLowerCase();
+        const match = allQ[0].toLowerCase() === allQ[1].toLowerCase();
         printLines([
             { t: '', c: 'blank' },
-            { t: `  Hash 1 : ${quoted[0]}`, c: 't-label' },
-            { t: `  Hash 2 : ${quoted[1]}`, c: 't-label' },
-            { t: `  Result : ${match ? '✔ MATCH — Hashes are identical' : '✘ NO MATCH — Hashes differ'}`, c: match ? 't-success' : 't-error' },
+            { t: `  Hash 1  : ${allQ[0]}`, c: 't-label' },
+            { t: `  Hash 2  : ${allQ[1]}`, c: 't-label' },
+            { t: '', c: 'blank' },
+            { t: `  Result  : ${match ? '✔ MATCH — Hashes are identical' : '✘ NO MATCH — Hashes differ'}`, c: match ? 't-success' : 't-error' },
             { t: '', c: 'blank' },
         ]);
         return;
     }
 
-    if (!text) {
-        printError('Usage: cryptokit hash --algo sha256 "your text here"');
+    if (!text && text !== '') {
+        printError('Usage: cryptokit hash --algo sha256 "your text or sentence here"');
         return;
     }
 
-    // --all mode
+    const algo = (flags.algo || 'sha256').toLowerCase();
+
     if (flags.all !== undefined) {
         hashAllAlgos(text);
         return;
@@ -893,104 +935,95 @@ function cmdCryptokitHash(raw) {
 }
 
 async function hashText(text, algo) {
-    const algoMap = {
-        'sha256': 'SHA-256',
-        'sha512': 'SHA-512',
-        'sha384': 'SHA-384',
-        'sha1':   'SHA-1',
-        'md5':    null,
-    };
-
+    const algoMap = { sha256:'SHA-256', sha512:'SHA-512', sha384:'SHA-384', sha1:'SHA-1', md5:null };
     STATE.busy = true;
     printLines([{ t: `  ⚙ Computing ${algo.toUpperCase()} hash...`, c: 't-info' }]);
-
     await delay(200);
 
     try {
         let hashHex;
+        const isWeak = algo === 'md5' || algo === 'sha1';
+
         if (algo === 'md5') {
             hashHex = md5Sim(text);
-            printLines([
-                { t: '', c: 'blank' },
-                { t: `  Algorithm : MD5`, c: 't-label' },
-                { t: `  Input     : "${text}"`, c: 't-label' },
-                { t: `  Hash      : ${hashHex}`, c: 't-hash' },
-                { t: `  ⚠ Warning : MD5 is cryptographically broken. Use SHA-256+.`, c: 't-warning' },
-                { t: '', c: 'blank' },
-            ]);
         } else {
             const webAlgo = algoMap[algo];
             if (!webAlgo) {
-                printError(`Unsupported algorithm: ${algo}. Use sha256, sha512, sha384, sha1, md5`);
+                printError(`Unsupported algorithm: ${algo}. Use: sha256, sha512, sha384, sha1, md5`);
                 STATE.busy = false;
                 return;
             }
-            const enc    = new TextEncoder().encode(text);
-            const buf    = await crypto.subtle.digest(webAlgo, enc);
-            hashHex      = bufToHex(buf);
+            const buf = await crypto.subtle.digest(webAlgo, new TextEncoder().encode(text));
+            hashHex   = bufToHex(buf);
+        }
 
-            printLines([
-                { t: '', c: 'blank' },
-                { t: `  Algorithm : ${webAlgo}`, c: 't-label' },
-                { t: `  Input     : "${text}"`, c: 't-label' },
-                { t: `  Length    : ${text.length} characters`, c: 't-label' },
-                { t: `  Hash      : ${hashHex}`, c: 't-hash' },
-                { t: `  Hex Len   : ${hashHex.length} characters`, c: 't-label' },
-                { t: '  ✔ Hash generated successfully', c: 't-success' },
-                { t: '', c: 'blank' },
-            ]);
+        printLines([
+            { t: '', c: 'blank' },
+            { t: `  Algorithm : ${(algoMap[algo] || 'MD5').toUpperCase()}`, c: 't-label' },
+            { t: `  Input     : "${text}"`, c: 't-label' },
+            { t: `  Length    : ${text.length} chars / ${new Blob([text]).size} bytes`, c: 't-label' },
+            { t: `  Hash      : ${hashHex}`, c: 't-hash' },
+            { t: `  Hex Len   : ${hashHex.length} characters`, c: 't-label' },
+            { t: '', c: 'blank' },
+        ]);
+
+        if (isWeak) {
+            appendLine(`  ⚠ Warning: ${algo.toUpperCase()} is cryptographically weak. Use SHA-256 or higher for security.`, 't-warning');
+            appendBlank();
+        } else {
+            appendLine('  ✔ Hash generated successfully', 't-success');
+            appendBlank();
         }
 
         STATE.lastOutput = hashHex;
     } catch (err) {
         printError(`Hash error: ${err.message}`);
     }
-
     STATE.busy = false;
 }
 
 async function hashAllAlgos(text) {
     STATE.busy = true;
-    printLines([
-        { t: '', c: 'blank' },
-        { t: `  ⚙ Computing all hashes for: "${text}"`, c: 't-info' },
-    ]);
-
-    await delay(300);
+    printLines([{ t: '', c: 'blank' }, { t: `  ⚙ Computing all hashes for: "${text}"`, c: 't-info' }]);
+    await delay(200);
 
     const algos = [
-        { name: 'MD5     ', web: null,      label: '⚠ Weak' },
-        { name: 'SHA-1   ', web: 'SHA-1',   label: '⚠ Weak' },
-        { name: 'SHA-256 ', web: 'SHA-256', label: '✔ Strong' },
-        { name: 'SHA-384 ', web: 'SHA-384', label: '✔ Strong' },
-        { name: 'SHA-512 ', web: 'SHA-512', label: '✔ Strongest' },
+        { name: 'MD5',     web: null,       weak: true },
+        { name: 'SHA-1',   web: 'SHA-1',    weak: true },
+        { name: 'SHA-256', web: 'SHA-256',  weak: false },
+        { name: 'SHA-384', web: 'SHA-384',  weak: false },
+        { name: 'SHA-512', web: 'SHA-512',  weak: false },
     ];
 
     const enc = new TextEncoder().encode(text);
-
-    printLines([{ t: '', c: 'blank' }]);
-    printLines([{ t: '  Algorithm    Hash                                                              Status', c: 't-muted' }]);
-    printLines([{ t: '  ──────────   ────────────────────────────────────────────────────────────────  ──────', c: 't-muted' }]);
+    appendBlank();
+    appendLine('  ┌────────────┬──────────────────────────────────────────────────────────────────┬────────────┐', 't-muted');
+    appendLine('  │ Algorithm  │ Hash                                                             │ Status     │', 't-muted');
+    appendLine('  ├────────────┼──────────────────────────────────────────────────────────────────┼────────────┤', 't-muted');
 
     for (const a of algos) {
         let hash;
-        if (!a.web) {
-            hash = md5Sim(text);
-        } else {
+        if (!a.web) hash = md5Sim(text);
+        else {
             const buf = await crypto.subtle.digest(a.web, enc);
-            hash = bufToHex(buf).substring(0, 64);
+            hash = bufToHex(buf);
         }
-        appendLine(
-            `  ${a.name}   ${hash.padEnd(66)}  ${a.label}`,
-            a.label.includes('Weak') ? 't-warning' : 't-success'
-        );
+        const shortHash = hash.substring(0, 64).padEnd(64);
+        const status    = a.weak ? '⚠ Weak' : '✔ Strong';
+        appendLine(`  │ ${a.name.padEnd(10)} │ ${shortHash}   │ ${status.padEnd(10)} │`, a.weak ? 't-warning' : 't-success');
     }
 
-    printLines([{ t: '', c: 'blank' }]);
+    appendLine('  └────────────┴──────────────────────────────────────────────────────────────────┴────────────┘', 't-muted');
+    appendBlank();
+    appendLine(`  Input: "${text}" (${text.length} chars)`, 't-muted');
+    appendBlank();
     STATE.busy = false;
 }
 
-/* ── CRYPTOKIT RSA ──────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   RSA KEY GENERATION
+═══════════════════════════════════════════════════════ */
 async function cmdCryptokitRSA(raw) {
     const flags  = parseFlags(raw);
     const tokens = tokenize(raw);
@@ -1003,7 +1036,7 @@ async function cmdCryptokitRSA(raw) {
             printError(`Invalid key size: ${bits}. Supported: 1024, 2048, 4096`);
             return;
         }
-        await generateRSA(bits, flags.export || 'pem');
+        await generateRSA(bits);
     } else if (action === '--analyze') {
         cmdRSAAnalyze();
     } else {
@@ -1011,91 +1044,83 @@ async function cmdCryptokitRSA(raw) {
     }
 }
 
-async function generateRSA(bits, exportFmt) {
+async function generateRSA(bits) {
     STATE.busy = true;
     printLines([
         { t: '', c: 'blank' },
         { t: `  ⚙ Generating RSA-${bits} key pair...`, c: 't-info' },
-        { t: `  This may take a moment for larger key sizes`, c: 't-muted' },
+        { t: '  Please wait, this may take a moment...', c: 't-muted' },
     ]);
-
     await delay(100);
 
     try {
+        const start = performance.now();
         const keyPair = await crypto.subtle.generateKey(
-            {
-                name:           'RSA-OAEP',
-                modulusLength:  bits,
-                publicExponent: new Uint8Array([1, 0, 1]),
-                hash:           'SHA-256',
-            },
-            true,
-            ['encrypt', 'decrypt']
+            { name:'RSA-OAEP', modulusLength:bits, publicExponent:new Uint8Array([1,0,1]), hash:'SHA-256' },
+            true, ['encrypt','decrypt']
         );
+        const elapsed = (performance.now() - start).toFixed(0);
 
-        // Export public key
         const pubDer  = await crypto.subtle.exportKey('spki', keyPair.publicKey);
         const pubB64  = bufToB64(pubDer);
         const pubPem  = wrapPem(pubB64, 'PUBLIC KEY');
 
-        // Export private key
         const privDer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
         const privB64 = bufToB64(privDer);
         const privPem = wrapPem(privB64, 'PRIVATE KEY');
 
+        STATE.rsaKeyPair = { pub: pubPem, priv: privPem, bits };
+
         printLines([
             { t: '', c: 'blank' },
-            { t: `  ✔ RSA-${bits} key pair generated successfully`, c: 't-success' },
+            { t: `  ✔ RSA-${bits} key pair generated in ${elapsed}ms`, c: 't-success' },
             { t: `  Key Size   : ${bits} bits`, c: 't-label' },
             { t: `  Algorithm  : RSA-OAEP with SHA-256`, c: 't-label' },
             { t: `  Exponent   : 65537 (0x10001)`, c: 't-label' },
-            { t: `  Format     : ${exportFmt.toUpperCase()}`, c: 't-label' },
             { t: '', c: 'blank' },
-            { t: '  ── PUBLIC KEY ────────────────────────────────────────', c: 't-muted' },
+            { t: '  ── PUBLIC KEY ─────────────────────────────────────────────', c: 't-muted' },
         ]);
-
         pubPem.split('\n').forEach(l => appendLine('  ' + l, 't-key'));
-
-        printLines([
-            { t: '', c: 'blank' },
-            { t: '  ── PRIVATE KEY ───────────────────────────────────────', c: 't-muted' },
-        ]);
-
+        appendBlank();
+        appendLine('  ── PRIVATE KEY ────────────────────────────────────────────', 't-muted');
         privPem.split('\n').forEach(l => appendLine('  ' + l, 't-purple'));
-
         printLines([
             { t: '', c: 'blank' },
-            { t: '  ⚠ Keep your private key secret! Never share it.', c: 't-warning' },
-            { t: `  Security Rating: ${bits >= 4096 ? '🔒🔒🔒 Excellent' : bits >= 2048 ? '🔒🔒 Good' : '🔒 Weak — upgrade to 2048+'}`, c: bits >= 2048 ? 't-success' : 't-warning' },
+            { t: '  ⚠ Keep your private key SECRET! Never share it publicly.', c: 't-warning' },
+            { t: `  Security: ${bits >= 4096 ? '🛡️ Excellent — Long-term security' : bits >= 2048 ? '🔒 Good — NIST recommended minimum' : '⚠️ Weak — Upgrade to 2048+'}`, c: bits >= 2048 ? 't-success' : 't-warning' },
             { t: '', c: 'blank' },
         ]);
-
         STATE.lastOutput = pubPem + '\n\n' + privPem;
-
     } catch (err) {
         printError(`RSA generation failed: ${err.message}`);
     }
-
     STATE.busy = false;
 }
 
 function cmdRSAAnalyze() {
     printLines([
         { t: '', c: 'blank' },
-        { t: '  RSA Key Security Analysis Guide', c: 't-accent' },
-        { t: '  ─────────────────────────────────────────────────────', c: 't-muted' },
-        { t: '  1024-bit  →  ✘ BROKEN — Do not use', c: 't-error' },
-        { t: '  2048-bit  →  ✔ Acceptable — Minimum recommended', c: 't-warning' },
-        { t: '  3072-bit  →  ✔ Good — Recommended for new systems', c: 't-success' },
-        { t: '  4096-bit  →  ✔ Excellent — Long-term security', c: 't-success' },
+        { t: '  ╔═══════════════════════════════════════════════╗', c: 't-accent' },
+        { t: '  ║     RSA Key Security Analysis Guide            ║', c: 't-accent' },
+        { t: '  ╚═══════════════════════════════════════════════╝', c: 't-accent' },
         { t: '', c: 'blank' },
-        { t: '  NIST Recommendation: 2048-bit minimum through 2030', c: 't-info' },
-        { t: '  OWASP Recommendation: 4096-bit for sensitive data', c: 't-info' },
+        { t: '  Key Size       Status                Recommendation', c: 't-muted' },
+        { t: '  ──────────     ──────────────────    ─────────────────────────', c: 't-muted' },
+        { t: '  512-bit        ✘ BROKEN              Never use', c: 't-error' },
+        { t: '  1024-bit       ✘ DEPRECATED          Phase out immediately', c: 't-error' },
+        { t: '  2048-bit       ✔ ACCEPTABLE          NIST minimum through 2030', c: 't-warning' },
+        { t: '  3072-bit       ✔ GOOD                Recommended for new systems', c: 't-success' },
+        { t: '  4096-bit       ✔ EXCELLENT           Long-term sensitive data', c: 't-success' },
+        { t: '', c: 'blank' },
+        { t: '  Standards: NIST SP 800-57, OWASP Key Management', c: 't-info' },
         { t: '', c: 'blank' },
     ]);
 }
 
-/* ── CRYPTOKIT PASSWORD ─────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   PASSWORD — Supports full sentences and all options
+═══════════════════════════════════════════════════════ */
 function cmdCryptokitPasswd(raw) {
     const flags  = parseFlags(raw);
     const tokens = tokenize(raw);
@@ -1106,133 +1131,140 @@ function cmdCryptokitPasswd(raw) {
     } else if (action === '--check') {
         const pwd = extractQuoted(raw);
         if (!pwd) {
-            printError('Usage: cryptokit passwd --check "your_password"');
+            printError('Usage: cryptokit passwd --check "your password here"');
             return;
         }
         checkPasswordStrength(pwd, !!flags.verbose);
     } else {
-        printError('Usage: cryptokit passwd --generate | --check "password"');
+        printError('Usage: cryptokit passwd --generate [options] | --check "password"');
     }
 }
 
 function generatePassword(flags) {
-    const length     = parseInt(flags.length || '16');
-    const noSymbols  = flags['no-symbols'] !== undefined;
-    const noNumbers  = flags['no-numbers'] !== undefined;
-    const strong     = flags.strong !== undefined;
-    const passphrase = flags.passphrase !== undefined;
+    const length    = parseInt(flags.length || '16');
+    const noSymbols = flags['no-symbols'] !== undefined;
+    const noNumbers = flags['no-numbers'] !== undefined;
+    const strong    = flags.strong !== undefined;
+    const passphrase= flags.passphrase !== undefined;
 
     if (passphrase) {
-        generatePassphrase();
+        const wordCount = parseInt(flags.words || '5');
+        generatePassphrase(wordCount);
+        return;
+    }
+
+    if (length < 4 || length > 128) {
+        printError('Password length must be between 4 and 128 characters');
         return;
     }
 
     let charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    if (!noNumbers)  charset += '0123456789';
-    if (!noSymbols)  charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    if (strong)      charset += '~`"\'\\/<>';
+    if (!noNumbers) charset += '0123456789';
+    if (!noSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    if (strong)     charset += '~`"\'/\\<>{}[]';
 
-    const arr  = new Uint32Array(length);
+    const arr = new Uint32Array(length);
     crypto.getRandomValues(arr);
     let pwd = '';
-    for (let i = 0; i < length; i++) {
-        pwd += charset[arr[i] % charset.length];
-    }
+    for (let i = 0; i < length; i++) pwd += charset[arr[i] % charset.length];
 
-    const strength = calcPasswordStrength(pwd);
-
+    const s = calcPasswordStrength(pwd);
     printLines([
         { t: '', c: 'blank' },
-        { t: `  ✔ Password Generated`, c: 't-success' },
-        { t: `  ─────────────────────────────────────────────`, c: 't-muted' },
-        { t: `  Password  : ${pwd}`, c: 't-hash' },
-        { t: `  Length    : ${pwd.length} characters`, c: 't-label' },
-        { t: `  Charset   : ${charset.length} possible characters`, c: 't-label' },
-        { t: `  Entropy   : ${strength.entropy.toFixed(1)} bits`, c: 't-label' },
-        { t: `  Strength  : ${strength.label} ${strength.icon}`, c: strength.cls },
-        { t: `  Est. Crack: ${strength.crackTime}`, c: 't-label' },
+        { t: '  ✔ Password Generated Successfully', c: 't-success' },
+        { t: '  ─────────────────────────────────────────────────', c: 't-muted' },
+        { t: `  Password   : ${pwd}`, c: 't-hash' },
+        { t: `  Length     : ${pwd.length} characters`, c: 't-label' },
+        { t: `  Charset    : ${charset.length} possible chars`, c: 't-label' },
+        { t: `  Entropy    : ${s.entropy.toFixed(1)} bits`, c: 't-label' },
+        { t: `  Strength   : ${s.label} ${s.icon}`, c: s.cls },
+        { t: `  Crack Time : ${s.crackTime}`, c: 't-label' },
+        { t: `  Options    : ${noSymbols ? 'No symbols ' : ''}${noNumbers ? 'No numbers ' : ''}${strong ? 'Strong ' : ''}`.trim() || 'Default', c: 't-muted' },
         { t: '', c: 'blank' },
         { t: '  ⚠ Store this password securely. Do not share it.', c: 't-warning' },
         { t: '', c: 'blank' },
     ]);
-
     STATE.lastOutput = pwd;
 }
 
-function generatePassphrase() {
+function generatePassphrase(wordCount) {
     const words = [
-        'correct','horse','battery','staple','purple','elephant',
-        'mountain','ocean','thunder','crystal','shadow','dragon',
-        'forest','copper','silver','golden','rocket','phoenix',
-        'solar','lunar','cosmic','cipher','matrix','quantum',
-        'vector','kernel','delta','sigma','alpha','omega',
+        'correct','horse','battery','staple','purple','elephant','mountain',
+        'ocean','thunder','crystal','shadow','dragon','forest','copper',
+        'silver','golden','rocket','phoenix','solar','lunar','cosmic',
+        'cipher','matrix','quantum','vector','kernel','delta','sigma',
+        'alpha','omega','nebula','prism','falcon','tiger','arctic',
+        'plasma','circuit','voltage','binary','beacon','carbon','zenith',
+        'harbor','bridge','tunnel','castle','garden','island','valley',
     ];
-    const count  = 5;
-    const arr    = new Uint32Array(count);
+    if (wordCount < 3) wordCount = 3;
+    if (wordCount > 12) wordCount = 12;
+
+    const arr    = new Uint32Array(wordCount);
     crypto.getRandomValues(arr);
     const phrase = Array.from(arr).map(n => words[n % words.length]).join('-');
-    const entropy = (Math.log2(words.length) * count).toFixed(1);
+    const entropy = (Math.log2(words.length) * wordCount).toFixed(1);
 
     printLines([
         { t: '', c: 'blank' },
-        { t: '  ✔ Passphrase Generated', c: 't-success' },
-        { t: '  ─────────────────────────────────────────────', c: 't-muted' },
+        { t: '  ✔ Passphrase Generated Successfully', c: 't-success' },
+        { t: '  ─────────────────────────────────────────────────', c: 't-muted' },
         { t: `  Passphrase : ${phrase}`, c: 't-hash' },
-        { t: `  Words      : ${count} random words`, c: 't-label' },
+        { t: `  Words      : ${wordCount} random words`, c: 't-label' },
+        { t: `  Word Pool  : ${words.length} words`, c: 't-label' },
         { t: `  Entropy    : ${entropy} bits`, c: 't-label' },
-        { t: `  Method     : Diceware-style CSPRNG`, c: 't-label' },
-        { t: '  ✔ Passphrases are easier to remember and highly secure', c: 't-success' },
+        { t: `  Method     : Diceware-style CSPRNG selection`, c: 't-label' },
+        { t: '', c: 'blank' },
+        { t: '  💡 Passphrases are easy to remember and very secure', c: 't-info' },
         { t: '', c: 'blank' },
     ]);
-
     STATE.lastOutput = phrase;
 }
 
 function checkPasswordStrength(pwd, verbose) {
     const s = calcPasswordStrength(pwd);
     const checks = [
-        { label: 'Length ≥ 8',       ok: pwd.length >= 8 },
-        { label: 'Length ≥ 12',      ok: pwd.length >= 12 },
-        { label: 'Uppercase letters', ok: /[A-Z]/.test(pwd) },
-        { label: 'Lowercase letters', ok: /[a-z]/.test(pwd) },
-        { label: 'Numbers',           ok: /[0-9]/.test(pwd) },
-        { label: 'Special symbols',   ok: /[^a-zA-Z0-9]/.test(pwd) },
-        { label: 'No common patterns',ok: !isCommonPattern(pwd) },
+        { label: 'Length ≥ 8 characters',  ok: pwd.length >= 8 },
+        { label: 'Length ≥ 12 characters', ok: pwd.length >= 12 },
+        { label: 'Length ≥ 16 characters', ok: pwd.length >= 16 },
+        { label: 'Has uppercase (A-Z)',    ok: /[A-Z]/.test(pwd) },
+        { label: 'Has lowercase (a-z)',    ok: /[a-z]/.test(pwd) },
+        { label: 'Has numbers (0-9)',      ok: /[0-9]/.test(pwd) },
+        { label: 'Has special symbols',    ok: /[^a-zA-Z0-9]/.test(pwd) },
+        { label: 'No common patterns',     ok: !isCommonPattern(pwd) },
+        { label: 'No repeated chars (aaa)',ok: !/(.)\1{2,}/.test(pwd) },
+        { label: 'No sequential (abc,123)',ok: !hasSequential(pwd) },
     ];
-
-    const score  = checks.filter(c => c.ok).length;
-    const bar    = buildStrengthBar(score, checks.length);
+    const score = checks.filter(c => c.ok).length;
+    const bar   = buildStrengthBar(score, checks.length);
 
     printLines([
         { t: '', c: 'blank' },
-        { t: `  Password Strength Analysis`, c: 't-accent' },
-        { t: `  ─────────────────────────────────────────────`, c: 't-muted' },
-        { t: `  Password  : ${'*'.repeat(Math.min(pwd.length, 20))}`, c: 't-label' },
-        { t: `  Length    : ${pwd.length} characters`, c: 't-label' },
-        { t: `  Entropy   : ${s.entropy.toFixed(1)} bits`, c: 't-label' },
-        { t: `  Strength  : ${s.label} ${s.icon}`, c: s.cls },
-        { t: `  Score     : ${score}/${checks.length}  ${bar}`, c: 't-label' },
-        { t: `  Est. Crack: ${s.crackTime}`, c: 't-label' },
+        { t: '  ╔══════════════════════════════════════════════╗', c: 't-accent' },
+        { t: '  ║      Password Strength Analysis               ║', c: 't-accent' },
+        { t: '  ╚══════════════════════════════════════════════╝', c: 't-accent' },
+        { t: `  Password   : ${'•'.repeat(Math.min(pwd.length, 30))} (${pwd.length} chars)`, c: 't-label' },
+        { t: `  Entropy    : ${s.entropy.toFixed(1)} bits`, c: 't-label' },
+        { t: `  Strength   : ${s.label} ${s.icon}`, c: s.cls },
+        { t: `  Score      : ${score}/${checks.length}  ${bar}`, c: 't-label' },
+        { t: `  Crack Time : ${s.crackTime}`, c: 't-label' },
     ]);
 
-    if (verbose) {
-        appendLine('', 't-muted');
-        appendLine('  Detailed Checks:', 't-muted');
+    if (verbose || true) {
+        appendBlank();
+        appendLine('  Detailed Analysis:', 't-muted');
+        appendLine('  ──────────────────────────────────────', 't-muted');
         checks.forEach(c => {
             appendLine(`    ${c.ok ? '✔' : '✘'} ${c.label}`, c.ok ? 't-success' : 't-error');
         });
     }
 
-    // Suggestions
     const missing = checks.filter(c => !c.ok);
     if (missing.length > 0) {
         appendBlank();
-        appendLine('  Suggestions to improve:', 't-warning');
-        missing.forEach(m => {
-            appendLine(`    → Add ${m.label.toLowerCase()}`, 't-muted');
-        });
+        appendLine('  💡 Suggestions to improve:', 't-warning');
+        missing.forEach(m => appendLine(`    → ${m.label}`, 't-muted'));
     }
-
     appendBlank();
 }
 
@@ -1242,51 +1274,64 @@ function calcPasswordStrength(pwd) {
     if (/[A-Z]/.test(pwd)) charset += 26;
     if (/[0-9]/.test(pwd)) charset += 10;
     if (/[^a-zA-Z0-9]/.test(pwd)) charset += 32;
-
     const entropy = pwd.length * Math.log2(charset || 1);
     let label, icon, cls, crackTime;
-
-    if (entropy < 28)      { label = 'VERY WEAK';  icon = '💀'; cls = 't-error';   crackTime = 'Instantly'; }
-    else if (entropy < 36) { label = 'WEAK';        icon = '⚠️';  cls = 't-error';   crackTime = 'Seconds to minutes'; }
-    else if (entropy < 60) { label = 'MODERATE';   icon = '⚡'; cls = 't-warning'; crackTime = 'Hours to days'; }
-    else if (entropy < 80) { label = 'STRONG';      icon = '🔒'; cls = 't-success'; crackTime = 'Years'; }
-    else                   { label = 'VERY STRONG'; icon = '🛡️';  cls = 't-success'; crackTime = 'Centuries+'; }
-
+    if (entropy < 28)      { label='VERY WEAK';  icon='💀'; cls='t-error';   crackTime='Instantly'; }
+    else if (entropy < 36) { label='WEAK';        icon='⚠️';  cls='t-error';   crackTime='Seconds to minutes'; }
+    else if (entropy < 50) { label='FAIR';         icon='🟡'; cls='t-warning'; crackTime='Hours to days'; }
+    else if (entropy < 65) { label='MODERATE';    icon='⚡'; cls='t-warning'; crackTime='Days to months'; }
+    else if (entropy < 80) { label='STRONG';       icon='🔒'; cls='t-success'; crackTime='Years'; }
+    else if (entropy < 100){ label='VERY STRONG'; icon='🛡️';  cls='t-success'; crackTime='Centuries'; }
+    else                   { label='EXCELLENT';    icon='🏆'; cls='t-success'; crackTime='Heat death of universe'; }
     return { entropy, label, icon, cls, crackTime };
 }
 
 function isCommonPattern(pwd) {
-    const common = ['password','123456','qwerty','abc123','letmein','admin','welcome','monkey'];
+    const common = ['password','123456','qwerty','abc123','letmein','admin','welcome','monkey','master','login','princess','dragon','passw0rd'];
     return common.some(c => pwd.toLowerCase().includes(c));
 }
 
-function buildStrengthBar(score, max) {
-    const filled = Math.round((score / max) * 10);
-    const empty  = 10 - filled;
-    return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']';
+function hasSequential(pwd) {
+    const seqs = ['abcdef','bcdefg','cdefgh','123456','234567','345678','qwerty','asdfgh','zxcvbn'];
+    return seqs.some(s => pwd.toLowerCase().includes(s));
 }
 
-/* ── CRYPTOKIT ENCODE / DECODE ──────────────────────── */
+function buildStrengthBar(score, max) {
+    const filled = Math.round((score / max) * 20);
+    return '█'.repeat(filled) + '░'.repeat(20 - filled);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   ENCODING / DECODING — Supports full sentences
+═══════════════════════════════════════════════════════ */
 function cmdCryptokitEncode(raw) {
     const flags = parseFlags(raw);
     const text  = extractQuoted(raw);
 
     if (flags.base64 !== undefined) {
-        if (!text) {
-            printError('Usage: cryptokit encode --base64 "your text"');
+        const input = text !== null ? text : (typeof flags.base64 === 'string' ? flags.base64 : null);
+        if (input === null) {
+            printError('Usage: cryptokit encode --base64 "your full sentence here"');
             return;
         }
-        const encoded = btoa(unescape(encodeURIComponent(text)));
-        printLines([
-            { t: '', c: 'blank' },
-            { t: `  Input   : "${text}"`, c: 't-label' },
-            { t: `  Base64  : ${encoded}`, c: 't-hash' },
-            { t: '  ✔ Encoded successfully', c: 't-success' },
-            { t: '', c: 'blank' },
-        ]);
-        STATE.lastOutput = encoded;
+        try {
+            const encoded = btoa(unescape(encodeURIComponent(input)));
+            printLines([
+                { t: '', c: 'blank' },
+                { t: `  Input    : "${input}"`, c: 't-label' },
+                { t: `  Bytes    : ${new Blob([input]).size}`, c: 't-label' },
+                { t: `  Base64   : ${encoded}`, c: 't-hash' },
+                { t: `  B64 Len  : ${encoded.length} characters`, c: 't-label' },
+                { t: '  ✔ Encoded successfully', c: 't-success' },
+                { t: '', c: 'blank' },
+            ]);
+            STATE.lastOutput = encoded;
+        } catch (err) {
+            printError(`Encoding error: ${err.message}`);
+        }
     } else {
-        printError('Specify encoding: cryptokit encode --base64 "text"');
+        printError('Specify encoding type: cryptokit encode --base64 "your text"');
     }
 }
 
@@ -1295,59 +1340,58 @@ function cmdCryptokitDecode(raw) {
     const text  = extractQuoted(raw);
 
     if (flags.base64 !== undefined) {
-        if (!text) {
-            printError('Usage: cryptokit decode --base64 "base64string"');
+        const input = text !== null ? text : (typeof flags.base64 === 'string' ? flags.base64 : null);
+        if (input === null) {
+            printError('Usage: cryptokit decode --base64 "your base64 string here"');
             return;
         }
         try {
-            const decoded = decodeURIComponent(escape(atob(text)));
+            const decoded = decodeURIComponent(escape(atob(input)));
             printLines([
                 { t: '', c: 'blank' },
-                { t: `  Input   : "${text}"`, c: 't-label' },
-                { t: `  Decoded : ${decoded}`, c: 't-hash' },
+                { t: `  Input    : "${input}"`, c: 't-label' },
+                { t: `  Decoded  : "${decoded}"`, c: 't-hash' },
+                { t: `  Length   : ${decoded.length} characters`, c: 't-label' },
                 { t: '  ✔ Decoded successfully', c: 't-success' },
                 { t: '', c: 'blank' },
             ]);
             STATE.lastOutput = decoded;
         } catch {
-            printError('Invalid Base64 string. Check your input.');
+            printError('Invalid Base64 string. Please check your input and try again.');
         }
     } else {
-        printError('Specify encoding: cryptokit decode --base64 "..."');
+        printError('Specify encoding type: cryptokit decode --base64 "base64string"');
     }
 }
 
-/* ── CRYPTOKIT AES ──────────────────────────────────── */
-async function cmdCryptokitAES(raw) {
-    const flags  = parseFlags(raw);
-    const tokens = tokenize(raw);
-    const action = tokens[2];
 
-    const quoted = [];
-    const qRegex = /"([^"]*?)"|'([^']*?)'/g;
-    let   m;
-    while ((m = qRegex.exec(raw)) !== null) {
-        quoted.push(m[1] !== undefined ? m[1] : m[2]);
-    }
+/* ═══════════════════════════════════════════════════════
+   AES ENCRYPTION — Supports full sentences
+═══════════════════════════════════════════════════════ */
+async function cmdCryptokitAES(raw) {
+    const flags   = parseFlags(raw);
+    const tokens  = tokenize(raw);
+    const action  = tokens[2];
+    const allQ    = extractAllQuoted(raw);
 
     if (action === '--encrypt') {
-        const msg = quoted[0];
-        const key = flags.key || quoted[1];
+        const msg = allQ[0];
+        const key = flags.key || allQ[1];
         if (!msg || !key) {
-            printError('Usage: cryptokit aes --encrypt "message" --key "password"');
+            printError('Usage: cryptokit aes --encrypt "your full message here" --key "your-password"');
             return;
         }
         await aesEncrypt(msg, key);
     } else if (action === '--decrypt') {
-        const cipher = quoted[0];
-        const key    = flags.key || quoted[1];
+        const cipher = allQ[0];
+        const key    = flags.key || allQ[1];
         if (!cipher || !key) {
-            printError('Usage: cryptokit aes --decrypt "ciphertext" --key "password"');
+            printError('Usage: cryptokit aes --decrypt "ciphertext" --key "your-password"');
             return;
         }
         await aesDecrypt(cipher, key);
     } else {
-        printError('Usage: cryptokit aes --encrypt "msg" --key "pass" | --decrypt ...');
+        printError('Usage: cryptokit aes --encrypt "message" --key "password"');
     }
 }
 
@@ -1355,40 +1399,42 @@ async function aesEncrypt(msg, password) {
     STATE.busy = true;
     printLines([{ t: '  ⚙ Encrypting with AES-256-GCM...', c: 't-info' }]);
     await delay(200);
-
     try {
-        const enc       = new TextEncoder();
-        const salt      = crypto.getRandomValues(new Uint8Array(16));
-        const iv        = crypto.getRandomValues(new Uint8Array(12));
-        const keyMat    = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-        const aesKey    = await crypto.subtle.deriveKey(
+        const enc     = new TextEncoder();
+        const salt    = crypto.getRandomValues(new Uint8Array(16));
+        const iv      = crypto.getRandomValues(new Uint8Array(12));
+        const keyMat  = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+        const aesKey  = await crypto.subtle.deriveKey(
             { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
             keyMat, { name:'AES-GCM', length:256 }, false, ['encrypt']
         );
-        const cipher    = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, aesKey, enc.encode(msg));
-        const combined  = new Uint8Array(salt.length + iv.length + cipher.byteLength);
+        const cipher  = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, aesKey, enc.encode(msg));
+        const combined = new Uint8Array(salt.length + iv.length + cipher.byteLength);
         combined.set(salt, 0);
         combined.set(iv, 16);
         combined.set(new Uint8Array(cipher), 28);
-        const b64       = bufToB64(combined.buffer);
+        const b64 = bufToB64(combined.buffer);
 
+        STATE.lastEncrypted = b64;
         printLines([
             { t: '', c: 'blank' },
-            { t: `  ✔ AES-256-GCM Encryption successful`, c: 't-success' },
+            { t: '  ✔ AES-256-GCM Encryption Successful', c: 't-success' },
+            { t: '  ─────────────────────────────────────────────────────', c: 't-muted' },
             { t: `  Algorithm  : AES-256-GCM`, c: 't-label' },
             { t: `  KDF        : PBKDF2-SHA256 (100,000 iterations)`, c: 't-label' },
             { t: `  Input      : "${msg}"`, c: 't-label' },
-            { t: `  Ciphertext : ${b64}`, c: 't-hash' },
+            { t: `  Input Len  : ${msg.length} chars / ${new Blob([msg]).size} bytes`, c: 't-label' },
+            { t: `  Ciphertext :`, c: 't-label' },
+            { t: `  ${b64}`, c: 't-hash' },
+            { t: `  Cipher Len : ${b64.length} characters`, c: 't-label' },
             { t: '', c: 'blank' },
-            { t: '  Tip: Use  cryptokit aes --decrypt  with the same key to recover', c: 't-muted' },
+            { t: '  💡 To decrypt: cryptokit aes --decrypt "<ciphertext>" --key "same-password"', c: 't-info' },
             { t: '', c: 'blank' },
         ]);
-
         STATE.lastOutput = b64;
     } catch (err) {
         printError(`Encryption failed: ${err.message}`);
     }
-
     STATE.busy = false;
 }
 
@@ -1396,52 +1442,275 @@ async function aesDecrypt(cipherB64, password) {
     STATE.busy = true;
     printLines([{ t: '  ⚙ Decrypting with AES-256-GCM...', c: 't-info' }]);
     await delay(200);
-
     try {
-        const enc       = new TextEncoder();
-        const dec       = new TextDecoder();
-        const combined  = new Uint8Array(b64ToBuf(cipherB64));
-        const salt      = combined.slice(0, 16);
-        const iv        = combined.slice(16, 28);
-        const data      = combined.slice(28);
-        const keyMat    = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
-        const aesKey    = await crypto.subtle.deriveKey(
+        const enc      = new TextEncoder();
+        const dec      = new TextDecoder();
+        const combined = new Uint8Array(b64ToBuf(cipherB64));
+        const salt     = combined.slice(0, 16);
+        const iv       = combined.slice(16, 28);
+        const data     = combined.slice(28);
+        const keyMat   = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+        const aesKey   = await crypto.subtle.deriveKey(
             { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
             keyMat, { name:'AES-GCM', length:256 }, false, ['decrypt']
         );
-        const plain     = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, aesKey, data);
+        const plain    = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, aesKey, data);
+        const result   = dec.decode(plain);
 
         printLines([
             { t: '', c: 'blank' },
-            { t: `  ✔ AES-256-GCM Decryption successful`, c: 't-success' },
-            { t: `  Plaintext : ${dec.decode(plain)}`, c: 't-hash' },
+            { t: '  ✔ AES-256-GCM Decryption Successful', c: 't-success' },
+            { t: '  ─────────────────────────────────────────────────────', c: 't-muted' },
+            { t: `  Plaintext : "${result}"`, c: 't-hash' },
+            { t: `  Length    : ${result.length} characters`, c: 't-label' },
             { t: '', c: 'blank' },
         ]);
-
-        STATE.lastOutput = dec.decode(plain);
+        STATE.lastOutput = result;
     } catch {
-        printError('Decryption failed. Wrong key or corrupted ciphertext.');
+        printError('Decryption failed. Wrong password or corrupted ciphertext.');
     }
-
     STATE.busy = false;
 }
 
-/* ── OPENSSL ────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   NEW COMMANDS — ROT13, HEX, MORSE, CAESAR, etc.
+═══════════════════════════════════════════════════════ */
+
+/* ── RANDOM ─────────────────────────────────────────── */
+function cmdCryptokitRandom(raw) {
+    const flags = parseFlags(raw);
+    const size  = parseInt(flags.hex || flags.base64 || flags.bytes || '16');
+    const bytes = crypto.getRandomValues(new Uint8Array(Math.min(size, 256)));
+    let result, format;
+
+    if (flags.hex)         { result = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''); format = 'Hexadecimal'; }
+    else if (flags.base64) { result = bufToB64(bytes.buffer); format = 'Base64'; }
+    else                   { result = Array.from(bytes).join(' '); format = 'Decimal'; }
+
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  ✔ Random ${size} bytes generated`, c: 't-success' },
+        { t: `  Format : ${format}`, c: 't-label' },
+        { t: `  Output : ${result}`, c: 't-hash' },
+        { t: `  Length : ${result.length} characters`, c: 't-label' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = result;
+}
+
+/* ── UUID ───────────────────────────────────────────── */
+function cmdUUID() {
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  ✔ UUID v4 Generated`, c: 't-success' },
+        { t: `  UUID : ${uuid}`, c: 't-hash' },
+        { t: `  Type : Version 4 (random)`, c: 't-label' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = uuid;
+}
+
+/* ── ROT13 ──────────────────────────────────────────── */
+function cmdROT13(raw) {
+    const text = extractQuoted(raw);
+    if (!text) {
+        printError('Usage: cryptokit rot13 "your text or sentence here"');
+        return;
+    }
+    const result = text.replace(/[a-zA-Z]/g, c => {
+        const base = c <= 'Z' ? 65 : 97;
+        return String.fromCharCode(((c.charCodeAt(0) - base + 13) % 26) + base);
+    });
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  Input  : "${text}"`, c: 't-label' },
+        { t: `  ROT13  : "${result}"`, c: 't-hash' },
+        { t: `  Length : ${text.length} characters`, c: 't-label' },
+        { t: '  💡 Apply ROT13 again to decode', c: 't-info' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = result;
+}
+
+/* ── HEX ENCODE / DECODE ───────────────────────────── */
+function cmdHex(raw) {
+    const flags = parseFlags(raw);
+    const text  = extractQuoted(raw);
+
+    if (flags.encode !== undefined) {
+        const input = text || (typeof flags.encode === 'string' ? flags.encode : null);
+        if (!input) { printError('Usage: cryptokit hex --encode "your text here"'); return; }
+        const hex = Array.from(new TextEncoder().encode(input)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+        printLines([
+            { t: '', c: 'blank' },
+            { t: `  Input : "${input}"`, c: 't-label' },
+            { t: `  Hex   : ${hex}`, c: 't-hash' },
+            { t: `  Bytes : ${input.length}`, c: 't-label' },
+            { t: '  ✔ Encoded successfully', c: 't-success' },
+            { t: '', c: 'blank' },
+        ]);
+        STATE.lastOutput = hex;
+    } else if (flags.decode !== undefined) {
+        const input = text || (typeof flags.decode === 'string' ? flags.decode : null);
+        if (!input) { printError('Usage: cryptokit hex --decode "68 65 6c 6c 6f"'); return; }
+        try {
+            const clean = input.replace(/\s+/g, '');
+            const bytes = clean.match(/.{1,2}/g).map(h => parseInt(h, 16));
+            const result = new TextDecoder().decode(new Uint8Array(bytes));
+            printLines([
+                { t: '', c: 'blank' },
+                { t: `  Input   : "${input}"`, c: 't-label' },
+                { t: `  Decoded : "${result}"`, c: 't-hash' },
+                { t: '  ✔ Decoded successfully', c: 't-success' },
+                { t: '', c: 'blank' },
+            ]);
+            STATE.lastOutput = result;
+        } catch { printError('Invalid hex string. Use format: "68 65 6c 6c 6f" or "68656c6c6f"'); }
+    } else {
+        printError('Usage: cryptokit hex --encode "text" | --decode "hex"');
+    }
+}
+
+/* ── COUNT ──────────────────────────────────────────── */
+function cmdCount(raw) {
+    const text = extractQuoted(raw);
+    if (!text) { printError('Usage: cryptokit count "your sentence or text here"'); return; }
+    const chars  = text.length;
+    const words  = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const lines  = text.split('\n').length;
+    const bytes  = new Blob([text]).size;
+    const spaces = (text.match(/\s/g) || []).length;
+    const digits = (text.match(/[0-9]/g) || []).length;
+    const uppers = (text.match(/[A-Z]/g) || []).length;
+    const lowers = (text.match(/[a-z]/g) || []).length;
+    const specials = (text.match(/[^a-zA-Z0-9\s]/g) || []).length;
+
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  Text Analysis for: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`, c: 't-accent' },
+        { t: '  ──────────────────────────────────────────────', c: 't-muted' },
+        { t: `  Characters   : ${chars}`, c: 't-white' },
+        { t: `  Words        : ${words}`, c: 't-white' },
+        { t: `  Lines        : ${lines}`, c: 't-white' },
+        { t: `  Bytes (UTF8) : ${bytes}`, c: 't-white' },
+        { t: `  Spaces       : ${spaces}`, c: 't-white' },
+        { t: `  Uppercase    : ${uppers}`, c: 't-white' },
+        { t: `  Lowercase    : ${lowers}`, c: 't-white' },
+        { t: `  Digits       : ${digits}`, c: 't-white' },
+        { t: `  Special Chars: ${specials}`, c: 't-white' },
+        { t: '', c: 'blank' },
+    ]);
+}
+
+/* ── REVERSE ────────────────────────────────────────── */
+function cmdReverse(raw) {
+    const text = extractQuoted(raw);
+    if (!text) { printError('Usage: cryptokit reverse "your text here"'); return; }
+    const result = text.split('').reverse().join('');
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  Input    : "${text}"`, c: 't-label' },
+        { t: `  Reversed : "${result}"`, c: 't-hash' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = result;
+}
+
+/* ── MORSE CODE ─────────────────────────────────────── */
+const MORSE_MAP = {
+    'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.',
+    'H':'....','I':'..','J':'.---','K':'-.-','L':'.-..','M':'--','N':'-.',
+    'O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-',
+    'V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+    '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-',
+    '5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
+    ' ':' / ','!':'-.-.--','?':'..--..','@':'.--.-.','&':'.-...',
+    '.':'.-.-.-',',':'--..--',':':'---...',';':'-.-.-.','=':'-...-',
+    '+':'.-.-.','−':'-....-','/':'-..-.','(':'-.--.',')':'-.--.-',
+};
+const MORSE_REV = {};
+Object.keys(MORSE_MAP).forEach(k => { if (k !== ' ') MORSE_REV[MORSE_MAP[k]] = k; });
+
+function cmdMorse(raw) {
+    const flags = parseFlags(raw);
+    const text  = extractQuoted(raw);
+    if (!text) { printError('Usage: cryptokit morse --encode "text" | --decode "-- --- .-."'); return; }
+
+    if (flags.encode !== undefined) {
+        const result = text.toUpperCase().split('').map(c => MORSE_MAP[c] || c).join(' ');
+        printLines([
+            { t: '', c: 'blank' },
+            { t: `  Input : "${text}"`, c: 't-label' },
+            { t: `  Morse : ${result}`, c: 't-hash' },
+            { t: '  ✔ Encoded to Morse code', c: 't-success' },
+            { t: '', c: 'blank' },
+        ]);
+        STATE.lastOutput = result;
+    } else if (flags.decode !== undefined) {
+        const words = text.split(' / ');
+        const result = words.map(word =>
+            word.split(' ').map(code => MORSE_REV[code] || code).join('')
+        ).join(' ');
+        printLines([
+            { t: '', c: 'blank' },
+            { t: `  Input   : "${text}"`, c: 't-label' },
+            { t: `  Decoded : "${result}"`, c: 't-hash' },
+            { t: '  ✔ Decoded from Morse code', c: 't-success' },
+            { t: '', c: 'blank' },
+        ]);
+        STATE.lastOutput = result;
+    } else {
+        printError('Usage: cryptokit morse --encode "text" | --decode "morse"');
+    }
+}
+
+/* ── CAESAR CIPHER ──────────────────────────────────── */
+function cmdCaesar(raw) {
+    const flags = parseFlags(raw);
+    const text  = extractQuoted(raw);
+    const shift = parseInt(flags.shift || '3');
+
+    if (!text) { printError('Usage: cryptokit caesar --shift 3 "your text here"'); return; }
+
+    const result = text.replace(/[a-zA-Z]/g, c => {
+        const base = c <= 'Z' ? 65 : 97;
+        return String.fromCharCode(((c.charCodeAt(0) - base + shift) % 26 + 26) % 26 + base);
+    });
+
+    printLines([
+        { t: '', c: 'blank' },
+        { t: `  Input    : "${text}"`, c: 't-label' },
+        { t: `  Shift    : ${shift}`, c: 't-label' },
+        { t: `  Cipher   : "${result}"`, c: 't-hash' },
+        { t: `  💡 To decode, use shift ${26 - (shift % 26)}`, c: 't-info' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = result;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   OPENSSL COMMANDS
+═══════════════════════════════════════════════════════ */
 async function cmdOpenssl(raw) {
     const tokens = tokenize(raw);
     const sub    = tokens[1]?.toLowerCase();
 
     if (sub === 'genrsa') {
         const bits = parseInt(tokens[tokens.length - 1]) || 2048;
-        await generateRSA(bits, 'pem');
+        await generateRSA(bits);
     } else if (sub === 'rsa') {
         if (raw.includes('-pubout')) {
             printLines([
                 { t: '', c: 'blank' },
-                { t: '  openssl rsa — Extract Public Key', c: 't-info' },
-                { t: '  In browser mode, generate a key pair first:', c: 't-muted' },
-                { t: '  $ cryptokit rsa --generate --bits 2048', c: 't-white' },
-                { t: '  The public key will be shown automatically.', c: 't-muted' },
+                { t: '  ℹ In browser mode, use: cryptokit rsa --generate', c: 't-info' },
+                { t: '  Public key will be shown automatically.', c: 't-muted' },
                 { t: '', c: 'blank' },
             ]);
         } else if (raw.includes('-text')) {
@@ -1449,283 +1718,188 @@ async function cmdOpenssl(raw) {
         } else {
             printLines([
                 { t: '', c: 'blank' },
-                { t: '  openssl rsa flags:', c: 't-info' },
-                { t: '    -in <file>   : Input key file', c: 't-white' },
-                { t: '    -pubout      : Output public key', c: 't-white' },
-                { t: '    -text        : Print key in text form', c: 't-white' },
-                { t: '    -noout       : Do not output key', c: 't-white' },
+                { t: '  openssl rsa subcommands:', c: 't-info' },
+                { t: '    -pubout : Extract public key', c: 't-white' },
+                { t: '    -text   : View key details', c: 't-white' },
                 { t: '', c: 'blank' },
             ]);
         }
     } else if (sub === 'rand') {
-        const flags  = parseFlags(raw);
-        const count  = parseInt(tokens[tokens.length - 1]) || 16;
-        const isHex  = raw.includes('-hex');
-        const isB64  = raw.includes('-base64');
-        const bytes  = crypto.getRandomValues(new Uint8Array(count));
-        let   result;
-
-        if (isHex)     result = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('');
-        else if (isB64) result = bufToB64(bytes.buffer);
-        else            result = Array.from(bytes).join(' ');
-
+        const isHex = raw.includes('-hex');
+        const isB64 = raw.includes('-base64');
+        const count = parseInt(tokens[tokens.length - 1]) || 16;
+        const bytes = crypto.getRandomValues(new Uint8Array(Math.min(count, 256)));
+        let result, format;
+        if (isHex)      { result = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''); format = 'hex'; }
+        else if (isB64) { result = bufToB64(bytes.buffer); format = 'base64'; }
+        else            { result = Array.from(bytes).join(' '); format = 'decimal'; }
         printLines([
             { t: '', c: 'blank' },
-            { t: `  ✔ Random ${count} bytes generated`, c: 't-success' },
-            { t: `  Format : ${isHex ? 'Hexadecimal' : isB64 ? 'Base64' : 'Decimal'}`, c: 't-label' },
-            { t: `  Output : ${result}`, c: 't-hash' },
+            { t: `  ✔ ${count} random bytes (${format})`, c: 't-success' },
+            { t: `  ${result}`, c: 't-hash' },
             { t: '', c: 'blank' },
         ]);
         STATE.lastOutput = result;
-    } else if (sub === 'rsautl' || sub === 'pkeyutl') {
-        printLines([
-            { t: '', c: 'blank' },
-            { t: '  RSA encrypt/decrypt — use CryptoKit wrapper instead:', c: 't-info' },
-            { t: '  $ cryptokit aes --encrypt "message" --key "password"', c: 't-white' },
-            { t: '', c: 'blank' },
-        ]);
     } else {
         printLines([
             { t: '', c: 'blank' },
-            { t: '  Supported openssl commands in browser mode:', c: 't-info' },
-            { t: '    openssl genrsa -out private.pem <bits>    Generate RSA key', c: 't-white' },
-            { t: '    openssl rsa -in priv.pem -pubout          Extract public key', c: 't-white' },
-            { t: '    openssl rsa -in priv.pem -text            Key details', c: 't-white' },
-            { t: '    openssl rand -hex <n>                     Random hex', c: 't-white' },
-            { t: '    openssl rand -base64 <n>                  Random Base64', c: 't-white' },
+            { t: '  Supported openssl commands:', c: 't-info' },
+            { t: '    openssl genrsa -out key.pem <bits>   Generate RSA', c: 't-white' },
+            { t: '    openssl rsa -in key.pem -pubout      Public key', c: 't-white' },
+            { t: '    openssl rsa -in key.pem -text        Key details', c: 't-white' },
+            { t: '    openssl rand -hex <n>                Random hex', c: 't-white' },
+            { t: '    openssl rand -base64 <n>             Random base64', c: 't-white' },
             { t: '', c: 'blank' },
         ]);
     }
 }
 
-/* ── GET-FILEHASH (PowerShell) ──────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   POWERSHELL / CMD / BASH NATIVE COMMANDS
+═══════════════════════════════════════════════════════ */
 async function cmdGetFileHash(raw) {
     const tokens = tokenize(raw);
-    let   algo   = 'SHA-256';
-
-    const algoIdx = raw.toLowerCase().indexOf('-algorithm');
-    if (algoIdx !== -1) {
-        const algoToken = tokens[tokens.findIndex(t => t.toLowerCase() === '-algorithm') + 1];
-        if (algoToken) {
-            const map = { sha256:'SHA-256', sha512:'SHA-512', sha384:'SHA-384', sha1:'SHA-1', md5:null };
-            algo = map[algoToken.toLowerCase()] || 'SHA-256';
-        }
+    let algo = 'SHA-256';
+    const aIdx = tokens.findIndex(t => t.toLowerCase() === '-algorithm');
+    if (aIdx !== -1 && tokens[aIdx + 1]) {
+        const map = { sha256:'SHA-256', sha512:'SHA-512', sha384:'SHA-384', sha1:'SHA-1', md5:null };
+        algo = map[tokens[aIdx + 1].toLowerCase()] ?? 'SHA-256';
     }
-
-    // Simulate file hash — use filename as seed text
     const filename = tokens[1] || 'file.txt';
-    const text     = `[Simulated hash for: ${filename}]`;
-
+    const text = `[File content simulation: ${filename}]`;
     STATE.busy = true;
-    printLines([{ t: '', c: 'blank' }]);
-    printLines([{ t: `  ⚙ Computing ${algo} hash...`, c: 't-info' }]);
-    await delay(300);
-
-    try {
-        let hash;
-        if (!algo) {
-            hash = md5Sim(text);
-        } else {
-            const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(text));
-            hash      = bufToHex(buf);
-        }
-
-        // PowerShell-style table output
-        printLines([
-            { t: '', c: 'blank' },
-            { t: '  Algorithm       Hash                                                              Path', c: 't-muted' },
-            { t: '  ---------       ----                                                              ----', c: 't-muted' },
-            { t: `  ${(algo||'MD5').padEnd(15)} ${hash.padEnd(66)} ${filename}`, c: 't-success' },
-            { t: '', c: 'blank' },
-            { t: '  ℹ Browser mode: hash computed from filename as seed.', c: 't-muted' },
-            { t: '     Upload real files on the File Integrity tool page.', c: 't-muted' },
-            { t: '', c: 'blank' },
-        ]);
-
-        STATE.lastOutput = hash;
-    } catch (err) {
-        printError(`Hash error: ${err.message}`);
-    }
-
+    await delay(250);
+    let hash;
+    if (!algo) hash = md5Sim(text);
+    else { const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(text)); hash = bufToHex(buf); }
+    printLines([
+        { t: '', c: 'blank' },
+        { t: '  Algorithm       Hash                                                              Path', c: 't-muted' },
+        { t: '  ---------       ----                                                              ----', c: 't-muted' },
+        { t: `  ${(algo||'MD5').padEnd(15)} ${hash.padEnd(66)} ${filename}`, c: 't-success' },
+        { t: '', c: 'blank' },
+        { t: '  ℹ Browser mode: simulated file hash. Use File Integrity tool for real files.', c: 't-muted' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = hash;
     STATE.busy = false;
 }
 
-/* ── CERTUTIL (CMD) ─────────────────────────────────── */
 async function cmdCertutil(raw) {
     const tokens = tokenize(raw);
-    const flag   = tokens[1]?.toLowerCase();
-
+    const flag = tokens[1]?.toLowerCase();
     if (flag === '-hashfile') {
         const filename = tokens[2] || 'file.txt';
-        const algoStr  = tokens[3]?.toUpperCase() || 'SHA256';
-        const algoMap  = { SHA256:'SHA-256', SHA512:'SHA-512', SHA384:'SHA-384', SHA1:'SHA-1', MD5:null };
-        const algo     = algoMap[algoStr];
-
-        const text = `[Simulated hash for: ${filename}]`;
+        const algoStr = tokens[3]?.toUpperCase() || 'SHA256';
+        const map = { SHA256:'SHA-256', SHA512:'SHA-512', SHA384:'SHA-384', SHA1:'SHA-1', MD5:null };
+        const algo = map[algoStr];
+        const text = `[File content simulation: ${filename}]`;
         STATE.busy = true;
-        printLines([{ t: `  ⚙ CertUtil: hashing ${filename}...`, c: 't-info' }]);
-        await delay(250);
-
-        try {
-            let hash;
-            if (algo === null) {
-                hash = md5Sim(text);
-            } else {
-                const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(text));
-                hash      = bufToHex(buf);
-            }
-
-            // CMD certutil output style
-            printLines([
-                { t: '', c: 'blank' },
-                { t: `  ${algoStr} hash of ${filename}:`, c: 't-white' },
-                { t: `  ${hash}`, c: 't-hash' },
-                { t: `  CertUtil: -hashfile command completed successfully.`, c: 't-success' },
-                { t: '', c: 'blank' },
-                { t: '  ℹ Browser mode: hash computed from filename as seed.', c: 't-muted' },
-                { t: '', c: 'blank' },
-            ]);
-
-            STATE.lastOutput = hash;
-        } catch (err) {
-            printError(`CertUtil error: ${err.message}`);
-        }
-
-        STATE.busy = false;
-
-    } else if (flag === '-encode') {
-        const inFile  = tokens[2] || 'input.txt';
-        const outFile = tokens[3] || 'output.b64';
-        const sample  = btoa(`[Simulated content of ${inFile}]`);
+        await delay(200);
+        let hash;
+        if (algo === null) hash = md5Sim(text);
+        else { const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(text)); hash = bufToHex(buf); }
         printLines([
             { t: '', c: 'blank' },
-            { t: `  Input  : ${inFile}`, c: 't-label' },
-            { t: `  Output : ${outFile}`, c: 't-label' },
-            { t: `  Base64 : ${sample}`, c: 't-hash' },
-            { t: `  CertUtil: -encode command completed successfully.`, c: 't-success' },
+            { t: `  ${algoStr} hash of ${filename}:`, c: 't-white' },
+            { t: `  ${hash}`, c: 't-hash' },
+            { t: '  CertUtil: -hashfile command completed successfully.', c: 't-success' },
+            { t: '', c: 'blank' },
+        ]);
+        STATE.lastOutput = hash;
+        STATE.busy = false;
+    } else if (flag === '-encode') {
+        const inFile = tokens[2] || 'input.txt';
+        const sample = btoa(`[Simulated: ${inFile}]`);
+        printLines([
+            { t: '', c: 'blank' },
+            { t: `  Input: ${inFile} → Base64: ${sample}`, c: 't-hash' },
+            { t: '  CertUtil: -encode command completed successfully.', c: 't-success' },
             { t: '', c: 'blank' },
         ]);
         STATE.lastOutput = sample;
-
-    } else if (flag === '-decode') {
-        const inFile  = tokens[2] || 'input.b64';
-        const outFile = tokens[3] || 'output.txt';
-        printLines([
-            { t: '', c: 'blank' },
-            { t: `  Input  : ${inFile}`, c: 't-label' },
-            { t: `  Output : ${outFile}`, c: 't-label' },
-            { t: `  CertUtil: -decode command completed successfully.`, c: 't-success' },
-            { t: '', c: 'blank' },
-        ]);
-
     } else {
         printLines([
             { t: '', c: 'blank' },
-            { t: '  Supported certutil commands:', c: 't-info' },
-            { t: '    certutil -hashfile <file> <algo>        Hash a file', c: 't-white' },
-            { t: '    certutil -encode <in> <out.b64>         Base64 encode', c: 't-white' },
-            { t: '    certutil -decode <in.b64> <out>         Base64 decode', c: 't-white' },
+            { t: '  certutil -hashfile <file> <algo>   Hash file', c: 't-white' },
+            { t: '  certutil -encode <in> <out>        Base64 encode', c: 't-white' },
+            { t: '  certutil -decode <in> <out>        Base64 decode', c: 't-white' },
             { t: '', c: 'blank' },
         ]);
     }
 }
 
-/* ── SHASUM (Bash/Unix) ─────────────────────────────── */
 async function cmdShasum(raw) {
-    const tokens  = tokenize(raw);
-    const aFlag   = tokens.indexOf('-a');
-    const algoNum = aFlag !== -1 ? tokens[aFlag + 1] : '256';
-    const file    = tokens[tokens.length - 1];
-
-    const algoMap = { '256':'SHA-256', '512':'SHA-512', '384':'SHA-384', '1':'SHA-1' };
-    const algo    = algoMap[algoNum] || 'SHA-256';
-
+    const tokens = tokenize(raw);
+    const aIdx   = tokens.indexOf('-a');
+    const algoNum= aIdx !== -1 ? tokens[aIdx + 1] : '256';
+    const file   = tokens[tokens.length - 1];
+    const map    = { '256':'SHA-256','512':'SHA-512','384':'SHA-384','1':'SHA-1' };
+    const algo   = map[algoNum] || 'SHA-256';
     STATE.busy = true;
-    printLines([{ t: `  ⚙ Computing SHA-${algoNum}...`, c: 't-info' }]);
     await delay(200);
-
-    try {
-        const text = `[Simulated content of: ${file}]`;
-        const buf  = await crypto.subtle.digest(algo, new TextEncoder().encode(text));
-        const hash = bufToHex(buf);
-
-        // Unix shasum output style
-        printLines([
-            { t: `  ${hash}  ${file}`, c: 't-hash' },
-            { t: '', c: 'blank' },
-            { t: '  ℹ Browser mode: hash computed from filename as seed.', c: 't-muted' },
-            { t: '', c: 'blank' },
-        ]);
-
-        STATE.lastOutput = hash;
-    } catch (err) {
-        printError(`shasum error: ${err.message}`);
-    }
-
+    const buf  = await crypto.subtle.digest(algo, new TextEncoder().encode(`[File: ${file}]`));
+    const hash = bufToHex(buf);
+    printLines([
+        { t: `  ${hash}  ${file}`, c: 't-hash' },
+        { t: '', c: 'blank' },
+    ]);
+    STATE.lastOutput = hash;
     STATE.busy = false;
 }
 
-/* ── MD5 (macOS) ────────────────────────────────────── */
 function cmdMd5(raw) {
-    const tokens = tokenize(raw);
-    const file   = tokens[1] || 'file.txt';
-    const hash   = md5Sim(`[Simulated content of: ${file}]`);
-
+    const file = tokenize(raw)[1] || 'file.txt';
+    const hash = md5Sim(`[File: ${file}]`);
     printLines([
         { t: `  MD5 (${file}) = ${hash}`, c: 't-hash' },
-        { t: '', c: 'blank' },
-        { t: '  ⚠ MD5 is cryptographically broken. Use SHA-256 or higher.', c: 't-warning' },
-        { t: '  ℹ Browser mode: hash computed from filename as seed.', c: 't-muted' },
+        { t: '  ⚠ MD5 is cryptographically broken. Use SHA-256+.', c: 't-warning' },
         { t: '', c: 'blank' },
     ]);
-
     STATE.lastOutput = hash;
 }
 
-/* ── ECHO (Bash base64) ─────────────────────────────── */
+/* ── ECHO (bash pipe to base64) ─────────────────────── */
 function cmdEcho(raw) {
     if (raw.includes('| base64')) {
         const text = extractQuoted(raw);
-        if (!text) {
-            printError('Usage: echo -n "your text" | base64');
-            return;
-        }
+        if (!text) { printError('Usage: echo -n "your full sentence here" | base64'); return; }
         if (raw.includes('--decode') || raw.includes('-d')) {
             try {
-                const decoded = atob(text);
-                printLines([
-                    { t: `  ${decoded}`, c: 't-hash' },
-                    { t: '', c: 'blank' },
-                ]);
+                const decoded = decodeURIComponent(escape(atob(text)));
+                printLines([{ t: `  ${decoded}`, c: 't-hash' }, { t: '', c: 'blank' }]);
                 STATE.lastOutput = decoded;
-            } catch {
-                printError('Invalid Base64 string.');
-            }
+            } catch { printError('Invalid Base64 string.'); }
         } else {
             const encoded = btoa(unescape(encodeURIComponent(text)));
-            printLines([
-                { t: `  ${encoded}`, c: 't-hash' },
-                { t: '', c: 'blank' },
-            ]);
+            printLines([{ t: `  ${encoded}`, c: 't-hash' }, { t: '', c: 'blank' }]);
             STATE.lastOutput = encoded;
         }
     } else {
         const text = extractQuoted(raw) || raw.replace(/^echo\s+-?n?\s*/i, '').trim();
-        printLines([{ t: `  ${text}`, c: 't-white' }]);
-        appendBlank();
+        printLines([{ t: `  ${text}`, c: 't-white' }, { t: '', c: 'blank' }]);
     }
 }
 
-/* ── UNKNOWN COMMAND ────────────────────────────────── */
+/* ── UNKNOWN ────────────────────────────────────────── */
 function cmdUnknown(raw) {
     const cmd = tokenize(raw)[0];
     printLines([
         { t: '', c: 'blank' },
-        { t: `  '${cmd}' : The term is not recognized.`, c: 't-error' },
-        { t: `  Type  help  to see all available commands.`, c: 't-info' },
+        { t: `  ✘ '${cmd}' is not recognized as a command.`, c: 't-error' },
         { t: '', c: 'blank' },
+        { t: '  Did you mean one of these?', c: 't-info' },
     ]);
+    const matches = AC_SUGGESTIONS.filter(s => s.cmd.toLowerCase().startsWith(cmd.toLowerCase().substring(0, 3))).slice(0, 4);
+    if (matches.length) {
+        matches.forEach(m => appendLine(`    → ${m.cmd}`, 't-muted'));
+    } else {
+        appendLine('    → Type  help  for all available commands', 't-muted');
+    }
+    appendBlank();
 }
+
 
 /* ═══════════════════════════════════════════════════════
    OUTPUT HELPERS
@@ -1762,31 +1936,33 @@ function printError(msg) {
 
 function scrollBottom() {
     const out = document.getElementById('terminalOutput');
-    out.scrollTop = out.scrollHeight;
+    if (out) out.scrollTop = out.scrollHeight;
 }
 
 function updateHistoryUI() {
     const list = document.getElementById('historyList');
-    if (STATE.history.length === 0) {
+    if (!list) return;
+    if (!STATE.history.length) {
         list.innerHTML = '<div class="history-empty">No commands yet</div>';
         return;
     }
     list.innerHTML = '';
-    [...STATE.history].reverse().slice(0, 15).forEach(cmd => {
+    [...STATE.history].reverse().slice(0, 20).forEach(cmd => {
         const div = document.createElement('div');
         div.className   = 'history-item';
         div.textContent = cmd;
-        div.onclick     = () => {
-            document.getElementById('terminalInput').value = cmd;
-            focusInput();
-        };
+        div.onclick     = () => { document.getElementById('terminalInput').value = cmd; focusInput(); };
         list.appendChild(div);
     });
 }
 
-/* ── UTILITY FUNCTIONS ──────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   UTILITY FUNCTIONS
+═══════════════════════════════════════════════════════ */
 function focusInput() {
-    document.getElementById('terminalInput').focus();
+    const input = document.getElementById('terminalInput');
+    if (input) input.focus();
 }
 
 function injectCommand(cmd) {
@@ -1795,29 +1971,23 @@ function injectCommand(cmd) {
 }
 
 function clearTerminal(reboot = true) {
-    document.getElementById('terminalOutput').innerHTML = '';
+    const out = document.getElementById('terminalOutput');
+    if (out) out.innerHTML = '';
     if (reboot) bootTerminal();
 }
 
 function copyLastOutput() {
-    if (!STATE.lastOutput) {
-        showToast('Nothing to copy yet', 'error');
-        return;
-    }
-    navigator.clipboard.writeText(STATE.lastOutput).then(() => {
-        showToast('✔ Copied to clipboard!', 'success');
-    }).catch(() => {
-        showToast('Copy failed', 'error');
-    });
+    if (!STATE.lastOutput) { showToast('Nothing to copy yet', 'error'); return; }
+    navigator.clipboard.writeText(STATE.lastOutput).then(() => showToast('✔ Copied to clipboard!', 'success')).catch(() => showToast('Copy failed', 'error'));
 }
 
 function downloadSession() {
     const out  = document.getElementById('terminalOutput');
-    const text = out.innerText || out.textContent;
+    const text = out ? (out.innerText || out.textContent) : '';
     const blob = new Blob([text], { type: 'text/plain' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    a.href     = url;
+    a.href = url;
     a.download = `cryptokit-session-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
@@ -1836,61 +2006,25 @@ function toggleFullscreen() {
 
 function showToast(msg, type = '') {
     const t = document.getElementById('toast');
+    if (!t) return;
     t.textContent = msg;
     t.className   = `toast show ${type}`;
     setTimeout(() => t.className = 'toast', 2800);
 }
 
-function delay(ms) {
-    return new Promise(r => setTimeout(r, ms));
-}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function bufToHex(buf) { return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join(''); }
+function bufToB64(buf) { const bytes = new Uint8Array(buf); let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b)); return btoa(bin); }
+function b64ToBuf(b64) { const bin = atob(b64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return bytes.buffer; }
+function wrapPem(b64, label) { const lines = b64.match(/.{1,64}/g) || [b64]; return `-----BEGIN ${label}-----\n${lines.join('\n')}\n-----END ${label}-----`; }
+function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-function bufToHex(buf) {
-    return Array.from(new Uint8Array(buf))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-function bufToB64(buf) {
-    const bytes  = new Uint8Array(buf);
-    let   binary = '';
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary);
-}
-
-function b64ToBuf(b64) {
-    const binary = atob(b64);
-    const bytes  = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes.buffer;
-}
-
-function wrapPem(b64, label) {
-    const lines = b64.match(/.{1,64}/g) || [b64];
-    return `-----BEGIN ${label}-----\n${lines.join('\n')}\n-----END ${label}-----`;
-}
-
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
-/* ── MD5 SIMULATION (browser fallback) ─────────────── */
 function md5Sim(str) {
-    // Simple non-cryptographic simulation for display purposes
-    // Real MD5 not available in WebCrypto (intentionally excluded as it's broken)
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-    }
-    // Expand to look like MD5 (32 hex chars)
-    const h1 = Math.abs(hash).toString(16).padStart(8, '0');
-    const h2 = Math.abs(hash * 1234567).toString(16).padStart(8, '0');
-    const h3 = Math.abs(hash * 7654321).toString(16).padStart(8, '0');
-    const h4 = Math.abs(hash * 9876543).toString(16).padStart(8, '0');
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+    const h1 = Math.abs(h).toString(16).padStart(8,'0');
+    const h2 = Math.abs(h * 1234567).toString(16).padStart(8,'0');
+    const h3 = Math.abs(h * 7654321).toString(16).padStart(8,'0');
+    const h4 = Math.abs(h * 9876543).toString(16).padStart(8,'0');
     return (h1 + h2 + h3 + h4).substring(0, 32);
 }
