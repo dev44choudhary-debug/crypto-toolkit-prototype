@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="normal">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoKit — Developer Terminal</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Fira+Code:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Dev Terminal CSS -->
+    <link rel="stylesheet" href="developer.css">
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════
+         MATRIX RAIN BACKGROUND
+    ═══════════════════════════════════ -->
+    <canvas id="matrixCanvas"></canvas>
+
+
+    <!-- ═══════════════════════════════════
+         TOP NAV BAR
+    ═══════════════════════════════════ -->
+    <nav class="dev-nav">
+        <a href="index.html" class="dev-nav-logo">
+            <svg viewBox="0 0 40 40" width="22" height="22" fill="none">
+                <rect x="2" y="2" width="36" height="36" rx="8" stroke="currentColor" stroke-width="2.5"/>
+                <path d="M20 8L20 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                <rect x="12" y="14" width="16" height="18" rx="3" stroke="currentColor" stroke-width="2.5"/>
+                <circle cx="20" cy="23" r="3" stroke="currentColor" stroke-width="2"/>
+                <path d="M20 26L20 28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span>CryptoKit</span>
+        </a>
+
+        <div class="dev-nav-center">
+            <span class="dev-mode-badge">
+                <i class="fas fa-terminal"></i> Developer Mode
+            </span>
+        </div>
+
+        <div class="dev-nav-right">
+            <!-- Shell Switcher -->
+            <div class="shell-switcher">
+                <button class="shell-btn" id="shellCmd" onclick="switchShell('cmd')" title="Windows CMD">
+                    <i class="fab fa-windows"></i> CMD
+                </button>
+                <button class="shell-btn active" id="shellPowershell" onclick="switchShell('powershell')" title="PowerShell">
+                    <i class="fas fa-bolt"></i> PowerShell
+                </button>
+                <button class="shell-btn" id="shellBash" onclick="switchShell('bash')" title="Bash / Zsh">
+                    <i class="fab fa-linux"></i> Bash
+                </button>
+            </div>
+
+            <button class="dev-nav-btn" onclick="clearTerminal()" title="Clear Terminal">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            <button class="dev-nav-btn" onclick="toggleFullscreen()" title="Fullscreen" id="fsBtn">
+                <i class="fas fa-expand"></i>
+            </button>
+            <a href="index.html" class="dev-nav-btn" title="Back to Home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </nav>
+
+
+    <!-- ═══════════════════════════════════
+         MAIN TERMINAL LAYOUT
+    ═══════════════════════════════════ -->
+    <div class="dev-layout">
+
+        <!-- ── LEFT SIDEBAR ─────────────────── -->
+        <aside class="dev-sidebar" id="devSidebar">
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-terminal"></i> Quick Commands
+                </div>
+                <div class="cmd-list" id="quickCmdList">
+                    <!-- Populated by JS based on shell -->
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-history"></i> History
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="history-empty">No commands yet</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-info-circle"></i> Engine Info
+                </div>
+                <div class="engine-info">
+                    <div class="engine-item">
+                        <span class="engine-label">Engine</span>
+                        <span class="engine-val">WebCrypto API</span>
+                    </div>
+                    <div class="engine-item">
+                        <span class="engine-label">Shell</span>
+                        <span class="engine-val" id="engineShellLabel">PowerShell</span>
+                    </div>
+                    <div class="engine-item">
+                        <span class="engine-label">Version</span>
+                        <span class="engine-val">v1.0.0</span>
+                    </div>
+                    <div class="engine-item">
+                        <span class="engine-label">Status</span>
+                        <span class="engine-val status-online">● Online</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ── TERMINAL AREA ─────────────────── -->
+        <main class="dev-terminal-wrapper">
+
+            <!-- Terminal Window -->
+            <div class="terminal-window" id="terminalWindow">
+
+                <!-- Window Chrome -->
+                <div class="terminal-chrome">
+                    <div class="chrome-dots">
+                        <span class="chrome-dot red"></span>
+                        <span class="chrome-dot yellow"></span>
+                        <span class="chrome-dot green"></span>
+                    </div>
+                    <span class="chrome-title" id="chromeTitle">
+                        Windows PowerShell — CryptoKit Developer Terminal
+                    </span>
+                    <div class="chrome-actions">
+                        <button class="chrome-action-btn" onclick="copyLastOutput()" title="Copy last output">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="chrome-action-btn" onclick="downloadSession()" title="Download session">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Terminal Output -->
+                <div class="terminal-output" id="terminalOutput">
+                    <!-- Boot message injected by JS -->
+                </div>
+
+                <!-- Terminal Input Row -->
+                <div class="terminal-input-row" id="terminalInputRow">
+                    <span class="terminal-prompt" id="terminalPrompt">PS C:\CryptoKit&gt;</span>
+                    <input
+                        type="text"
+                        class="terminal-input"
+                        id="terminalInput"
+                        placeholder=""
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                    >
+                    <button class="terminal-run-btn" onclick="runCommand()">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Bottom Shortcuts Bar -->
+            <div class="shortcuts-bar">
+                <span class="shortcut"><kbd>↑</kbd><kbd>↓</kbd> History</span>
+                <span class="shortcut"><kbd>Tab</kbd> Autocomplete</span>
+                <span class="shortcut"><kbd>Ctrl</kbd><kbd>L</kbd> Clear</span>
+                <span class="shortcut"><kbd>Ctrl</kbd><kbd>C</kbd> Cancel</span>
+                <span class="shortcut"><kbd>Enter</kbd> Execute</span>
+                <span class="shortcut shortcut-right">
+                    <i class="fas fa-circle status-dot-green"></i> WebCrypto Ready
+                </span>
+            </div>
+
+        </main>
+
+        <!-- ── RIGHT PANEL ─────────────────── -->
+        <aside class="dev-right-panel" id="devRightPanel">
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-book"></i> Command Reference
+                </div>
+                <div class="ref-accordion" id="refAccordion">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- ═══════════════════════════════════
+         AUTOCOMPLETE DROPDOWN
+    ═══════════════════════════════════ -->
+    <div class="autocomplete-box" id="autocompleteBox"></div>
+
+
+    <!-- ═══════════════════════════════════
+         TOAST NOTIFICATION
+    ═══════════════════════════════════ -->
+    <div class="toast" id="toast"></div>
+
+
+    <!-- Developer Terminal JS -->
+    <script src="developer.js"></script>
+
+</body>
+</html>
