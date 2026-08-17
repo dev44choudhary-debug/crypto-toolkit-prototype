@@ -8,18 +8,726 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+
+    <style>
+    /* ═══════════════════════════════════════════
+       CYBERSECURITY 3D DARK BACKGROUND
+       — Visibility balanced for readability
+    ═══════════════════════════════════════════ */
+
+    body {
+        background: #08080f !important;
+        overflow-x: hidden;
+    }
+
+    /* ── 3D scene wrapper ── */
+    .cyber-scene {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        perspective: 1200px;
+        perspective-origin: 50% 50%;
+        overflow: hidden;
+    }
+
+    /* ── 3D rotating grid floor ── */
+    .cyber-floor {
+        position: absolute;
+        bottom: -50%;
+        left: -25%;
+        width: 150%;
+        height: 150%;
+        transform: rotateX(65deg) translateZ(-100px);
+        animation: floorScroll 20s linear infinite;
+    }
+    [data-theme="hacker"] .cyber-floor {
+        background-image:
+            linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        opacity: 0.5;
+    }
+    [data-theme="normal"] .cyber-floor {
+        background-image:
+            linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        opacity: 0.3;
+    }
+    @keyframes floorScroll {
+        0%   { background-position: 0 0; }
+        100% { background-position: 0 60px; }
+    }
+
+    /* ── Canvas ── */
+    #cyber-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════
+       3D CODE PANELS — Heavily blurred
+    ══════════════════════════════════════ */
+    .cyber-panel {
+        position: fixed;
+        z-index: 0;
+        pointer-events: none;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        line-height: 1.8;
+        white-space: pre;
+        transform-style: preserve-3d;
+
+        /* KEY: Heavy blur + low opacity makes them bg-only */
+        filter: blur(1.5px);
+        opacity: 0;
+    }
+
+    [data-theme="hacker"] .cyber-panel {
+        background: rgba(0, 10, 0, 0.5);
+        border: 1px solid rgba(0,255,65,0.08);
+        box-shadow: 0 0 30px rgba(0,255,65,0.03);
+    }
+    [data-theme="normal"] .cyber-panel {
+        background: rgba(15, 15, 30, 0.4);
+        border: 1px solid rgba(108,99,255,0.08);
+        box-shadow: 0 0 20px rgba(108,99,255,0.03);
+    }
+
+    /* Panel header */
+    .cp-header {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .cp-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .cp-dot.r { background: #FF3B30; }
+    .cp-dot.y { background: #FFD60A; }
+    .cp-dot.g { background: #30D158; }
+    .cp-title {
+        margin-left: 8px;
+        font-size: 8px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.15);
+    }
+
+    /* Muted syntax colors */
+    .cy-k  { color: rgba(255,121,198,0.5); }
+    .cy-f  { color: rgba(80,250,123,0.5); }
+    .cy-s  { color: rgba(241,250,140,0.5); }
+    .cy-c  { color: rgba(98,114,164,0.4); }
+    .cy-n  { color: rgba(189,147,249,0.5); }
+    .cy-v  { color: rgba(139,233,253,0.5); }
+    .cy-o  { color: rgba(255,85,85,0.5); }
+    .cy-t  { color: rgba(248,248,242,0.4); }
+    .cy-w  { color: rgba(255,184,108,0.5); }
+
+    [data-theme="hacker"] .cy-k  { color: rgba(0,255,255,0.35); }
+    [data-theme="hacker"] .cy-f  { color: rgba(0,255,65,0.4); }
+    [data-theme="hacker"] .cy-s  { color: rgba(255,215,0,0.35); }
+    [data-theme="hacker"] .cy-c  { color: rgba(0,255,65,0.15); }
+    [data-theme="hacker"] .cy-n  { color: rgba(255,16,240,0.35); }
+    [data-theme="hacker"] .cy-v  { color: rgba(0,229,255,0.35); }
+    [data-theme="hacker"] .cy-o  { color: rgba(255,49,49,0.4); }
+    [data-theme="hacker"] .cy-t  { color: rgba(0,255,65,0.3); }
+    [data-theme="hacker"] .cy-w  { color: rgba(255,184,0,0.35); }
+
+    /* Panel positions with 3D */
+    .cp-1 {
+        top: 3%; left: 1%;
+        transform: perspective(800px) rotateY(15deg) rotateX(-3deg);
+        animation: panelDrift1 28s ease-in-out infinite;
+    }
+    .cp-2 {
+        top: 8%; right: 1%;
+        transform: perspective(800px) rotateY(-12deg) rotateX(5deg);
+        animation: panelDrift2 32s ease-in-out infinite;
+    }
+    .cp-3 {
+        bottom: 25%; left: 0%;
+        transform: perspective(800px) rotateY(20deg) rotateX(-8deg);
+        animation: panelDrift3 30s ease-in-out infinite;
+    }
+    .cp-4 {
+        top: 45%; right: 0%;
+        transform: perspective(800px) rotateY(-18deg) rotateX(4deg);
+        animation: panelDrift4 34s ease-in-out infinite;
+    }
+    .cp-5 {
+        bottom: 5%; right: 2%;
+        transform: perspective(800px) rotateY(-8deg) rotateX(6deg);
+        animation: panelDrift5 26s ease-in-out infinite;
+    }
+    .cp-6 {
+        top: 70%; left: 2%;
+        transform: perspective(800px) rotateY(10deg) rotateX(-5deg);
+        animation: panelDrift6 36s ease-in-out infinite;
+    }
+
+    /* Panels fade to max 0.35 opacity — never overwhelm content */
+    @keyframes panelDrift1 {
+        0%   { opacity: 0; transform: perspective(800px) rotateY(15deg) rotateX(-3deg) translateZ(-60px); }
+        10%  { opacity: 0.3; transform: perspective(800px) rotateY(15deg) rotateX(-3deg) translateZ(0); }
+        50%  { opacity: 0.35; transform: perspective(800px) rotateY(12deg) rotateX(-5deg) translateZ(10px) translateY(-8px); }
+        90%  { opacity: 0.3; }
+        100% { opacity: 0; transform: perspective(800px) rotateY(18deg) rotateX(-2deg) translateZ(-60px) translateY(15px); }
+    }
+    @keyframes panelDrift2 {
+        0%   { opacity: 0; transform: perspective(800px) rotateY(-12deg) rotateX(5deg) translateZ(-60px); }
+        12%  { opacity: 0.28; }
+        50%  { opacity: 0.32; transform: perspective(800px) rotateY(-15deg) rotateX(3deg) translateZ(12px) translateY(-12px); }
+        88%  { opacity: 0.28; }
+        100% { opacity: 0; }
+    }
+    @keyframes panelDrift3 {
+        0%   { opacity: 0; transform: perspective(800px) rotateY(20deg) rotateX(-8deg) translateZ(-50px); }
+        8%   { opacity: 0.25; }
+        50%  { opacity: 0.3; transform: perspective(800px) rotateY(16deg) rotateX(-6deg) translateZ(15px) translateY(-6px); }
+        88%  { opacity: 0.25; }
+        100% { opacity: 0; }
+    }
+    @keyframes panelDrift4 {
+        0%   { opacity: 0; transform: perspective(800px) rotateY(-18deg) rotateX(4deg) translateZ(-55px); }
+        12%  { opacity: 0.28; }
+        55%  { opacity: 0.32; transform: perspective(800px) rotateY(-14deg) rotateX(6deg) translateZ(10px) translateY(-10px); }
+        90%  { opacity: 0.28; }
+        100% { opacity: 0; }
+    }
+    @keyframes panelDrift5 {
+        0%   { opacity: 0; transform: perspective(800px) rotateY(-8deg) rotateX(6deg) translateZ(-45px); }
+        10%  { opacity: 0.25; }
+        52%  { opacity: 0.3; transform: perspective(800px) rotateY(-5deg) rotateX(4deg) translateZ(14px) translateY(-5px); }
+        90%  { opacity: 0.25; }
+        100% { opacity: 0; }
+    }
+    @keyframes panelDrift6 {
+        0%   { opacity: 0; transform: perspective(800px) rotateY(10deg) rotateX(-5deg) translateZ(-50px); }
+        7%   { opacity: 0.22; }
+        50%  { opacity: 0.28; transform: perspective(800px) rotateY(8deg) rotateX(-3deg) translateZ(12px) translateY(-8px); }
+        88%  { opacity: 0.22; }
+        100% { opacity: 0; }
+    }
+
+
+    /* ══════════════════════════════════════
+       3D ALERT POPUPS — Blurred & subtle
+    ══════════════════════════════════════ */
+    .cyber-alert {
+        position: fixed;
+        z-index: 0;
+        pointer-events: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform-style: preserve-3d;
+
+        /* KEY: Blur + low opacity */
+        filter: blur(1px);
+        opacity: 0;
+    }
+    .ca-icon { font-size: 16px; flex-shrink: 0; }
+    .ca-text { line-height: 1.5; }
+    .ca-label {
+        font-weight: 700;
+        font-size: 9px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    /* Error */
+    .ca-error { border: 1px solid rgba(255,49,49,0.15); }
+    [data-theme="hacker"] .ca-error { background: rgba(255,49,49,0.04); color: rgba(255,49,49,0.6); }
+    [data-theme="normal"] .ca-error { background: rgba(255,49,49,0.03); color: rgba(255,107,107,0.5); }
+    .ca-error .ca-label { color: rgba(255,49,49,0.7); }
+
+    /* Warning */
+    .ca-warning { border: 1px solid rgba(255,184,0,0.15); }
+    [data-theme="hacker"] .ca-warning { background: rgba(255,184,0,0.03); color: rgba(255,184,0,0.5); }
+    [data-theme="normal"] .ca-warning { background: rgba(255,184,0,0.03); color: rgba(255,200,71,0.5); }
+    .ca-warning .ca-label { color: rgba(255,184,0,0.6); }
+
+    /* Success */
+    .ca-success { border: 1px solid rgba(0,255,65,0.15); }
+    [data-theme="hacker"] .ca-success { background: rgba(0,255,65,0.03); color: rgba(0,255,65,0.5); }
+    [data-theme="normal"] .ca-success { background: rgba(6,214,160,0.03); color: rgba(6,214,160,0.5); }
+    .ca-success .ca-label { color: rgba(0,255,65,0.6); }
+
+    /* Info */
+    .ca-info { border: 1px solid rgba(0,229,255,0.15); }
+    [data-theme="hacker"] .ca-info { background: rgba(0,229,255,0.03); color: rgba(0,229,255,0.5); }
+    [data-theme="normal"] .ca-info { background: rgba(0,180,216,0.03); color: rgba(0,180,216,0.5); }
+    .ca-info .ca-label { color: rgba(0,229,255,0.6); }
+
+    /* Alert 3D positions */
+    .ca-1 { top: 12%; right: 5%;  transform: perspective(600px) rotateY(-10deg); animation: alertFade1 14s ease-in-out infinite; }
+    .ca-2 { top: 55%; left: 3%;   transform: perspective(600px) rotateY(8deg);  animation: alertFade2 18s ease-in-out infinite; animation-delay: 3s; }
+    .ca-3 { bottom: 12%; right: 4%; transform: perspective(600px) rotateY(-6deg); animation: alertFade3 12s ease-in-out infinite; animation-delay: 6s; }
+    .ca-4 { top: 30%; left: 2%;   transform: perspective(600px) rotateY(12deg);  animation: alertFade4 16s ease-in-out infinite; animation-delay: 2s; }
+    .ca-5 { bottom: 35%; right: 2%; transform: perspective(600px) rotateY(-14deg); animation: alertFade5 20s ease-in-out infinite; animation-delay: 8s; }
+    .ca-6 { top: 80%; left: 5%;   transform: perspective(600px) rotateY(6deg);  animation: alertFade6 17s ease-in-out infinite; animation-delay: 5s; }
+
+    /* Alerts max out at 0.4 opacity — readable but not distracting */
+    @keyframes alertFade1 {
+        0%   { opacity: 0; transform: perspective(600px) rotateY(-10deg) scale(0.85) translateZ(-20px); }
+        6%   { opacity: 0.35; transform: perspective(600px) rotateY(-10deg) scale(1) translateZ(0); }
+        9%   { opacity: 0.4; transform: perspective(600px) rotateY(-10deg) scale(1.02); }
+        11%  { opacity: 0.35; transform: perspective(600px) rotateY(-10deg) scale(1); }
+        82%  { opacity: 0.35; }
+        100% { opacity: 0; }
+    }
+    @keyframes alertFade2 {
+        0%   { opacity: 0; transform: perspective(600px) rotateY(8deg) scale(0.85); }
+        7%   { opacity: 0.3; transform: perspective(600px) rotateY(8deg) scale(1); }
+        85%  { opacity: 0.3; }
+        100% { opacity: 0; }
+    }
+    @keyframes alertFade3 {
+        0%   { opacity: 0; transform: perspective(600px) rotateY(-6deg) scale(0.8); }
+        8%   { opacity: 0.35; transform: perspective(600px) rotateY(-6deg) scale(1); }
+        80%  { opacity: 0.35; }
+        100% { opacity: 0; }
+    }
+    @keyframes alertFade4 {
+        0%   { opacity: 0; transform: perspective(600px) rotateY(12deg) scale(0.85); }
+        7%   { opacity: 0.3; transform: perspective(600px) rotateY(12deg) scale(1); }
+        78%  { opacity: 0.3; }
+        100% { opacity: 0; }
+    }
+    @keyframes alertFade5 {
+        0%   { opacity: 0; transform: perspective(600px) rotateY(-14deg) scale(0.85); }
+        5%   { opacity: 0.3; transform: perspective(600px) rotateY(-14deg) scale(1); }
+        88%  { opacity: 0.3; }
+        100% { opacity: 0; }
+    }
+    @keyframes alertFade6 {
+        0%   { opacity: 0; transform: perspective(600px) rotateY(6deg) scale(0.85); }
+        6%   { opacity: 0.28; transform: perspective(600px) rotateY(6deg) scale(1); }
+        84%  { opacity: 0.28; }
+        100% { opacity: 0; }
+    }
+
+
+    /* ══════════════════════════════════════
+       AMBIENT LAYERS
+    ══════════════════════════════════════ */
+
+    /* Glow orbs — very subtle */
+    .cyber-orb {
+        position: fixed; z-index: 0; pointer-events: none;
+        border-radius: 50%; filter: blur(140px);
+        animation: orbDrift 25s ease-in-out infinite;
+    }
+    .co-1 { width: 600px; height: 600px; top: -200px; left: -150px; }
+    .co-2 { width: 500px; height: 500px; bottom: -150px; right: -100px; animation-delay: 6s; }
+    .co-3 { width: 400px; height: 400px; top: 40%; left: 50%; animation-delay: 12s; }
+
+    [data-theme="hacker"] .co-1 { background: rgba(0,255,65,0.04); }
+    [data-theme="hacker"] .co-2 { background: rgba(0,229,255,0.03); }
+    [data-theme="hacker"] .co-3 { background: rgba(255,16,240,0.02); }
+    [data-theme="normal"] .co-1 { background: rgba(108,99,255,0.04); }
+    [data-theme="normal"] .co-2 { background: rgba(0,180,216,0.03); }
+    [data-theme="normal"] .co-3 { background: rgba(255,101,132,0.02); }
+
+    @keyframes orbDrift {
+        0%, 100% { transform: translate(0,0) scale(1); }
+        33% { transform: translate(40px,-30px) scale(1.08); }
+        66% { transform: translate(-25px,25px) scale(0.95); }
+    }
+
+    /* Heavy vignette — focuses attention on center */
+    .cyber-vignette {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+    [data-theme="hacker"] .cyber-vignette {
+        background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.85) 100%);
+    }
+    [data-theme="normal"] .cyber-vignette {
+        background: radial-gradient(ellipse at center, transparent 30%, rgba(8,8,15,0.7) 100%);
+    }
+
+    /* Scan line — very faint */
+    .cyber-scan {
+        position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+        z-index: 1; pointer-events: none;
+    }
+    [data-theme="hacker"] .cyber-scan {
+        background: linear-gradient(90deg, transparent, rgba(0,255,65,0.25), transparent);
+        box-shadow: 0 0 12px rgba(0,255,65,0.15);
+        animation: cyberScan 6s linear infinite;
+    }
+    [data-theme="normal"] .cyber-scan {
+        background: linear-gradient(90deg, transparent, rgba(108,99,255,0.15), transparent);
+        box-shadow: 0 0 8px rgba(108,99,255,0.1);
+        animation: cyberScan 10s linear infinite;
+    }
+    @keyframes cyberScan {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(100vh); }
+    }
+
+    /* CRT overlay — barely visible */
+    .cyber-crt {
+        position: fixed; inset: 0; z-index: 1; pointer-events: none;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0,0,0,0.06),
+            rgba(0,0,0,0.06) 1px,
+            transparent 1px,
+            transparent 3px
+        );
+    }
+    [data-theme="normal"] .cyber-crt { opacity: 0.2; }
+
+
+    /* ═══════════════════════════════════════════
+       CONTENT READABILITY BOOST
+       — Glass layer behind hero & members
+    ═══════════════════════════════════════════ */
+
+    .team-intro::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center,
+            rgba(8,8,15,0.6) 0%,
+            rgba(8,8,15,0.3) 50%,
+            transparent 80%
+        );
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .tp-members-section::before {
+        content: '';
+        position: absolute;
+        top: -50px; left: -50px; right: -50px; bottom: -50px;
+        background: rgba(8,8,15,0.4);
+        filter: blur(40px);
+        z-index: -1;
+        pointer-events: none;
+        border-radius: 40px;
+    }
+
+
+    /* ═══════════════════════════════════════════
+       TEAM PAGE LAYOUT
+    ═══════════════════════════════════════════ */
+
+    .team-page-nav {
+        position: fixed; top: 0; left: 0; right: 0;
+        padding: 20px 40px; display: flex; align-items: center;
+        justify-content: space-between; z-index: 100; backdrop-filter: blur(15px);
+    }
+    [data-theme="normal"] .team-page-nav { background: rgba(8,8,15,0.75); border-bottom: 1px solid rgba(108,99,255,0.1); }
+    [data-theme="hacker"] .team-page-nav { background: rgba(0,5,0,0.85); border-bottom: 1px solid rgba(0,255,65,0.15); box-shadow: 0 0 15px rgba(0,255,65,0.03); }
+
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; color: rgba(255,255,255,0.7); font-size: 14px;
+        font-weight: 600; transition: all 0.3s; text-decoration: none;
+    }
+    .btn-back:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateX(-3px); box-shadow: 0 4px 15px var(--primary-glow); }
+    [data-theme="hacker"] .btn-back { color: var(--primary); border-color: rgba(0,255,65,0.2); }
+    [data-theme="hacker"] .btn-back:hover { background: var(--primary); color: #000; }
+
+    /* ── INTRO ── */
+    .team-intro {
+        min-height: 100vh; display: flex; align-items: center;
+        justify-content: center; position: relative; overflow: hidden;
+        padding: 100px 24px 40px;
+    }
+
+    .tp-grid {
+        position: absolute; inset: 0;
+        animation: gridMove 20s linear infinite;
+        mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+    [data-theme="hacker"] .tp-grid {
+        background-image:
+            linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+    [data-theme="normal"] .tp-grid {
+        background-image:
+            linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+    @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+
+    .tp-glow-orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3; animation: orbFloat 10s ease-in-out infinite; }
+    .tp-orb-1 { width: 500px; height: 500px; top: -100px; left: -100px; }
+    .tp-orb-2 { width: 400px; height: 400px; bottom: -100px; right: -100px; animation-delay: 3s; }
+    .tp-orb-3 { width: 350px; height: 350px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: 6s; }
+
+    [data-theme="hacker"] .tp-orb-1 { background: rgba(0,255,65,0.2); }
+    [data-theme="hacker"] .tp-orb-2 { background: rgba(0,229,255,0.15); }
+    [data-theme="hacker"] .tp-orb-3 { background: rgba(255,16,240,0.1); }
+    [data-theme="normal"] .tp-orb-1 { background: rgba(108,99,255,0.2); }
+    [data-theme="normal"] .tp-orb-2 { background: rgba(0,180,216,0.15); }
+    [data-theme="normal"] .tp-orb-3 { background: rgba(255,101,132,0.1); }
+
+    @keyframes orbFloat { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-30px) scale(1.1); } }
+    .tp-orb-3 { animation: orbFC 10s ease-in-out infinite; }
+    @keyframes orbFC { 0%, 100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.15); } }
+
+    /* Hero content — HIGH z-index, always readable */
+    .tp-hero { position: relative; z-index: 5; text-align: center; max-width: 900px; }
+
+    .tp-badge { display: inline-flex; align-items: center; gap: 10px; padding: 10px 24px; border-radius: 30px; font-size: 12px; font-weight: 700; letter-spacing: 3px; margin-bottom: 32px; opacity: 0; animation: fadeInUp 1s ease 0.2s forwards; backdrop-filter: blur(10px); }
+    [data-theme="hacker"] .tp-badge { background: rgba(0,255,65,0.1); border: 1px solid rgba(0,255,65,0.3); color: #00FF41; }
+    [data-theme="normal"] .tp-badge { background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3); color: #8B80FF; }
+    .tp-badge-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+
+    .tp-hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(60px,12vw,140px);
+        font-weight: 700; line-height: 0.95;
+        letter-spacing: -3px; margin-bottom: 32px;
+        display: flex; justify-content: center;
+        gap: 20px; flex-wrap: wrap;
+        color: #FFFFFF;
+        /* text-shadow for readability on busy bg */
+        text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+    }
+    [data-theme="hacker"] .tp-hero-title {
+        color: #00FF41;
+        text-shadow: 0 0 40px rgba(0,255,65,0.3), 0 2px 20px rgba(0,0,0,0.8);
+    }
+
+    .tp-word { display: inline-block; opacity: 0; transform: translateY(60px) rotateX(-90deg); animation: wordReveal 0.9s cubic-bezier(0.16,1,0.3,1) forwards; transform-origin: bottom center; }
+    .tp-word:nth-child(1) { animation-delay: 0.4s; }
+    .tp-word:nth-child(2) { animation-delay: 0.6s; }
+    .tp-word:nth-child(3) { animation-delay: 0.8s; }
+    @keyframes wordReveal { to { opacity: 1; transform: translateY(0) rotateX(0); } }
+
+    .tp-gradient {
+        background: linear-gradient(135deg, #00FF41, #00FFFF, #FF10F0);
+        background-size: 200% 200%;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: wordReveal 0.9s cubic-bezier(0.16,1,0.3,1) 0.8s forwards, gradShift 4s ease infinite;
+        filter: drop-shadow(0 2px 15px rgba(0,255,65,0.4));
+    }
+    [data-theme="normal"] .tp-gradient {
+        background: linear-gradient(135deg, #6C63FF, #00B4D8, #FF6584);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        background-size: 200% 200%;
+        filter: drop-shadow(0 2px 15px rgba(108,99,255,0.4));
+    }
+    @keyframes gradShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    .tp-hero-subtitle {
+        font-size: clamp(16px,2vw,20px);
+        color: rgba(255,255,255,0.7);
+        line-height: 1.7; max-width: 600px;
+        margin: 0 auto 60px; opacity: 0;
+        animation: fadeInUp 1s ease 1.4s forwards;
+        text-shadow: 0 1px 10px rgba(0,0,0,0.6);
+    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .tp-scroll-hint { display: flex; flex-direction: column; align-items: center; gap: 12px; opacity: 0; animation: fadeInUp 1s ease 1.8s forwards; cursor: pointer; }
+    .tp-mouse { width: 26px; height: 42px; border: 2px solid rgba(0,255,65,0.4); border-radius: 14px; position: relative; box-shadow: 0 0 10px rgba(0,255,65,0.15); }
+    [data-theme="normal"] .tp-mouse { border-color: rgba(108,99,255,0.4); box-shadow: 0 0 10px rgba(108,99,255,0.15); }
+    .tp-scroll-dot { width: 4px; height: 8px; background: #00FF41; border-radius: 3px; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); animation: scrollBounce 2s ease-in-out infinite; }
+    [data-theme="normal"] .tp-scroll-dot { background: #6C63FF; }
+    @keyframes scrollBounce { 0% { transform: translate(-50%,0); opacity: 1; } 100% { transform: translate(-50%,18px); opacity: 0; } }
+    .tp-scroll-hint span { font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 2px; text-transform: uppercase; }
+
+    .tp-float { position: absolute; font-family: 'JetBrains Mono', monospace; opacity: 0.08; animation: floatCode 15s ease-in-out infinite; z-index: 1; pointer-events: none; }
+    [data-theme="hacker"] .tp-float { color: rgba(0,255,65,0.15); }
+    [data-theme="normal"] .tp-float { color: rgba(108,99,255,0.1); }
+    .tp-float-1 { top: 15%; left: 10%; font-size: 60px; }
+    .tp-float-2 { top: 20%; right: 12%; font-size: 50px; animation-delay: 2s; }
+    .tp-float-3 { bottom: 25%; left: 15%; font-size: 55px; animation-delay: 4s; }
+    .tp-float-4 { bottom: 20%; right: 10%; font-size: 70px; animation-delay: 6s; }
+    @keyframes floatCode { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-30px) rotate(10deg); } }
+
+
+    /* ── MEMBERS ── */
+    .tp-members-section { position: relative; z-index: 2; padding: 100px 24px; }
+    .tp-section-header { text-align: center; max-width: 700px; margin: 0 auto 100px; }
+    .tp-section-line { width: 80px; height: 3px; margin: 0 auto 20px; border-radius: 3px; }
+    [data-theme="hacker"] .tp-section-line { background: linear-gradient(90deg, #00FF41, #00FFFF); box-shadow: 0 0 15px rgba(0,255,65,0.3); }
+    [data-theme="normal"] .tp-section-line { background: linear-gradient(90deg, #6C63FF, #00B4D8); box-shadow: 0 0 15px rgba(108,99,255,0.2); }
+    .tp-section-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(36px,5vw,56px); font-weight: 700; color: #fff; margin-bottom: 16px; text-shadow: 0 2px 15px rgba(0,0,0,0.6); }
+    [data-theme="hacker"] .tp-section-title { color: #00FF41; text-shadow: 0 0 20px rgba(0,255,65,0.2), 0 2px 15px rgba(0,0,0,0.6); }
+    .tp-section-desc { font-size: 18px; color: rgba(255,255,255,0.5); }
+
+    .tp-members { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 150px; }
+    .tp-member { position: relative; opacity: 0; transform: translateY(80px); transition: all 1.2s cubic-bezier(0.16,1,0.3,1); }
+    .tp-member.visible { opacity: 1; transform: translateY(0); }
+    .tp-member-number { position: absolute; top: -60px; left: 0; font-family: 'Space Grotesk', sans-serif; font-size: 180px; font-weight: 700; color: transparent; line-height: 1; z-index: 0; letter-spacing: -8px; }
+    [data-theme="hacker"] .tp-member-number { -webkit-text-stroke: 2px rgba(0,255,65,0.08); }
+    [data-theme="normal"] .tp-member-number { -webkit-text-stroke: 2px rgba(108,99,255,0.1); }
+    .tp-member.reversed .tp-member-number { left: auto; right: 0; }
+
+    .tp-member-content { display: grid; grid-template-columns: 1fr 1.3fr; gap: 80px; align-items: center; position: relative; z-index: 1; }
+    .tp-member.reversed .tp-member-content { grid-template-columns: 1.3fr 1fr; }
+    .tp-member.reversed .tp-member-photo-side { order: 2; }
+    .tp-member.reversed .tp-member-info-side { order: 1; }
+
+    .tp-member-photo-side { position: relative; display: flex; justify-content: center; align-items: center; aspect-ratio: 1; max-width: 380px; margin: 0 auto; width: 100%; }
+    .tp-photo-decor { position: absolute; width: 60px; height: 60px; z-index: 2; }
+    [data-theme="hacker"] .tp-photo-decor { border: 3px solid rgba(0,255,65,0.3); }
+    [data-theme="normal"] .tp-photo-decor { border: 3px solid rgba(108,99,255,0.3); }
+    .tp-decor-tl { top: -15px; left: -15px; border-right: none; border-bottom: none; border-radius: 15px 0 0 0; }
+    .tp-decor-br { bottom: -15px; right: -15px; border-left: none; border-top: none; border-radius: 0 0 15px 0; }
+    .tp-photo-wrap { position: relative; width: 100%; height: 100%; border-radius: 24px; overflow: hidden; transition: all 0.5s ease; }
+    .tp-member:hover .tp-photo-wrap { transform: scale(1.03); }
+    .tp-photo-glow { position: absolute; inset: -20px; filter: blur(40px); opacity: 0.3; z-index: -1; animation: glowPulse 4s ease-in-out infinite; }
+    [data-theme="hacker"] .tp-photo-glow { background: linear-gradient(135deg, rgba(0,255,65,0.2), rgba(0,229,255,0.2)); }
+    [data-theme="normal"] .tp-photo-glow { background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,180,216,0.2)); }
+    @keyframes glowPulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.05); } }
+    .tp-photo { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; transition: all 0.6s ease; }
+    .tp-member:hover .tp-photo { transform: scale(1.1); filter: brightness(1.1) contrast(1.05); }
+    .tp-photo-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 100px; font-weight: 700; }
+    [data-theme="hacker"] .tp-photo-fallback { background: linear-gradient(135deg, rgba(0,255,65,0.1), rgba(0,229,255,0.1)); color: #00FF41; }
+    [data-theme="normal"] .tp-photo-fallback { background: linear-gradient(135deg, #6C63FF, #00B4D8); color: #fff; }
+
+    .tp-member-info-side { padding: 20px 0; }
+    .tp-member-role { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+    [data-theme="hacker"] .tp-member-role { background: rgba(0,255,65,0.08); border: 1px solid rgba(0,255,65,0.25); color: #00FF41; }
+    [data-theme="normal"] .tp-member-role { background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.25); color: #8B80FF; }
+    .tp-member-name { font-family: 'Space Grotesk', sans-serif; font-size: clamp(36px,5vw,52px); font-weight: 700; line-height: 1.1; color: #fff; margin-bottom: 16px; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    [data-theme="hacker"] .tp-member-name { color: #00FF41; text-shadow: 0 0 20px rgba(0,255,65,0.2), 0 2px 10px rgba(0,0,0,0.5); }
+    .tp-member-tagline { font-size: 18px; font-style: italic; margin-bottom: 24px; padding-left: 20px; }
+    [data-theme="hacker"] .tp-member-tagline { color: #00FFFF; border-left: 3px solid #00FFFF; }
+    [data-theme="normal"] .tp-member-tagline { color: #8B80FF; border-left: 3px solid #8B80FF; }
+    .tp-member-bio { font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.8; margin-bottom: 28px; }
+
+    .tp-member-skills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+    .tp-skill { padding: 8px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 500; transition: all 0.3s; }
+    .tp-skill:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 0 15px var(--primary-glow); }
+
+    .tp-member-socials { display: flex; flex-wrap: wrap; gap: 12px; }
+    .tp-social { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; transition: all 0.3s; text-decoration: none; }
+    .tp-social:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 20px var(--primary-glow); }
+    .tp-social i { font-size: 16px; }
+
+    .tp-cta { max-width: 700px; margin: 150px auto 0; text-align: center; padding: 60px 40px; border-radius: 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(15px); }
+    [data-theme="hacker"] .tp-cta { border-color: rgba(0,255,65,0.15); box-shadow: 0 0 25px rgba(0,255,65,0.03); }
+    .tp-cta h3 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(24px,3vw,32px); font-weight: 700; color: #fff; margin-bottom: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    [data-theme="hacker"] .tp-cta h3 { color: #00FF41; text-shadow: 0 0 15px rgba(0,255,65,0.2), 0 2px 10px rgba(0,0,0,0.5); }
+
+    @media (max-width: 900px) {
+        .tp-member-content, .tp-member.reversed .tp-member-content { grid-template-columns: 1fr; gap: 40px; }
+        .tp-member.reversed .tp-member-photo-side, .tp-member.reversed .tp-member-info-side { order: initial; }
+        .tp-member-photo-side { max-width: 320px; }
+        .tp-member-info-side { text-align: center; }
+        .tp-member-tagline { border-left: none; border-top: 3px solid currentColor; padding-left: 0; padding-top: 12px; }
+        .tp-member-skills, .tp-member-socials { justify-content: center; }
+        .tp-member-number { font-size: 120px; top: -40px; }
+        .tp-members { gap: 100px; }
+        .team-page-nav { padding: 16px 20px; }
+        .cyber-panel { display: none !important; }
+        .cyber-alert { display: none !important; }
+    }
+    @media (max-width: 600px) {
+        .tp-hero-title { font-size: 60px; gap: 12px; }
+        .tp-member-number { font-size: 80px; }
+        .btn-back span { display: none; }
+        .btn-back { padding: 10px 14px; }
+    }
+    </style>
 </head>
 <body>
 
-    <!-- Backgrounds -->
-    <div class="bg-shapes">
-        <div class="bg-shape bg-shape-1"></div>
-        <div class="bg-shape bg-shape-2"></div>
-        <div class="bg-shape bg-shape-3"></div>
-    </div>
-    <canvas id="team-particle-canvas"></canvas>
+    <!-- ═══════════════════════════════════
+         BACKGROUND LAYERS
+    ═══════════════════════════════════ -->
+    <div class="cyber-scene"><div class="cyber-floor"></div></div>
+    <canvas id="cyber-canvas"></canvas>
+    <div class="cyber-orb co-1"></div>
+    <div class="cyber-orb co-2"></div>
+    <div class="cyber-orb co-3"></div>
+    <div class="cyber-vignette"></div>
+    <div class="cyber-scan"></div>
+    <div class="cyber-crt"></div>
 
-    <!-- Simple Back Navbar -->
+    <!-- 3D CODE PANELS (blurred, subtle) -->
+    <div class="cyber-panel cp-1"><div class="cp-header"><div class="cp-dot r"></div><div class="cp-dot y"></div><div class="cp-dot g"></div><span class="cp-title">encrypt.js</span></div><span class="cy-k">const</span> <span class="cy-v">key</span> = <span class="cy-k">await</span> crypto.subtle
+  .<span class="cy-f">generateKey</span>(
+    { name: <span class="cy-s">"AES-GCM"</span>,
+      length: <span class="cy-n">256</span> },
+    <span class="cy-n">true</span>,
+    [<span class="cy-s">"encrypt"</span>, <span class="cy-s">"decrypt"</span>]
+  );
+<span class="cy-c">// ✓ Key generated</span></div>
+
+    <div class="cyber-panel cp-2"><div class="cp-header"><div class="cp-dot r"></div><div class="cp-dot y"></div><div class="cp-dot g"></div><span class="cp-title">auth.py</span></div><span class="cy-k">def</span> <span class="cy-f">verify_token</span>(<span class="cy-v">token</span>):
+    <span class="cy-k">try</span>:
+        payload = jwt.<span class="cy-f">decode</span>(
+            token,
+            SECRET_KEY,
+            algorithms=[<span class="cy-s">"HS256"</span>]
+        )
+        <span class="cy-k">return</span> payload
+    <span class="cy-k">except</span> jwt.ExpiredSignatureError:
+        <span class="cy-o">raise AuthError(401)</span></div>
+
+    <div class="cyber-panel cp-3"><div class="cp-header"><div class="cp-dot r"></div><div class="cp-dot y"></div><div class="cp-dot g"></div><span class="cp-title">terminal</span></div><span class="cy-f">$</span> nmap -sV --script vuln target
+<span class="cy-w">[*] Scanning 10.0.0.1...</span>
+<span class="cy-t">PORT    STATE  SERVICE</span>
+<span class="cy-f">22/tcp  open   ssh</span>
+<span class="cy-f">443/tcp open   https</span>
+<span class="cy-o">⚠ CVE-2024-3214 DETECTED</span>
+<span class="cy-w">[!] 2 vulnerabilities found</span></div>
+
+    <div class="cyber-panel cp-4"><div class="cp-header"><div class="cp-dot r"></div><div class="cp-dot y"></div><div class="cp-dot g"></div><span class="cp-title">rsa.rs</span></div><span class="cy-k">fn</span> <span class="cy-f">generate_keypair</span>() {
+    <span class="cy-k">let</span> <span class="cy-v">bits</span> = <span class="cy-n">4096</span>;
+    <span class="cy-k">let</span> <span class="cy-v">key</span> = RsaPrivateKey
+        ::<span class="cy-f">new</span>(&<span class="cy-k">mut</span> rng, bits)
+        .<span class="cy-f">expect</span>(<span class="cy-s">"keygen failed"</span>);
+    key.<span class="cy-f">to_pkcs8_pem</span>()
+}</div>
+
+    <div class="cyber-panel cp-5"><div class="cp-header"><div class="cp-dot r"></div><div class="cp-dot y"></div><div class="cp-dot g"></div><span class="cp-title">build.log</span></div><span class="cy-f">[INFO]</span>  Compiling crypto_core v2.1
+<span class="cy-f">[PASS]</span>  AES-256-GCM ............ <span class="cy-f">OK</span>
+<span class="cy-f">[PASS]</span>  RSA-4096 ............... <span class="cy-f">OK</span>
+<span class="cy-o">[FAIL]</span>  <span class="cy-o">MD5 collision .......... FAIL</span>
+<span class="cy-w">[WARN]</span>  <span class="cy-w">MD5 deprecated — remove</span></div>
+
+    <div class="cyber-panel cp-6"><div class="cp-header"><div class="cp-dot r"></div><div class="cp-dot y"></div><div class="cp-dot g"></div><span class="cp-title">monitor.sh</span></div><span class="cy-f">$</span> tail -f /var/log/auth.log
+<span class="cy-o">FAILED login root 192.168.1.42</span>
+<span class="cy-o">FAILED login admin 10.0.0.99</span>
+<span class="cy-w">[ALERT] Brute force detected</span>
+<span class="cy-f">[ACTION] IP banned</span>
+<span class="cy-f">$ iptables -A INPUT -s</span>
+  <span class="cy-o">192.168.1.42</span> -j <span class="cy-o">DROP</span></div>
+
+    <!-- ALERT POPUPS (blurred, subtle) -->
+    <div class="cyber-alert ca-error ca-1"><div class="ca-icon">🚨</div><div class="ca-text"><span class="ca-label">Critical Error</span>Buffer overflow at 0x7FFE4D2A</div></div>
+    <div class="cyber-alert ca-warning ca-2"><div class="ca-icon">⚠️</div><div class="ca-text"><span class="ca-label">Warning</span>Deprecated cipher MD5 in use</div></div>
+    <div class="cyber-alert ca-success ca-3"><div class="ca-icon">✅</div><div class="ca-text"><span class="ca-label">Encrypted</span>AES-256-GCM — integrity OK</div></div>
+    <div class="cyber-alert ca-error ca-4"><div class="ca-icon">💀</div><div class="ca-text"><span class="ca-label">Intrusion</span>SSH brute force from 192.168.1.42</div></div>
+    <div class="cyber-alert ca-info ca-5"><div class="ca-icon">🔑</div><div class="ca-text"><span class="ca-label">Key Generated</span>RSA-4096 in 182ms</div></div>
+    <div class="cyber-alert ca-warning ca-6"><div class="ca-icon">🛡️</div><div class="ca-text"><span class="ca-label">Firewall</span>3 blocked from port 8080</div></div>
+
+
+    <!-- ═══════════════════════════════════
+         NAVBAR
+    ═══════════════════════════════════ -->
     <nav class="team-page-nav">
         <a href="index.html" class="nav-logo">
             <div class="nav-logo-icon">
@@ -33,55 +741,28 @@
             </div>
             <span class="nav-logo-text">CryptoKit</span>
         </a>
-
-        <a href="index.html" class="btn-back">
-            <i class="fas fa-arrow-left"></i>
-            <span>Back to Home</span>
-        </a>
+        <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i><span>Back to Home</span></a>
     </nav>
 
 
     <!-- ═══════════════════════════════════
-         CINEMATIC INTRO SECTION
+         CINEMATIC INTRO
     ═══════════════════════════════════ -->
     <section class="team-intro">
-
-        <!-- Animated Grid Background -->
         <div class="tp-grid"></div>
-
-        <!-- Animated Radial Glow -->
         <div class="tp-glow-orb tp-orb-1"></div>
         <div class="tp-glow-orb tp-orb-2"></div>
         <div class="tp-glow-orb tp-orb-3"></div>
-
-        <!-- Hero Content -->
         <div class="tp-hero">
-            <div class="tp-badge">
-                <span class="tp-badge-dot"></span>
-                THE PEOPLE BEHIND THE MAGIC
-            </div>
-
+            <div class="tp-badge"><span class="tp-badge-dot"></span>THE PEOPLE BEHIND THE MAGIC</div>
             <h1 class="tp-hero-title">
                 <span class="tp-word">Meet</span>
                 <span class="tp-word">The</span>
                 <span class="tp-word tp-gradient">Team</span>
             </h1>
-
-            <p class="tp-hero-subtitle">
-                Four passionate minds. One shared vision.
-                <br/>
-                Building the future of open-source cryptography.
-            </p>
-
-            <div class="tp-scroll-hint">
-                <div class="tp-mouse">
-                    <div class="tp-scroll-dot"></div>
-                </div>
-                <span>Scroll to meet us</span>
-            </div>
+            <p class="tp-hero-subtitle">Four passionate minds. One shared vision.<br/>Building the future of open-source cryptography.</p>
+            <div class="tp-scroll-hint"><div class="tp-mouse"><div class="tp-scroll-dot"></div></div><span>Scroll to meet us</span></div>
         </div>
-
-        <!-- Floating decorative elements -->
         <div class="tp-float tp-float-1">{ }</div>
         <div class="tp-float tp-float-2">&lt;/&gt;</div>
         <div class="tp-float tp-float-3">#!</div>
@@ -90,240 +771,205 @@
 
 
     <!-- ═══════════════════════════════════
-         TEAM MEMBERS SHOWCASE
+         TEAM MEMBERS
     ═══════════════════════════════════ -->
     <section class="tp-members-section">
-
         <div class="tp-section-header">
             <div class="tp-section-line"></div>
             <h2 class="tp-section-title">The <span class="tp-gradient">Builders</span></h2>
             <p class="tp-section-desc">Get to know the individuals shaping CryptoKit</p>
         </div>
-
-        <!-- Member Cards -->
         <div class="tp-members">
 
-            <!-- ═══ Member 1 ═══ -->
             <div class="tp-member" data-member="1">
                 <div class="tp-member-number">01</div>
-
                 <div class="tp-member-content">
-                    <div class="tp-member-photo-side">
-                        <div class="tp-photo-decor tp-decor-tl"></div>
-                        <div class="tp-photo-decor tp-decor-br"></div>
-                        <div class="tp-photo-wrap">
-                            <div class="tp-photo-glow"></div>
-                            <img
-                                src="images/Ashish.png"
-                                alt="Ashish Kumawat"
-                                class="tp-photo"
-                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                            />
-                            <div class="tp-photo-fallback" style="display:none;">AK</div>
-                        </div>
-                    </div>
-
+                    <div class="tp-member-photo-side"><div class="tp-photo-decor tp-decor-tl"></div><div class="tp-photo-decor tp-decor-br"></div><div class="tp-photo-wrap"><div class="tp-photo-glow"></div><img src="images/Ashish.png" alt="Ashish Kumawat" class="tp-photo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="tp-photo-fallback" style="display:none;">AK</div></div></div>
                     <div class="tp-member-info-side">
                         <div class="tp-member-role">Algorithm Architect</div>
                         <h3 class="tp-member-name">Ashish Kumawat</h3>
                         <div class="tp-member-tagline">"Elegant algorithms, powerful solutions"</div>
-                        <p class="tp-member-bio">
-                            Designs and optimizes the core algorithms that power the platform's tools
-                            and features. Passionate about creating efficient, elegant solutions to
-                            complex cryptographic challenges.
-                        </p>
-
-                        <div class="tp-member-skills">
-                            <span class="tp-skill">Algorithm Design</span>
-                            <span class="tp-skill">Optimization</span>
-                            <span class="tp-skill">Problem Solving</span>
-                        </div>
-
+                        <p class="tp-member-bio">Designs and optimizes the core algorithms that power the platform's tools and features.</p>
+                        <div class="tp-member-skills"><span class="tp-skill">Algorithm Design</span><span class="tp-skill">Optimization</span><span class="tp-skill">Problem Solving</span></div>
                         <div class="tp-member-socials">
-                            <a href="https://github.com/AshishKumawat04" target="_blank" class="tp-social">
-                                <i class="fab fa-github"></i> GitHub
-                            </a>
-                            <a href="https://www.linkedin.com/in/ashish-kumawat-96a95b322" target="_blank" class="tp-social">
-                                <i class="fab fa-linkedin"></i> LinkedIn
-                            </a>
-                            <a href="https://instagram.com/" target="_blank" class="tp-social">
-                                <i class="fab fa-instagram"></i> Instagram
-                            </a>
+                            <a href="https://github.com/AshishKumawat04" target="_blank" class="tp-social"><i class="fab fa-github"></i> GitHub</a>
+                            <a href="https://www.linkedin.com/in/ashish-kumawat-96a95b322" target="_blank" class="tp-social"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            <a href="https://instagram.com/" target="_blank" class="tp-social"><i class="fab fa-instagram"></i> Instagram</a>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-            <!-- ═══ Member 2 ═══ -->
             <div class="tp-member reversed" data-member="2">
                 <div class="tp-member-number">02</div>
-
                 <div class="tp-member-content">
-                    <div class="tp-member-photo-side">
-                        <div class="tp-photo-decor tp-decor-tl"></div>
-                        <div class="tp-photo-decor tp-decor-br"></div>
-                        <div class="tp-photo-wrap">
-                            <div class="tp-photo-glow"></div>
-                            <img
-                                src="images/Sadanand.jpeg"
-                                alt="Sadanand Kumawat"
-                                class="tp-photo"
-                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                            />
-                            <div class="tp-photo-fallback" style="display:none;">SK</div>
-                        </div>
-                    </div>
-
+                    <div class="tp-member-photo-side"><div class="tp-photo-decor tp-decor-tl"></div><div class="tp-photo-decor tp-decor-br"></div><div class="tp-photo-wrap"><div class="tp-photo-glow"></div><img src="images/Sadanand.jpeg" alt="Sadanand Kumawat" class="tp-photo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="tp-photo-fallback" style="display:none;">SK</div></div></div>
                     <div class="tp-member-info-side">
                         <div class="tp-member-role">Backend Engineer</div>
                         <h3 class="tp-member-name">Sadanand Kumawat</h3>
                         <div class="tp-member-tagline">"Building the invisible foundations"</div>
-                        <p class="tp-member-bio">
-                            Develops and maintains the server-side logic, APIs, and core application
-                            functionality. Ensures every request is handled with speed, security,
-                            and reliability.
-                        </p>
-
-                        <div class="tp-member-skills">
-                            <span class="tp-skill">API Development</span>
-                            <span class="tp-skill">Server Architecture</span>
-                            <span class="tp-skill">System Design</span>
-                        </div>
-
+                        <p class="tp-member-bio">Develops and maintains the server-side logic, APIs, and core application functionality.</p>
+                        <div class="tp-member-skills"><span class="tp-skill">API Development</span><span class="tp-skill">Server Architecture</span><span class="tp-skill">System Design</span></div>
                         <div class="tp-member-socials">
-                            <a href="https://github.com/Sadanand1754" target="_blank" class="tp-social">
-                                <i class="fab fa-github"></i> GitHub
-                            </a>
-                            <a href="https://linkedin.com/in/" target="_blank" class="tp-social">
-                                <i class="fab fa-linkedin"></i> LinkedIn
-                            </a>
-                            <a href="https://instagram.com/" target="_blank" class="tp-social">
-                                <i class="fab fa-instagram"></i> Instagram
-                            </a>
+                            <a href="https://github.com/Sadanand1754" target="_blank" class="tp-social"><i class="fab fa-github"></i> GitHub</a>
+                            <a href="https://linkedin.com/in/" target="_blank" class="tp-social"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            <a href="https://instagram.com/" target="_blank" class="tp-social"><i class="fab fa-instagram"></i> Instagram</a>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-            <!-- ═══ Member 3 ═══ -->
             <div class="tp-member" data-member="3">
                 <div class="tp-member-number">03</div>
-
                 <div class="tp-member-content">
-                    <div class="tp-member-photo-side">
-                        <div class="tp-photo-decor tp-decor-tl"></div>
-                        <div class="tp-photo-decor tp-decor-br"></div>
-                        <div class="tp-photo-wrap">
-                            <div class="tp-photo-glow"></div>
-                            <img
-                                src="images/Narendra.jpeg"
-                                alt="Narendra Kumar"
-                                class="tp-photo"
-                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                            />
-                            <div class="tp-photo-fallback" style="display:none;">NK</div>
-                        </div>
-                    </div>
-
+                    <div class="tp-member-photo-side"><div class="tp-photo-decor tp-decor-tl"></div><div class="tp-photo-decor tp-decor-br"></div><div class="tp-photo-wrap"><div class="tp-photo-glow"></div><img src="images/Narendra.jpeg" alt="Narendra Kumar" class="tp-photo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="tp-photo-fallback" style="display:none;">NK</div></div></div>
                     <div class="tp-member-info-side">
                         <div class="tp-member-role">Security &amp; Database Engineer</div>
                         <h3 class="tp-member-name">Narendra Kumar</h3>
                         <div class="tp-member-tagline">"Guarding data, one byte at a time"</div>
-                        <p class="tp-member-bio">
-                            Ensures data security, manages database architecture, and maintains
-                            system integrity. Every layer of defense is thoughtfully designed
-                            and rigorously tested.
-                        </p>
-
-                        <div class="tp-member-skills">
-                            <span class="tp-skill">Security Auditing</span>
-                            <span class="tp-skill">Database Design</span>
-                            <span class="tp-skill">Data Integrity</span>
-                        </div>
-
+                        <p class="tp-member-bio">Ensures data security, manages database architecture, and maintains system integrity.</p>
+                        <div class="tp-member-skills"><span class="tp-skill">Security Auditing</span><span class="tp-skill">Database Design</span><span class="tp-skill">Data Integrity</span></div>
                         <div class="tp-member-socials">
-                            <a href="https://github.com/" target="_blank" class="tp-social">
-                                <i class="fab fa-github"></i> GitHub
-                            </a>
-                            <a href="https://www.linkedin.com/in/narendra-kumar-0924/" target="_blank" class="tp-social">
-                                <i class="fab fa-linkedin"></i> LinkedIn
-                            </a>
-                            <a href="https://instagram.com/" target="_blank" class="tp-social">
-                                <i class="fab fa-instagram"></i> Instagram
-                            </a>
+                            <a href="https://github.com/" target="_blank" class="tp-social"><i class="fab fa-github"></i> GitHub</a>
+                            <a href="https://www.linkedin.com/in/narendra-kumar-0924/" target="_blank" class="tp-social"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            <a href="https://instagram.com/" target="_blank" class="tp-social"><i class="fab fa-instagram"></i> Instagram</a>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-            <!-- ═══ Member 4 ═══ -->
             <div class="tp-member reversed" data-member="4">
                 <div class="tp-member-number">04</div>
-
                 <div class="tp-member-content">
-                    <div class="tp-member-photo-side">
-                        <div class="tp-photo-decor tp-decor-tl"></div>
-                        <div class="tp-photo-decor tp-decor-br"></div>
-                        <div class="tp-photo-wrap">
-                            <div class="tp-photo-glow"></div>
-                            <img
-                                src="images/Profile Photo.jpeg"
-                                alt="Dev Choudhary"
-                                class="tp-photo"
-                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                            />
-                            <div class="tp-photo-fallback" style="display:none;">DC</div>
-                        </div>
-                    </div>
-
+                    <div class="tp-member-photo-side"><div class="tp-photo-decor tp-decor-tl"></div><div class="tp-photo-decor tp-decor-br"></div><div class="tp-photo-wrap"><div class="tp-photo-glow"></div><img src="images/Profile Photo.jpeg" alt="Dev Choudhary" class="tp-photo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div class="tp-photo-fallback" style="display:none;">DC</div></div></div>
                     <div class="tp-member-info-side">
                         <div class="tp-member-role">Frontend Engineer</div>
                         <h3 class="tp-member-name">Dev Choudhary</h3>
                         <div class="tp-member-tagline">"Where pixels meet purpose"</div>
-                        <p class="tp-member-bio">
-                            Builds responsive user interfaces and assists in implementing and
-                            refining algorithm logic. Passionate about crafting delightful user
-                            experiences that just work.
-                        </p>
-
-                        <div class="tp-member-skills">
-                            <span class="tp-skill">UI/UX Design</span>
-                            <span class="tp-skill">Frontend Dev</span>
-                            <span class="tp-skill">Animation</span>
-                        </div>
-
+                        <p class="tp-member-bio">Builds responsive user interfaces and assists in implementing and refining algorithm logic.</p>
+                        <div class="tp-member-skills"><span class="tp-skill">UI/UX Design</span><span class="tp-skill">Frontend Dev</span><span class="tp-skill">Animation</span></div>
                         <div class="tp-member-socials">
-                            <a href="https://github.com/dev44choudhary-debug" target="_blank" class="tp-social">
-                                <i class="fab fa-github"></i> GitHub
-                            </a>
-                            <a href="https://linkedin.com/in/dev-choudhary-2006june" target="_blank" class="tp-social">
-                                <i class="fab fa-linkedin"></i> LinkedIn
-                            </a>
-                            <a href="https://instagram.com/devgadwal2006" target="_blank" class="tp-social">
-                                <i class="fab fa-instagram"></i> Instagram
-                            </a>
+                            <a href="https://github.com/dev44choudhary-debug" target="_blank" class="tp-social"><i class="fab fa-github"></i> GitHub</a>
+                            <a href="https://linkedin.com/in/dev-choudhary-2006june" target="_blank" class="tp-social"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            <a href="https://instagram.com/devgadwal2006" target="_blank" class="tp-social"><i class="fab fa-instagram"></i> Instagram</a>
                         </div>
                     </div>
                 </div>
             </div>
 
         </div>
-
-
-        <!-- Bottom CTA -->
         <div class="tp-cta">
             <h3>Ready to explore what we built?</h3>
-            <a href="index.html#tools" class="btn-primary">
-                <i class="fas fa-rocket"></i> Check Out Our Tools
-            </a>
+            <a href="index.html#tools" class="btn-primary"><i class="fas fa-rocket"></i> Check Out Our Tools</a>
         </div>
-
     </section>
 
 
-    <script src="team.js"></script>
+    <!-- ═══════════════════════════════════
+         JAVASCRIPT
+    ═══════════════════════════════════ -->
+    <script>
+    var currentTheme = localStorage.getItem('cryptokit-theme') || 'normal';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
+    /* Canvas */
+    var can = document.getElementById('cyber-canvas');
+    var ctx = can ? can.getContext('2d') : null;
+    function resize() { if(!can)return; can.width=window.innerWidth; can.height=window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var parts = [];
+    var CHARS = '0123456789ABCDEFアイウエオ{}[]<>';
+    var COUNT = 60;
+
+    function mkP() {
+        var isH = currentTheme === 'hacker';
+        return {
+            x: Math.random()*can.width, y: Math.random()*can.height,
+            vx: (Math.random()-0.5)*0.3, vy: Math.random()*0.4+0.1,
+            sz: Math.random()*12+8,
+            op: Math.random()*0.15+0.03,
+            ch: CHARS[Math.floor(Math.random()*CHARS.length)],
+            cl: isH?(Math.random()>0.85?'rgba(0,255,255,0.4)':'rgba(0,255,65,0.3)')
+                   :(Math.random()>0.5?'rgba(108,99,255,0.2)':'rgba(0,180,216,0.15)'),
+            r: Math.random()*1.5+0.5
+        };
+    }
+    for(var i=0;i<COUNT;i++) parts.push(mkP());
+
+    var mx=-999, my=-999;
+    window.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;});
+
+    function draw() {
+        if(!ctx)return;
+        ctx.clearRect(0,0,can.width,can.height);
+        var isH=currentTheme==='hacker';
+
+        for(var i=0;i<parts.length;i++){
+            var p=parts[i];
+            p.x+=p.vx; p.y+=p.vy;
+            if(p.y>can.height+20){parts[i]=mkP();parts[i].y=-20;continue;}
+            if(p.x<-20||p.x>can.width+20){parts[i]=mkP();continue;}
+            if(Math.random()<0.008) p.ch=CHARS[Math.floor(Math.random()*CHARS.length)];
+
+            ctx.globalAlpha=p.op;
+            ctx.fillStyle=p.cl;
+            ctx.font=p.sz+'px JetBrains Mono';
+            ctx.fillText(p.ch,p.x,p.y);
+        }
+
+        /* Connections */
+        var md=isH?130:100;
+        for(var i=0;i<parts.length;i++){
+            for(var j=i+1;j<parts.length;j++){
+                var dx=parts[i].x-parts[j].x,dy=parts[i].y-parts[j].y;
+                var d=Math.sqrt(dx*dx+dy*dy);
+                if(d<md){
+                    ctx.globalAlpha=(1-d/md)*(isH?0.06:0.03);
+                    ctx.beginPath();ctx.moveTo(parts[i].x,parts[i].y);ctx.lineTo(parts[j].x,parts[j].y);
+                    ctx.strokeStyle=isH?'#00FF41':'#6C63FF';ctx.lineWidth=0.4;ctx.stroke();
+                }
+            }
+            /* Mouse */
+            var dmx=mx-parts[i].x,dmy=my-parts[i].y,dm=Math.sqrt(dmx*dmx+dmy*dmy);
+            if(dm<180){
+                ctx.globalAlpha=(1-dm/180)*(isH?0.15:0.06);
+                ctx.beginPath();ctx.moveTo(parts[i].x,parts[i].y);ctx.lineTo(mx,my);
+                ctx.strokeStyle=isH?'#00FFFF':'#00B4D8';ctx.lineWidth=0.6;ctx.stroke();
+                parts[i].vx+=dmx*0.00002;parts[i].vy+=dmy*0.00002;
+            }
+            var spd=Math.sqrt(parts[i].vx*parts[i].vx+parts[i].vy*parts[i].vy);
+            if(spd>0.8){parts[i].vx*=0.98;parts[i].vy*=0.98;}
+        }
+        ctx.globalAlpha=1;
+        requestAnimationFrame(draw);
+    }
+    draw();
+
+    /* Parallax */
+    window.addEventListener('mousemove',function(e){
+        var o1=document.querySelector('.tp-orb-1'),o2=document.querySelector('.tp-orb-2');
+        if(o1&&o2){
+            var nx=(e.clientX/window.innerWidth-0.5),ny=(e.clientY/window.innerHeight-0.5);
+            o1.style.transform='translate('+(nx*25)+'px,'+(ny*25)+'px)';
+            o2.style.transform='translate('+(nx*-25)+'px,'+(ny*-25)+'px)';
+        }
+    });
+
+    /* Scroll reveal */
+    var obs=new IntersectionObserver(function(en){
+        en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+    },{threshold:0.15,rootMargin:'-50px'});
+    document.querySelectorAll('.tp-member').forEach(function(m){obs.observe(m);});
+
+    /* Scroll hint */
+    var sh=document.querySelector('.tp-scroll-hint');
+    if(sh) sh.addEventListener('click',function(){
+        var s=document.querySelector('.tp-members-section');
+        if(s) s.scrollIntoView({behavior:'smooth'});
+    });
+    </script>
+
 </body>
 </html>
