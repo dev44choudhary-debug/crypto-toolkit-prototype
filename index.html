@@ -13,6 +13,152 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* ── Mobile Theme Submenu ── */
+        .mobile-theme-submenu {
+            display: none;
+            flex-direction: column;
+            background: rgba(0,0,0,0.08);
+            border-left: 3px solid var(--accent, #7c3aed);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-theme-submenu.open {
+            display: flex;
+        }
+
+        .mobile-theme-submenu a {
+            padding: 12px 24px 12px 32px !important;
+            font-size: 14px !important;
+            border-bottom: none !important;
+            opacity: 0.9;
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-theme-submenu a:last-child {
+            border-bottom: none !important;
+        }
+
+        .mobile-theme-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .mobile-theme-toggle-btn .theme-arrow {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .mobile-theme-toggle-btn.active .theme-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Mobile Developer Mode Popup */
+        .mobile-dev-popup {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            padding: 20px;
+        }
+
+        .mobile-dev-popup.show {
+            display: flex;
+        }
+
+        .mobile-dev-popup-box {
+            background: var(--card-bg, #1a1a2e);
+            border: 2px solid var(--accent, #7c3aed);
+            border-radius: 20px;
+            padding: 36px 28px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(124,58,237,0.4);
+            animation: popupIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes popupIn {
+            from { opacity: 0; transform: scale(0.7) translateY(30px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .mobile-dev-popup-icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+            display: block;
+            filter: drop-shadow(0 0 16px rgba(124,58,237,0.6));
+        }
+
+        .mobile-dev-popup-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary, #fff);
+            margin-bottom: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .mobile-dev-popup-msg {
+            font-size: 14px;
+            color: var(--text-secondary, #a0aec0);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .mobile-dev-popup-msg strong {
+            color: var(--accent, #7c3aed);
+        }
+
+        .mobile-dev-popup-close {
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .mobile-dev-popup-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(124,58,237,0.5);
+        }
+
+        /* Active theme indicator in submenu */
+        .mobile-theme-submenu a.active-theme {
+            color: var(--accent, #7c3aed) !important;
+            font-weight: 600;
+        }
+
+        .mobile-theme-submenu a .theme-active-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent, #7c3aed);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--accent, #7c3aed);
+        }
+    </style>
 </head>
 <body>
 
@@ -36,240 +182,191 @@
 
 
     <!-- ═══════════════════════════════════
-     NAVBAR
-═══════════════════════════════════ -->
-<nav class="navbar" id="navbar">
+         NAVBAR
+    ═══════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
 
-    <a href="#home" class="nav-logo">
-        <div class="nav-logo-icon">
-            <svg viewBox="0 0 40 40" width="28" height="28" fill="none">
-                <rect x="2" y="2" width="36" height="36" rx="8"
-                      stroke="currentColor" stroke-width="2.5"/>
-                <path d="M20 8L20 14"
-                      stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round"/>
-                <rect x="12" y="14" width="16" height="18" rx="3"
-                      stroke="currentColor" stroke-width="2.5"/>
-                <circle cx="20" cy="23" r="3"
-                        stroke="currentColor" stroke-width="2"/>
-                <path d="M20 26L20 28"
-                      stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round"/>
-            </svg>
-        </div>
-
-        <span class="nav-logo-text">CryptoKit</span>
-    </a>
-
-
-    <!-- NAVIGATION LINKS -->
-    <ul class="nav-links">
-
-        <li>
-            <a href="#tools">Tools</a>
-        </li>
-
-        <li>
-            <a href="#how">How it Works</a>
-        </li>
-
-        <li>
-            <a href="team.html">Team</a>
-        </li>
-
-        <!-- Developer Terminal -->
-        <li>
-            <a href="developer.html">
-                <i class="fas fa-terminal"></i>
-                Developer
-            </a>
-        </li>
-
-        <li>
-            <a href="#about">About</a>
-        </li>
-
-        <li>
-            <a href="#feedback">Feedback</a>
-        </li>
-
-        <li>
-            <a href="#"
-               onclick="event.preventDefault();toggleChat();">
-                Assistant
-            </a>
-        </li>
-
-    </ul>
+        <a href="#home" class="nav-logo">
+            <div class="nav-logo-icon">
+                <svg viewBox="0 0 40 40" width="28" height="28" fill="none">
+                    <rect x="2" y="2" width="36" height="36" rx="8"
+                          stroke="currentColor" stroke-width="2.5"/>
+                    <path d="M20 8L20 14"
+                          stroke="currentColor" stroke-width="2.5"
+                          stroke-linecap="round"/>
+                    <rect x="12" y="14" width="16" height="18" rx="3"
+                          stroke="currentColor" stroke-width="2.5"/>
+                    <circle cx="20" cy="23" r="3"
+                            stroke="currentColor" stroke-width="2"/>
+                    <path d="M20 26L20 28"
+                          stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round"/>
+                </svg>
+            </div>
+            <span class="nav-logo-text">CryptoKit</span>
+        </a>
 
 
-    <!-- RIGHT NAV ACTIONS -->
-    <div class="nav-actions">
+        <!-- NAVIGATION LINKS -->
+        <ul class="nav-links">
+            <li><a href="#tools">Tools</a></li>
+            <li><a href="#how">How it Works</a></li>
+            <li><a href="team.html">Team</a></li>
+            <li>
+                <a href="developer.html">
+                    <i class="fas fa-terminal"></i>
+                    Developer
+                </a>
+            </li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#feedback">Feedback</a></li>
+            <li>
+                <a href="#"
+                   onclick="event.preventDefault();toggleChat();">
+                    Assistant
+                </a>
+            </li>
+        </ul>
 
-        <!-- MODE DROPDOWN -->
-        <div class="mode-selector" id="modeSelector">
 
-            <button class="mode-btn" onclick="toggleModeDropdown()">
-                <span id="modeIcon">☀️</span>
-                <span class="mode-label" id="modeLabel">Normal</span>
+        <!-- RIGHT NAV ACTIONS -->
+        <div class="nav-actions">
 
-                <i class="fas fa-chevron-down mode-arrow"
-                   id="modeArrow"></i>
-            </button>
+            <!-- MODE DROPDOWN -->
+            <div class="mode-selector" id="modeSelector">
 
+                <button class="mode-btn" onclick="toggleModeDropdown()">
+                    <span id="modeIcon">☀️</span>
+                    <span class="mode-label" id="modeLabel">Normal</span>
+                    <i class="fas fa-chevron-down mode-arrow" id="modeArrow"></i>
+                </button>
 
-            <div class="mode-dropdown" id="modeDropdown">
+                <div class="mode-dropdown" id="modeDropdown">
 
-                <!-- NORMAL MODE -->
-                <div class="mode-option"
-                     onclick="selectMode('normal')">
-
-                    <span class="mode-option-icon">☀️</span>
-
-                    <div>
-                        <div class="mode-option-title">
-                            Normal Mode
+                    <!-- NORMAL MODE -->
+                    <div class="mode-option" onclick="selectMode('normal')">
+                        <span class="mode-option-icon">☀️</span>
+                        <div>
+                            <div class="mode-option-title">Normal Mode</div>
+                            <div class="mode-option-desc">Clean &amp; professional look</div>
                         </div>
-
-                        <div class="mode-option-desc">
-                            Clean &amp; professional look
-                        </div>
+                        <i class="fas fa-check mode-check" id="checkNormal"></i>
                     </div>
 
-                    <i class="fas fa-check mode-check"
-                       id="checkNormal"></i>
-
-                </div>
-
-
-                <!-- HACKER MODE -->
-                <div class="mode-option"
-                     onclick="selectMode('hacker')">
-
-                    <span class="mode-option-icon">💀</span>
-
-                    <div>
-                        <div class="mode-option-title">
-                            Hacker Mode
+                    <!-- HACKER MODE -->
+                    <div class="mode-option" onclick="selectMode('hacker')">
+                        <span class="mode-option-icon">💀</span>
+                        <div>
+                            <div class="mode-option-title">Hacker Mode</div>
+                            <div class="mode-option-desc">Matrix &amp; terminal vibes</div>
                         </div>
-
-                        <div class="mode-option-desc">
-                            Matrix &amp; terminal vibes
-                        </div>
+                        <i class="fas fa-check mode-check" id="checkHacker" style="display:none;"></i>
                     </div>
 
-                    <i class="fas fa-check mode-check"
-                       id="checkHacker"
-                       style="display:none;"></i>
-
-                </div>
-
-
-                <!-- DEVELOPER MODE -->
-                <div class="mode-option"
-                     onclick="window.location.href='developer.html'">
-
-                    <span class="mode-option-icon">💻</span>
-
-                    <div>
-                        <div class="mode-option-title">
-                            Developer Mode
+                    <!-- DEVELOPER MODE -->
+                    <div class="mode-option" onclick="window.location.href='developer.html'">
+                        <span class="mode-option-icon">💻</span>
+                        <div>
+                            <div class="mode-option-title">Developer Mode</div>
+                            <div class="mode-option-desc">Interactive crypto terminal</div>
                         </div>
-
-                        <div class="mode-option-desc">
-                            Interactive crypto terminal
-                        </div>
+                        <i class="fas fa-terminal mode-check" style="display:none;"></i>
                     </div>
 
-                    <i class="fas fa-terminal mode-check"
-                       style="display:none;"></i>
-
                 </div>
-
             </div>
 
+            <!-- LOGIN -->
+            <button class="btn-nav-login">Login</button>
+
+            <!-- GET STARTED -->
+            <button class="btn-nav-cta">🚀 Get Started</button>
+
         </div>
 
+        <!-- HAMBURGER -->
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
 
-        <!-- LOGIN -->
-        <button class="btn-nav-login">
-            Login
-        </button>
+    </nav>
 
 
-        <!-- GET STARTED -->
-        <button class="btn-nav-cta">
-            🚀 Get Started
-        </button>
+    <!-- ═══════════════════════════════════
+         MOBILE MENU
+    ═══════════════════════════════════ -->
+    <div class="mobile-menu" id="mobileMenu">
+
+        <a href="#tools" onclick="toggleMenu()">🔧 Tools</a>
+        <a href="#how" onclick="toggleMenu()">📖 How it Works</a>
+        <a href="team.html" onclick="toggleMenu()">👥 Team</a>
+        <a href="#about" onclick="toggleMenu()">ℹ️ About</a>
+        <a href="#feedback" onclick="toggleMenu()">💬 Feedback</a>
+        <a href="#"
+           onclick="event.preventDefault();toggleMenu();toggleChat();">
+            🤖 Assistant
+        </a>
+
+        <!-- ── THEME SWITCHER with Submenu ── -->
+        <a href="#"
+           onclick="event.preventDefault();toggleMobileThemeMenu(this);"
+           class="mobile-theme-toggle-btn"
+           id="mobileThemeToggleLink">
+            🎨 Switch Theme
+            <i class="fas fa-chevron-down theme-arrow" id="mobileThemeArrow"></i>
+        </a>
+
+        <div class="mobile-theme-submenu" id="mobileThemeSubmenu">
+
+            <!-- Normal Mode -->
+            <a href="#"
+               id="mobileNormalOption"
+               onclick="event.preventDefault();mobileSwitchTheme('normal');">
+                ☀️ Normal Mode
+                <span class="theme-active-dot" id="normalDot" style="display:none;"></span>
+            </a>
+
+            <!-- Hacker Mode -->
+            <a href="#"
+               id="mobileHackerOption"
+               onclick="event.preventDefault();mobileSwitchTheme('hacker');">
+                💀 Hacker Mode
+                <span class="theme-active-dot" id="hackerDot" style="display:none;"></span>
+            </a>
+
+            <!-- Developer Mode -->
+            <a href="#"
+               id="mobileDevOption"
+               onclick="event.preventDefault();showMobileDevPopup();">
+                💻 Developer Mode
+            </a>
+
+        </div>
 
     </div>
 
 
-    <!-- HAMBURGER -->
-    <div class="hamburger" onclick="toggleMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
+    <!-- ═══════════════════════════════════
+         MOBILE DEVELOPER MODE POPUP
+    ═══════════════════════════════════ -->
+    <div class="mobile-dev-popup" id="mobileDevPopup" onclick="hideMobileDevPopup(event)">
+        <div class="mobile-dev-popup-box">
+            <span class="mobile-dev-popup-icon">🖥️</span>
+            <div class="mobile-dev-popup-title">Desktop Only Feature</div>
+            <p class="mobile-dev-popup-msg">
+                <strong>Developer Mode</strong> is optimized for larger screens
+                and requires a desktop or laptop for the best experience.<br><br>
+                Please visit CryptoKit on a <strong>desktop or laptop</strong>
+                to access the interactive crypto terminal.
+            </p>
+            <button class="mobile-dev-popup-close" onclick="hideMobileDevPopup()">
+                Got it! 👍
+            </button>
+        </div>
     </div>
 
-</nav>
-
-
-<!-- ═══════════════════════════════════
-     MOBILE MENU
-═══════════════════════════════════ -->
-
-<div class="mobile-menu" id="mobileMenu">
-
-    <a href="#tools"
-       onclick="toggleMenu()">
-        🔧 Tools
-    </a>
-
-    <a href="#how"
-       onclick="toggleMenu()">
-        📖 How it Works
-    </a>
-
-    <a href="team.html"
-       onclick="toggleMenu()">
-        👥 Team
-    </a>
-
-    <!-- Developer Mode -->
-    <a href="developer.html">
-        💻 Developer Mode
-    </a>
-
-    <a href="#about"
-       onclick="toggleMenu()">
-        ℹ️ About
-    </a>
-
-    <a href="#feedback"
-       onclick="toggleMenu()">
-        💬 Feedback
-    </a>
-
-    <a href="#"
-       onclick="
-           event.preventDefault();
-           toggleMenu();
-           toggleChat();
-       ">
-        🤖 Assistant
-    </a>
-
-    <a href="#"
-       onclick="
-           event.preventDefault();
-           toggleMenu();
-           mobileThemeSwitch();
-       ">
-        🔄 Switch Theme
-    </a>
-
-</div>
 
     <!-- ═══════════════════════════════════
          HERO SECTION
@@ -642,7 +739,6 @@
     </section>
 
 
-
     <!-- ═══════════════════════════════════
          FEEDBACK & REVIEWS
     ═══════════════════════════════════ -->
@@ -912,6 +1008,139 @@
     <!-- Custom JavaScript -->
     <script src="script.js"></script>
 
+    <!-- ═══════════════════════════════════
+         MOBILE THEME & DEV POPUP SCRIPTS
+    ═══════════════════════════════════ -->
+    <script>
+        /* ──────────────────────────────────────
+           Toggle the mobile theme submenu
+        ────────────────────────────────────── */
+        function toggleMobileThemeMenu(btn) {
+            const submenu = document.getElementById('mobileThemeSubmenu');
+            const arrow   = document.getElementById('mobileThemeArrow');
+            const isOpen  = submenu.classList.contains('open');
+
+            if (isOpen) {
+                submenu.classList.remove('open');
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                submenu.classList.add('open');
+                arrow.style.transform = 'rotate(180deg)';
+                updateMobileThemeDots(); // refresh active dots
+            }
+        }
+
+        /* ──────────────────────────────────────
+           Switch theme from mobile submenu
+        ────────────────────────────────────── */
+        function mobileSwitchTheme(mode) {
+            // Call existing selectMode from script.js
+            if (typeof selectMode === 'function') {
+                selectMode(mode);
+            } else {
+                // Fallback: manually set theme attribute
+                document.documentElement.setAttribute('data-theme', mode);
+            }
+
+            // Update active dots
+            updateMobileThemeDots();
+
+            // Close submenu + menu after a short delay
+            setTimeout(() => {
+                document.getElementById('mobileThemeSubmenu').classList.remove('open');
+                document.getElementById('mobileThemeArrow').style.transform = 'rotate(0deg)';
+                if (typeof toggleMenu === 'function') toggleMenu();
+            }, 400);
+        }
+
+        /* ──────────────────────────────────────
+           Show active theme dot indicators
+        ────────────────────────────────────── */
+        function updateMobileThemeDots() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'normal';
+
+            const normalDot  = document.getElementById('normalDot');
+            const hackerDot  = document.getElementById('hackerDot');
+            const normalLink = document.getElementById('mobileNormalOption');
+            const hackerLink = document.getElementById('mobileHackerOption');
+
+            // Reset
+            if (normalDot) normalDot.style.display = 'none';
+            if (hackerDot) hackerDot.style.display = 'none';
+            if (normalLink) normalLink.classList.remove('active-theme');
+            if (hackerLink) hackerLink.classList.remove('active-theme');
+
+            // Set active
+            if (currentTheme === 'hacker') {
+                if (hackerDot)  hackerDot.style.display  = 'inline-block';
+                if (hackerLink) hackerLink.classList.add('active-theme');
+            } else {
+                if (normalDot)  normalDot.style.display  = 'inline-block';
+                if (normalLink) normalLink.classList.add('active-theme');
+            }
+        }
+
+        /* ──────────────────────────────────────
+           Show Developer Mode desktop-only popup
+        ────────────────────────────────────── */
+        function showMobileDevPopup() {
+            // Close the submenu & mobile menu first
+            document.getElementById('mobileThemeSubmenu').classList.remove('open');
+            document.getElementById('mobileThemeArrow').style.transform = 'rotate(0deg)';
+            if (typeof toggleMenu === 'function') toggleMenu();
+
+            // Show popup
+            const popup = document.getElementById('mobileDevPopup');
+            popup.classList.add('show');
+            document.body.style.overflow = 'hidden'; // prevent scroll
+        }
+
+        /* ──────────────────────────────────────
+           Hide Developer Mode popup
+        ────────────────────────────────────── */
+        function hideMobileDevPopup(event) {
+            // If clicking backdrop (not the box itself), close
+            if (event && event.target !== document.getElementById('mobileDevPopup')) return;
+
+            const popup = document.getElementById('mobileDevPopup');
+            popup.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // Also allow the button click to close
+        document.addEventListener('DOMContentLoaded', function () {
+            const closeBtn = document.querySelector('.mobile-dev-popup-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    document.getElementById('mobileDevPopup').classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            // Initialize dots on load
+            updateMobileThemeDots();
+        });
+
+        /* ──────────────────────────────────────
+           Close popup on Escape key
+        ────────────────────────────────────── */
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                const popup = document.getElementById('mobileDevPopup');
+                if (popup && popup.classList.contains('show')) {
+                    popup.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        /* ──────────────────────────────────────
+           Legacy mobileThemeSwitch — keep for safety
+        ────────────────────────────────────── */
+        function mobileThemeSwitch() {
+            toggleMobileThemeMenu();
+        }
+    </script>
+
 </body>
 </html>
-
