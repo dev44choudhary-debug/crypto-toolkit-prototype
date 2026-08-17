@@ -156,7 +156,7 @@ var fallbacks = [
 function findMatch(q) {
     var query = q.toLowerCase().replace(/[?!.,]/g, '').trim();
     var words = query.split(/\s+/);
-    var best = null;
+    var best  = null;
     var bestScore = 0;
 
     for (var i = 0; i < KB.length; i++) {
@@ -189,12 +189,12 @@ function findMatch(q) {
    CHAT STATE & FUNCTIONS
 ═══════════════════════════════════════════════════════ */
 
-var chatOpen = false;
-var msgCount = 0;
+var chatOpen     = false;
+var msgCount     = 0;
 var currentTheme = 'normal';
 
 
-// Toggle Chat Window
+/* ── Toggle Chat Window ── */
 function toggleChat() {
     chatOpen = !chatOpen;
     var w = document.getElementById('aiChatWindow');
@@ -207,9 +207,9 @@ function toggleChat() {
 }
 
 
-// Show Welcome Message
+/* ── Welcome Message ── */
 function showWelcome() {
-    var h = (currentTheme === 'hacker');
+    var h   = (currentTheme === 'hacker');
     var msg = h
         ? '> GHOST TERMINAL ONLINE<br>> KB LOADED [' + KB.length + ' entries]<br>> SECURE CHANNEL ACTIVE<br><br>I am <strong>GHOST</strong>. Ask about encryption, hashing, or tools.<br><em>Type /help for commands.</em>'
         : '👋 Hi! I\'m <strong>CryptoBot</strong>!<br><br>🔧 Find the <strong>right tool</strong><br>📚 <strong>Explain</strong> crypto concepts<br>🛡️ <strong>Security advice</strong><br><br>What can I help with?';
@@ -219,29 +219,27 @@ function showWelcome() {
 }
 
 
-// Add Bot Message
+/* ── Add Bot Message ── */
 function addBot(html, sug, tid, tn) {
     sug = sug || [];
     tid = tid || null;
-    tn = tn || null;
+    tn  = tn  || null;
 
     var msgs = document.getElementById('aiMessages');
-    var h = (currentTheme === 'hacker');
+    var h    = (currentTheme === 'hacker');
 
     var wrapper = document.createElement('div');
     wrapper.className = 'ai-msg';
 
-    // Avatar
     var avatar = document.createElement('div');
-    avatar.className = 'ai-msg-avatar bot';
+    avatar.className   = 'ai-msg-avatar bot';
     avatar.textContent = h ? '👾' : '🤖';
 
-    // Content
     var content = document.createElement('div');
-    content.className = 'ai-msg-content bot';
+    content.className  = 'ai-msg-content bot';
 
     var textDiv = document.createElement('div');
-    textDiv.innerHTML = html;
+    textDiv.innerHTML  = html;
     content.appendChild(textDiv);
 
     // Tool Navigation Button
@@ -255,7 +253,7 @@ function addBot(html, sug, tid, tn) {
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     el.style.transition = 'box-shadow 0.3s';
-                    el.style.boxShadow = isHacker
+                    el.style.boxShadow  = isHacker
                         ? '0 0 40px rgba(0,255,65,0.5)'
                         : '0 0 40px rgba(108,99,255,0.4)';
                     setTimeout(function() { el.style.boxShadow = ''; }, 2500);
@@ -271,7 +269,7 @@ function addBot(html, sug, tid, tn) {
         sugDiv.className = 'ai-quick-suggestions';
         for (var i = 0; i < sug.length; i++) {
             var sugBtn = document.createElement('button');
-            sugBtn.className = 'ai-suggestion-btn';
+            sugBtn.className   = 'ai-suggestion-btn';
             sugBtn.textContent = h ? '> ' + sug[i] : sug[i];
             sugBtn.onclick = (function(s) {
                 return function() { sendQuery(s); };
@@ -281,10 +279,11 @@ function addBot(html, sug, tid, tn) {
         content.appendChild(sugDiv);
     }
 
-    // Feedback Buttons
+    // Feedback Row
     var fb = document.createElement('div');
     fb.className = 'ai-feedback';
-    fb.innerHTML = '<span>Helpful?</span>' +
+    fb.innerHTML =
+        '<span>Helpful?</span>' +
         '<button class="ai-fb-btn" onclick="this.parentElement.innerHTML=\'<span style=color:var(--success)>✅ Thanks!</span>\'">👍</button>' +
         '<button class="ai-fb-btn" onclick="this.parentElement.innerHTML=\'<span style=color:var(--accent)>😔 Try rephrasing.</span>\'">👎</button>';
     content.appendChild(fb);
@@ -296,20 +295,20 @@ function addBot(html, sug, tid, tn) {
 }
 
 
-// Add User Message
+/* ── Add User Message ── */
 function addUser(text) {
     var msgs = document.getElementById('aiMessages');
-    var h = (currentTheme === 'hacker');
+    var h    = (currentTheme === 'hacker');
 
     var wrapper = document.createElement('div');
     wrapper.className = 'ai-msg user';
 
     var avatar = document.createElement('div');
-    avatar.className = 'ai-msg-avatar user';
+    avatar.className   = 'ai-msg-avatar user';
     avatar.textContent = h ? '💀' : '👤';
 
     var content = document.createElement('div');
-    content.className = 'ai-msg-content user';
+    content.className  = 'ai-msg-content user';
     content.textContent = text;
 
     wrapper.appendChild(content);
@@ -319,22 +318,25 @@ function addUser(text) {
 }
 
 
-// Typing Indicator
+/* ── Typing Indicator ── */
 function showTyping() {
     var msgs = document.getElementById('aiMessages');
-    var h = (currentTheme === 'hacker');
+    var h    = (currentTheme === 'hacker');
 
-    var d = document.createElement('div');
+    var d  = document.createElement('div');
     d.className = 'ai-typing';
-    d.id = 'typingInd';
+    d.id        = 'typingInd';
 
     var av = document.createElement('div');
-    av.className = 'ai-msg-avatar bot';
+    av.className   = 'ai-msg-avatar bot';
     av.textContent = h ? '👾' : '🤖';
 
     var dots = document.createElement('div');
     dots.className = 'ai-typing-dots';
-    dots.innerHTML = '<div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div>';
+    dots.innerHTML =
+        '<div class="ai-typing-dot"></div>' +
+        '<div class="ai-typing-dot"></div>' +
+        '<div class="ai-typing-dot"></div>';
 
     d.appendChild(av);
     d.appendChild(dots);
@@ -348,22 +350,21 @@ function hideTyping() {
 }
 
 
-// Send Message
+/* ── Send Message ── */
 function sendMessage() {
     var input = document.getElementById('aiInput');
-    var q = input.value.trim();
+    var q     = input.value.trim();
     if (!q) return;
-    input.value = '';
+    input.value        = '';
     input.style.height = 'auto';
     sendQuery(q);
 }
 
 
-// Process Query
+/* ── Process Query ── */
 function sendQuery(q) {
     var h = (currentTheme === 'hacker');
 
-    // Handle hacker slash commands
     if (h && q.charAt(0) === '/') {
         handleCmd(q);
         return;
@@ -388,7 +389,7 @@ function sendQuery(q) {
 }
 
 
-// Hacker Slash Commands
+/* ── Hacker Slash Commands ── */
 function handleCmd(cmd) {
     addUser(cmd);
     showTyping();
@@ -397,36 +398,26 @@ function handleCmd(cmd) {
         hideTyping();
         var c = cmd.toLowerCase().trim();
 
-        if (c === '/help') {
-            addBot('> COMMANDS:<br>/tools /hash /rsa /encrypt /file /pass /sign /clear /about<br><br>Or just type naturally.', ['/tools', '/hash', '/rsa']);
-        } else if (c === '/tools') {
-            askCategory('tools');
-        } else if (c === '/hash') {
-            addBot('> LAUNCHING: Hash Generator...', [], 'tool-hash', 'Hash Generator');
-        } else if (c === '/rsa') {
-            addBot('> LAUNCHING: RSA Generator...', [], 'tool-rsa', 'RSA Key Generator');
-        } else if (c === '/encrypt') {
-            addBot('> LAUNCHING: Encrypt Tool...', [], 'tool-encrypt', 'Text Encrypt/Decrypt');
-        } else if (c === '/file') {
-            addBot('> LAUNCHING: File Integrity...', [], 'tool-integrity', 'File Integrity Checker');
-        } else if (c === '/pass') {
-            addBot('> LAUNCHING: Password Tools...', [], 'tool-password', 'Password Tools');
-        } else if (c === '/sign') {
-            addBot('> LAUNCHING: Digital Signature...', [], 'tool-signature', 'Digital Signature');
-        } else if (c === '/clear') {
+        if      (c === '/help')    { addBot('> COMMANDS:<br>/tools /hash /rsa /encrypt /file /pass /sign /clear /about<br><br>Or just type naturally.', ['/tools', '/hash', '/rsa']); }
+        else if (c === '/tools')   { askCategory('tools'); }
+        else if (c === '/hash')    { addBot('> LAUNCHING: Hash Generator...',       [], 'tool-hash',      'Hash Generator'); }
+        else if (c === '/rsa')     { addBot('> LAUNCHING: RSA Generator...',        [], 'tool-rsa',       'RSA Key Generator'); }
+        else if (c === '/encrypt') { addBot('> LAUNCHING: Encrypt Tool...',         [], 'tool-encrypt',   'Text Encrypt/Decrypt'); }
+        else if (c === '/file')    { addBot('> LAUNCHING: File Integrity...',       [], 'tool-integrity', 'File Integrity Checker'); }
+        else if (c === '/pass')    { addBot('> LAUNCHING: Password Tools...',       [], 'tool-password',  'Password Tools'); }
+        else if (c === '/sign')    { addBot('> LAUNCHING: Digital Signature...',    [], 'tool-signature', 'Digital Signature'); }
+        else if (c === '/clear')   {
             document.getElementById('aiMessages').innerHTML = '';
             msgCount = 0;
             showWelcome();
-        } else if (c === '/about') {
-            sendQuery('about cryptokit');
-        } else {
-            addBot('> UNKNOWN: ' + cmd + '<br>> TYPE /help', ['/help']);
         }
+        else if (c === '/about')   { sendQuery('about cryptokit'); }
+        else                       { addBot('> UNKNOWN: ' + cmd + '<br>> TYPE /help', ['/help']); }
     }, 400);
 }
 
 
-// Browse Category
+/* ── Browse Category ── */
 function askCategory(cat) {
     var r = catResp[cat];
     if (!r) return;
@@ -439,7 +430,7 @@ function askCategory(cat) {
 }
 
 
-// Clear Chat
+/* ── Clear Chat ── */
 function clearChat() {
     document.getElementById('aiMessages').innerHTML = '';
     msgCount = 0;
@@ -447,33 +438,33 @@ function clearChat() {
 }
 
 
-// Update AI Theme
+/* ── Update AI Theme ── */
 function updateAiTheme(isH) {
-    var fabIcon = document.getElementById('fabIcon');
+    var fabIcon  = document.getElementById('fabIcon');
     var aiAvatar = document.getElementById('aiAvatar');
-    var aiName = document.getElementById('aiName');
+    var aiName   = document.getElementById('aiName');
     var aiStatus = document.getElementById('aiStatusText');
-    var aiInput = document.querySelector('.ai-input');
+    var aiInput  = document.querySelector('.ai-input');
 
-    if (fabIcon) fabIcon.textContent = isH ? '👾' : '🤖';
+    if (fabIcon)  fabIcon.textContent  = isH ? '👾' : '🤖';
     if (aiAvatar) aiAvatar.textContent = isH ? '👾' : '🤖';
-    if (aiName) aiName.textContent = isH ? 'GHOST' : 'CryptoBot';
+    if (aiName)   aiName.textContent   = isH ? 'GHOST' : 'CryptoBot';
     if (aiStatus) aiStatus.textContent = isH ? 'ONLINE · SECURE' : 'Online · Ready';
-    if (aiInput) aiInput.placeholder = isH
+    if (aiInput)  aiInput.placeholder  = isH
         ? '> TYPE QUERY OR /help...'
         : 'Ask me anything about cryptography...';
 }
 
 
 /* ═══════════════════════════════════════════════════════
-   PARTICLE CANVAS - Normal Mode
+   PARTICLE CANVAS — Normal Mode
 ═══════════════════════════════════════════════════════ */
 
 var pCanvas = document.getElementById('particle-canvas');
-var pCtx = pCanvas.getContext('2d');
+var pCtx    = pCanvas.getContext('2d');
 
 function resizePC() {
-    pCanvas.width = window.innerWidth;
+    pCanvas.width  = window.innerWidth;
     pCanvas.height = window.innerHeight;
 }
 resizePC();
@@ -483,19 +474,17 @@ var HEX_CHARS = '0123456789ABCDEF';
 
 function createParticle() {
     return {
-        x: Math.random() * pCanvas.width,
-        y: Math.random() * pCanvas.height,
-        size: Math.random() * 10 + 8,
-        speed: Math.random() * 0.4 + 0.2,
+        x:       Math.random() * pCanvas.width,
+        y:       Math.random() * pCanvas.height,
+        size:    Math.random() * 10 + 8,
+        speed:   Math.random() * 0.4 + 0.2,
         opacity: Math.random() * 0.3 + 0.1,
-        char: HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)],
-        color: Math.random() > 0.5 ? '#6C63FF' : '#00B4D8'
+        char:    HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)],
+        color:   Math.random() > 0.5 ? '#6C63FF' : '#00B4D8'
     };
 }
 
-for (var i = 0; i < 60; i++) {
-    particles.push(createParticle());
-}
+for (var i = 0; i < 60; i++) { particles.push(createParticle()); }
 
 var pAnimId;
 
@@ -508,7 +497,7 @@ function animateParticles() {
         p.y += p.speed;
 
         if (p.y > pCanvas.height) {
-            particles[i] = createParticle();
+            particles[i]   = createParticle();
             particles[i].y = 0;
         }
 
@@ -517,8 +506,8 @@ function animateParticles() {
         }
 
         pCtx.globalAlpha = p.opacity;
-        pCtx.fillStyle = p.color;
-        pCtx.font = p.size + 'px JetBrains Mono';
+        pCtx.fillStyle   = p.color;
+        pCtx.font        = p.size + 'px JetBrains Mono';
         pCtx.fillText(p.char, p.x, p.y);
     }
 
@@ -529,26 +518,28 @@ animateParticles();
 
 
 /* ═══════════════════════════════════════════════════════
-   MATRIX RAIN - Hacker Mode
+   MATRIX RAIN — Hacker Mode
 ═══════════════════════════════════════════════════════ */
 
 var mCanvas = document.getElementById('matrix-canvas');
-var mCtx = mCanvas.getContext('2d');
+var mCtx    = mCanvas.getContext('2d');
 
 function resizeMC() {
-    mCanvas.width = window.innerWidth;
+    mCanvas.width  = window.innerWidth;
     mCanvas.height = window.innerHeight;
 }
 resizeMC();
 
-var matrixChars = 'アイウエオカキクケコサシスセソ0123456789ABCDEF{}[]<>|/*&^%$#@!';
-var fontSize = 14;
-var columns = Math.floor(mCanvas.width / fontSize);
-var drops = [];
+var matrixChars  = 'アイウエオカキクケコサシスセソ0123456789ABCDEF{}[]<>|/*&^%$#@!';
+var fontSize     = 14;
+var columns      = Math.floor(mCanvas.width / fontSize);
+var drops        = [];
 for (var i = 0; i < columns; i++) drops[i] = 1;
 
-// Multiple colors for hacker mode matrix (dominantly green + rare accents)
-var matrixColors = ['#00FF41', '#00FF41', '#00FF41', '#00FF41', '#00FF41', '#39FF14', '#39FF14', '#CCFF00', '#00E5FF'];
+var matrixColors = [
+    '#00FF41','#00FF41','#00FF41','#00FF41','#00FF41',
+    '#39FF14','#39FF14','#CCFF00','#00E5FF'
+];
 
 var mAnimId;
 
@@ -561,12 +552,9 @@ function drawMatrix() {
 
     for (var i = 0; i < drops.length; i++) {
         var ch = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-        // White at head, colored trail
-        if (drops[i] * fontSize < 50) {
-            mCtx.fillStyle = '#FFFFFF';
-        } else {
-            mCtx.fillStyle = matrixColors[Math.floor(Math.random() * matrixColors.length)];
-        }
+        mCtx.fillStyle = (drops[i] * fontSize < 50)
+            ? '#FFFFFF'
+            : matrixColors[Math.floor(Math.random() * matrixColors.length)];
         mCtx.fillText(ch, i * fontSize, drops[i] * fontSize);
 
         if (drops[i] * fontSize > mCanvas.height && Math.random() > 0.975) {
@@ -578,191 +566,276 @@ function drawMatrix() {
     mAnimId = requestAnimationFrame(drawMatrix);
 }
 
-// Handle window resize
+/* ── Resize handler ── */
 window.addEventListener('resize', function() {
     resizePC();
     resizeMC();
     columns = Math.floor(mCanvas.width / fontSize);
-    drops = [];
+    drops   = [];
     for (var i = 0; i < columns; i++) drops[i] = 1;
 });
 
 
 /* ═══════════════════════════════════════════════════════
-   TERMINAL ANIMATION
+   TERMINAL SYSTEM — Clean Typewriter Animation
+   Single authoritative system. No duplicate runners.
 ═══════════════════════════════════════════════════════ */
 
-var macTermLines = [
-    { type: 'prompt',  text: 'cryptokit hash --algo SHA-256 --input "Hello"' },
-    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
-    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
-    { type: 'success', text: '✅ Hash generated in 2ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit rsa --generate --bits 2048' },
-    { type: 'success', text: '⚙  Generating RSA-2048 key pair...' },
-    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
-    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
-    { type: 'success', text: '✅ Keys generated in 180ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit verify --file report.pdf' },
-    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
-    { type: 'success', text: '✅ File integrity verified!' },
-    { type: 'blank',   text: '' },
-    { type: 'cursor',  text: '' }
-];
-
-var winTermLines = [
-    { type: 'prompt',  text: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello"' },
-    { type: 'key',     text: 'Algorithm: ', val: 'SHA-256' },
-    { type: 'value',   text: '185f8db32921bd46d35e5f139f501d393a6b...' },
-    { type: 'success', text: '[OK] Hash generated in 2ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit.exe rsa /generate /bits:2048' },
-    { type: 'success', text: '[...] Generating RSA-2048 key pair...' },
-    { type: 'key',     text: 'Public:  ', val: '-----BEGIN PUBLIC KEY-----' },
-    { type: 'key',     text: 'Private: ', val: '-----BEGIN PRIVATE KEY-----' },
-    { type: 'success', text: '[OK] Keys generated in 180ms' },
-    { type: 'blank',   text: '' },
-    { type: 'prompt',  text: 'cryptokit.exe verify /file:report.pdf' },
-    { type: 'value',   text: 'a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...' },
-    { type: 'success', text: '[OK] File integrity verified!' },
-    { type: 'blank',   text: '' },
-    { type: 'cursor',  text: '' }
-];
-
-var termLines = macTermLines;
-var termBody = document.getElementById('terminalBody');
-var lineIdx = 0;
-
-function addTermLine() {
-    if (lineIdx >= termLines.length) {
-        setTimeout(function() {
-            termBody.innerHTML = '';
-            lineIdx = 0;
-            addTermLine();
-        }, 3000);
-        return;
-    }
-
-    var line = termLines[lineIdx];
-    var el = document.createElement('div');
-    el.className = 'terminal-line';
-
-    if (line.type === 'prompt') {
-        el.innerHTML = '<span class="terminal-prompt">❯ </span><span class="terminal-cmd">' + line.text + '</span>';
-    } else if (line.type === 'key') {
-        el.innerHTML = '<span class="terminal-key">&nbsp;&nbsp;' + line.text + '</span><span class="terminal-value">' + line.val + '</span>';
-    } else if (line.type === 'value') {
-        el.innerHTML = '<span class="terminal-value">&nbsp;&nbsp;' + line.text + '</span>';
-    } else if (line.type === 'success') {
-        el.innerHTML = '<span class="terminal-success">&nbsp;&nbsp;' + line.text + '</span>';
-    } else if (line.type === 'cursor') {
-        el.innerHTML = '<span class="terminal-prompt">❯ </span><span class="terminal-cursor"></span>';
-    } else {
-        el.innerHTML = '&nbsp;';
-    }
-
-    termBody.appendChild(el);
-    termBody.scrollTop = termBody.scrollHeight;
-    lineIdx++;
-
-    var delay = (line.type === 'blank') ? 150 : (line.type === 'cursor') ? 0 : 550;
-    setTimeout(addTermLine, delay);
-}
-
-// Start terminal after page loads
-setTimeout(addTermLine, 800);
-
-
-
-// ═══════════════════════════════════════════════════════
-// TERMINAL OS SWITCHER — Uses YOUR existing CSS classes
-// ═══════════════════════════════════════════════════════
-const TERM_COMMANDS = {
+/* ── Terminal data for each OS ── */
+var TERMINALS = {
     mac: {
-        title: 'cryptokit ~ zsh',
+        title:  'cryptokit ~ zsh',
+        prompt: '➜ ~',
         lines: [
-            { type: 'cmd', prompt: '➜', cmd: 'cryptokit hash --algo SHA-256 --input "Hello"' },
-            { type: 'out', html: '<span class="terminal-key">Algorithm:</span> <span class="terminal-value">SHA-256</span>' },
-            { type: 'out', html: '<span class="terminal-value">185f8db32921bd46d35e5f139f501d393a6b...</span>' },
-            { type: 'out', html: '<span class="terminal-success">✅ Hash generated in 2ms</span>' },
+            { type: 'cmd',     text: 'cryptokit hash --algo SHA-256 --input "Hello World"' },
+            { type: 'output',  text: 'Algorithm  : SHA-256' },
+            { type: 'output',  text: 'Input      : "Hello World"' },
+            { type: 'hash',    text: 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b...' },
+            { type: 'success', text: '✅  Hash generated in 2ms' },
             { type: 'blank' },
-            { type: 'cmd', prompt: '➜', cmd: 'cryptokit rsa --generate --bits 2048' },
-            { type: 'out', html: '<span class="terminal-success">⚙ Generating RSA-2048 key pair...</span>' },
-            { type: 'out', html: '<span class="terminal-key">Public:</span>  <span class="terminal-value">-----BEGIN PUBLIC KEY-----</span>' },
-            { type: 'out', html: '<span class="terminal-key">Private:</span> <span class="terminal-value">-----BEGIN PRIVATE KEY-----</span>' },
-            { type: 'out', html: '<span class="terminal-success">✅ Keys generated in 180ms</span>' },
+            { type: 'cmd',     text: 'cryptokit rsa --generate --bits 2048' },
+            { type: 'info',    text: '⚙  Generating RSA-2048 key pair...' },
+            { type: 'output',  text: 'Public  → -----BEGIN PUBLIC KEY-----' },
+            { type: 'output',  text: 'Private → -----BEGIN PRIVATE KEY-----' },
+            { type: 'success', text: '✅  Keys saved to ./keys/ in 180ms' },
             { type: 'blank' },
-            { type: 'cmd', prompt: '➜', cmd: 'cryptokit verify --file report.pdf' },
-            { type: 'out', html: '<span class="terminal-value">a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3...</span>' },
-            { type: 'out', html: '<span class="terminal-success">✅ File integrity verified!</span>' },
+            { type: 'cmd',     text: 'cryptokit verify --file report.pdf --hash a3f5c8...' },
+            { type: 'info',    text: '🔍  Computing SHA-256 of report.pdf...' },
+            { type: 'output',  text: 'Expected : a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3' },
+            { type: 'output',  text: 'Actual   : a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3' },
+            { type: 'success', text: '✅  File integrity verified — no tampering detected!' },
             { type: 'blank' },
-            { type: 'cmd', prompt: '➜', cmd: '<span class="terminal-cursor"></span>' }
+            { type: 'cmd',     text: 'cryptokit encrypt --algo AES-256 --file secret.txt' },
+            { type: 'info',    text: '🔒  Encrypting with AES-256-CBC...' },
+            { type: 'output',  text: 'Output   → secret.txt.enc' },
+            { type: 'success', text: '✅  Encryption complete in 5ms' },
+            { type: 'blank' },
+            { type: 'cursor' }
         ]
     },
     win: {
-        title: 'C:\\CryptoKit> cmd.exe',
+        title:  'C:\\Users\\CryptoKit> cmd.exe',
+        prompt: 'C:\\CryptoKit>',
         lines: [
-            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello"' },
-            { type: 'out', html: '<span class="terminal-key">Algorithm:</span> <span class="terminal-value">SHA-256</span>' },
-            { type: 'out', html: '<span class="terminal-value">185F8DB32921BD46D35E5F139F501D393A6B...</span>' },
-            { type: 'out', html: '<span class="terminal-success">[OK] Hash generated in 2ms</span>' },
+            { type: 'cmd',     text: 'cryptokit.exe hash /algo:SHA-256 /input:"Hello World"' },
+            { type: 'output',  text: 'Algorithm  : SHA-256' },
+            { type: 'output',  text: 'Input      : "Hello World"' },
+            { type: 'hash',    text: 'A591A6D40BF420404A011733CFB7B190D62C65BF0BCDA32B...' },
+            { type: 'success', text: '[OK]  Hash generated in 2ms' },
             { type: 'blank' },
-            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: 'cryptokit.exe rsa /generate /bits:2048' },
-            { type: 'out', html: '<span class="terminal-success">[*] Generating RSA-2048 key pair...</span>' },
-            { type: 'out', html: '<span class="terminal-key">Public:</span>  <span class="terminal-value">-----BEGIN PUBLIC KEY-----</span>' },
-            { type: 'out', html: '<span class="terminal-key">Private:</span> <span class="terminal-value">-----BEGIN PRIVATE KEY-----</span>' },
-            { type: 'out', html: '<span class="terminal-success">[OK] Keys generated in 180ms</span>' },
+            { type: 'cmd',     text: 'cryptokit.exe rsa /generate /bits:2048' },
+            { type: 'info',    text: '[**]  Generating RSA-2048 key pair...' },
+            { type: 'output',  text: 'Public  -> -----BEGIN PUBLIC KEY-----' },
+            { type: 'output',  text: 'Private -> -----BEGIN PRIVATE KEY-----' },
+            { type: 'success', text: '[OK]  Keys saved to .\\keys\\ in 180ms' },
             { type: 'blank' },
-            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: 'cryptokit.exe verify /file:report.pdf' },
-            { type: 'out', html: '<span class="terminal-value">A3F5C8D2E1B4A7F9C2D5E8A1B4C7D0E3...</span>' },
-            { type: 'out', html: '<span class="terminal-success">[OK] File integrity verified!</span>' },
+            { type: 'cmd',     text: 'cryptokit.exe verify /file:report.pdf /hash:a3f5c8...' },
+            { type: 'info',    text: '[..]  Computing SHA-256 of report.pdf...' },
+            { type: 'output',  text: 'Expected : a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3' },
+            { type: 'output',  text: 'Actual   : a3f5c8d2e1b4a7f9c2d5e8a1b4c7d0e3' },
+            { type: 'success', text: '[OK]  File integrity verified — no tampering detected!' },
             { type: 'blank' },
-            { type: 'cmd', prompt: 'C:\\CryptoKit&gt;', cmd: '<span class="terminal-cursor"></span>' }
+            { type: 'cmd',     text: 'cryptokit.exe encrypt /algo:AES-256 /file:secret.txt' },
+            { type: 'info',    text: '[..]  Encrypting with AES-256-CBC...' },
+            { type: 'output',  text: 'Output   -> secret.txt.enc' },
+            { type: 'success', text: '[OK]  Encryption complete in 5ms' },
+            { type: 'blank' },
+            { type: 'cursor' }
         ]
     }
 };
 
-function renderTerminal(os) {
-    const body  = document.getElementById('terminalBody');
-    const title = document.getElementById('terminalTitle');
-    if (!body || !title) return;
+/* ── Typing speed per line type (ms per character) ── */
+var CHAR_DELAYS = {
+    cmd:     42,
+    output:  18,
+    hash:    12,
+    success: 22,
+    info:    22
+};
 
-    const data = TERM_COMMANDS[os];
+/* ── Post-line pause (ms) ── */
+var LINE_PAUSE = {
+    cmd:    480,   /* longer pause after commands so output feels "responsive" */
+    output:  70,
+    hash:    70,
+    success: 90,
+    info:    90,
+    blank:  200,
+    restart: 2800  /* pause before the whole sequence loops */
+};
+
+/* ── Terminal state ── */
+var termOS      = 'mac';
+var termTimerId = null;   /* single setTimeout handle — easy to cancel */
+var termAlive   = false;  /* flag: false = stop the current run */
+
+
+/* ── Build one empty terminal line element ── */
+function buildTermLine(type, prompt) {
+    var el = document.createElement('div');
+    el.className = 'terminal-line tl-' + type;
+
+    switch (type) {
+        case 'cmd':
+            el.innerHTML =
+                '<span class="terminal-prompt">' + prompt + ' </span>' +
+                '<span class="terminal-cmd"></span>';
+            break;
+        case 'output':
+            el.innerHTML = '<span class="terminal-output"></span>';
+            break;
+        case 'hash':
+            el.innerHTML = '<span class="terminal-hash"></span>';
+            break;
+        case 'success':
+            el.innerHTML = '<span class="terminal-success"></span>';
+            break;
+        case 'info':
+            el.innerHTML = '<span class="terminal-info"></span>';
+            break;
+        case 'blank':
+            el.innerHTML = '&nbsp;';
+            break;
+        case 'cursor':
+            el.innerHTML =
+                '<span class="terminal-prompt">' + prompt + ' </span>' +
+                '<span class="terminal-cursor-blink">█</span>';
+            break;
+    }
+    return el;
+}
+
+
+/* ── Type characters one-by-one into a span ── */
+function typeIntoSpan(span, text, charDelay, onDone) {
+    var idx = 0;
+
+    function nextChar() {
+        if (!termAlive) return;          /* abort if terminal was stopped */
+        if (idx < text.length) {
+            span.textContent += text[idx++];
+            var body = document.getElementById('terminalBody');
+            if (body) body.scrollTop = body.scrollHeight;
+            termTimerId = setTimeout(nextChar, charDelay);
+        } else {
+            onDone();
+        }
+    }
+
+    nextChar();
+}
+
+
+/* ── Render lines one after another (recursive, index-driven) ── */
+function renderLine(lines, prompt, idx) {
+    if (!termAlive) return;
+
+    /* All lines done → wait, then loop */
+    if (idx >= lines.length) {
+        termTimerId = setTimeout(function() {
+            var body = document.getElementById('terminalBody');
+            if (body && termAlive) {
+                body.innerHTML = '';
+                renderLine(lines, prompt, 0);
+            }
+        }, LINE_PAUSE.restart);
+        return;
+    }
+
+    var line = lines[idx];
+    var body = document.getElementById('terminalBody');
+    if (!body) return;
+
+    /* ── blank line ── */
+    if (line.type === 'blank') {
+        body.appendChild(buildTermLine('blank', prompt));
+        body.scrollTop = body.scrollHeight;
+        termTimerId = setTimeout(function() {
+            renderLine(lines, prompt, idx + 1);
+        }, LINE_PAUSE.blank);
+        return;
+    }
+
+    /* ── blinking cursor (last line) ── */
+    if (line.type === 'cursor') {
+        body.appendChild(buildTermLine('cursor', prompt));
+        body.scrollTop = body.scrollHeight;
+        /* wait then restart */
+        termTimerId = setTimeout(function() {
+            if (body && termAlive) {
+                body.innerHTML = '';
+                renderLine(lines, prompt, 0);
+            }
+        }, LINE_PAUSE.restart);
+        return;
+    }
+
+    /* ── typed lines ── */
+    var el   = buildTermLine(line.type, prompt);
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+
+    /* find the span we type into */
+    var spanClass = {
+        cmd:     '.terminal-cmd',
+        output:  '.terminal-output',
+        hash:    '.terminal-hash',
+        success: '.terminal-success',
+        info:    '.terminal-info'
+    }[line.type];
+
+    var span      = el.querySelector(spanClass);
+    var charDelay = CHAR_DELAYS[line.type] || 20;
+    var postPause = LINE_PAUSE[line.type]  || 80;
+
+    typeIntoSpan(span, line.text || '', charDelay, function() {
+        termTimerId = setTimeout(function() {
+            renderLine(lines, prompt, idx + 1);
+        }, postPause);
+    });
+}
+
+
+/* ── Start (or restart) the terminal for the given OS ── */
+function startTerminal(os) {
+    /* 1. Kill any running animation */
+    termAlive = false;
+    clearTimeout(termTimerId);
+
+    var data  = TERMINALS[os];
+    var body  = document.getElementById('terminalBody');
+    var title = document.getElementById('terminalTitle');
+
+    if (!body || !title || !data) return;
+
+    /* 2. Reset DOM */
+    body.innerHTML    = '';
     title.textContent = data.title;
 
-    let html = '';
-    data.lines.forEach((line, i) => {
-        // stagger the fade-in animation
-        const delay = `style="animation-delay:${i * 0.05}s"`;
-        if (line.type === 'blank') {
-            html += `<div class="terminal-line" ${delay}>&nbsp;</div>`;
-        } else if (line.type === 'cmd') {
-            html += `<div class="terminal-line" ${delay}><span class="terminal-prompt">${line.prompt}</span> <span class="terminal-cmd">${line.cmd}</span></div>`;
-        } else if (line.type === 'out') {
-            html += `<div class="terminal-line" ${delay}>${line.html}</div>`;
-        }
-    });
-    body.innerHTML = html;
+    /* 3. Brief pause so the clear is visible, then start */
+    termTimerId = setTimeout(function() {
+        termAlive = true;
+        renderLine(data.lines, data.prompt, 0);
+    }, 120);
 }
 
+
+/* ── OS switcher button handler ── */
 function switchTermOS(os) {
-    const macBtn = document.getElementById('osMac');
-    const winBtn = document.getElementById('osWin');
+    termOS = os;
+
+    var macBtn = document.getElementById('osMac');
+    var winBtn = document.getElementById('osWin');
     if (macBtn) macBtn.classList.toggle('active', os === 'mac');
     if (winBtn) winBtn.classList.toggle('active', os === 'win');
-    renderTerminal(os);
+
+    startTerminal(os);
 }
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    renderTerminal('mac');
-});
-
 
 
 /* ═══════════════════════════════════════════════════════
-   THEME TOGGLE - BOOT MESSAGES
+   THEME TOGGLE — Boot Messages & Transition
 ═══════════════════════════════════════════════════════ */
 
 var hackerBoot = [
@@ -783,7 +856,7 @@ var normalBoot = [
 
 function showTransition(msgs, callback) {
     var overlay = document.getElementById('themeOverlay');
-    var textEl = document.getElementById('transitionText');
+    var textEl  = document.getElementById('transitionText');
     overlay.classList.add('active');
     textEl.innerHTML = '';
 
@@ -810,17 +883,17 @@ function showTransition(msgs, callback) {
 
 
 /* ═══════════════════════════════════════════════════════
-   ⭐ MODE DROPDOWN SELECTOR (SINGLE CLEAN VERSION)
+   MODE DROPDOWN SELECTOR
 ═══════════════════════════════════════════════════════ */
 
 function toggleModeDropdown() {
     var dropdown = document.getElementById('modeDropdown');
-    var arrow = document.getElementById('modeArrow');
+    var arrow    = document.getElementById('modeArrow');
     if (dropdown) dropdown.classList.toggle('open');
-    if (arrow) arrow.classList.toggle('open');
+    if (arrow)    arrow.classList.toggle('open');
 }
 
-// Close dropdown when clicking outside
+/* Close dropdown on outside click */
 document.addEventListener('click', function(e) {
     var selector = document.getElementById('modeSelector');
     if (selector && !selector.contains(e.target)) {
@@ -831,89 +904,79 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Mobile theme quick switch
+/* Mobile quick-switch */
 function mobileThemeSwitch() {
-    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
-    selectMode(newMode);
+    selectMode(currentTheme === 'normal' ? 'hacker' : 'normal');
 }
 
-// MAIN MODE SELECTOR FUNCTION
+
+/* ── MAIN MODE SELECTOR ── */
 function selectMode(mode) {
 
-    // Step 1: Close the dropdown
+    /* Close dropdown */
     var dd = document.getElementById('modeDropdown');
     var ar = document.getElementById('modeArrow');
     if (dd) dd.classList.remove('open');
     if (ar) ar.classList.remove('open');
 
-    // Step 2: Skip if already in this mode
+    /* No-op if already in this mode */
     if (mode === currentTheme) return;
 
-    // Step 3: Pick the right boot messages
     var isGoingHacker = (mode === 'hacker');
-    var bootMsgs = isGoingHacker ? hackerBoot : normalBoot;
+    var bootMsgs      = isGoingHacker ? hackerBoot : normalBoot;
 
-    // Step 4: Show transition overlay, then switch everything
     showTransition(bootMsgs, function() {
 
         if (isGoingHacker) {
-            // ── SWITCH TO HACKER ──
+            /* ── TO HACKER ── */
             currentTheme = 'hacker';
             document.documentElement.setAttribute('data-theme', 'hacker');
             localStorage.setItem('cryptokit-theme', 'hacker');
 
-            // Stop normal particles
             cancelAnimationFrame(pAnimId);
             pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
 
-            // Start matrix rain
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
             columns = Math.floor(mCanvas.width / fontSize);
-            drops = [];
+            drops   = [];
             for (var i = 0; i < columns; i++) drops[i] = 1;
             drawMatrix();
 
-            // Update dropdown UI
             var mi = document.getElementById('modeIcon');
             var ml = document.getElementById('modeLabel');
             var cn = document.getElementById('checkNormal');
             var ch = document.getElementById('checkHacker');
-            if (mi) mi.textContent = '💀';
-            if (ml) ml.textContent = 'Hacker';
+            if (mi) mi.textContent  = '💀';
+            if (ml) ml.textContent  = 'Hacker';
             if (cn) cn.style.display = 'none';
             if (ch) ch.style.display = 'inline';
 
-            // Update AI assistant
             updateAiTheme(true);
 
         } else {
-            // ── SWITCH TO NORMAL ──
+            /* ── TO NORMAL ── */
             currentTheme = 'normal';
             document.documentElement.setAttribute('data-theme', 'normal');
             localStorage.setItem('cryptokit-theme', 'normal');
 
-            // Stop matrix rain
             cancelAnimationFrame(mAnimId);
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
 
-            // Start normal particles
             animateParticles();
 
-            // Update dropdown UI
             var mi2 = document.getElementById('modeIcon');
             var ml2 = document.getElementById('modeLabel');
             var cn2 = document.getElementById('checkNormal');
             var ch2 = document.getElementById('checkHacker');
-            if (mi2) mi2.textContent = '☀️';
-            if (ml2) ml2.textContent = 'Normal';
+            if (mi2) mi2.textContent  = '☀️';
+            if (ml2) ml2.textContent  = 'Normal';
             if (cn2) cn2.style.display = 'inline';
             if (ch2) ch2.style.display = 'none';
 
-            // Update AI assistant
             updateAiTheme(false);
         }
 
-        // Refresh AI chat if it was open
+        /* Refresh chat if open */
         if (chatOpen && msgCount > 0) {
             document.getElementById('aiMessages').innerHTML = '';
             msgCount = 0;
@@ -922,10 +985,9 @@ function selectMode(mode) {
     });
 }
 
-// Keep toggleTheme as a wrapper (for backwards compatibility)
+/* Backwards-compat wrapper */
 function toggleTheme() {
-    var newMode = (currentTheme === 'normal') ? 'hacker' : 'normal';
-    selectMode(newMode);
+    selectMode(currentTheme === 'normal' ? 'hacker' : 'normal');
 }
 
 
@@ -933,7 +995,7 @@ function toggleTheme() {
    NAVBAR & MOBILE MENU
 ═══════════════════════════════════════════════════════ */
 
-var navbar = document.getElementById('navbar');
+var navbar       = document.getElementById('navbar');
 var scrollTopBtn = document.getElementById('scrollTop');
 
 window.addEventListener('scroll', function() {
@@ -952,16 +1014,14 @@ function toggleMenu() {
 
 
 /* ═══════════════════════════════════════════════════════
-   LIVE DEMO FUNCTIONALITY
+   LIVE DEMO
 ═══════════════════════════════════════════════════════ */
 
 var demoMode = 'hash';
 
 function setDemoTab(btn, mode) {
     var tabs = document.querySelectorAll('.demo-tab');
-    for (var i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove('active');
-    }
+    for (var i = 0; i < tabs.length; i++) { tabs[i].classList.remove('active'); }
     btn.classList.add('active');
     demoMode = mode;
 
@@ -970,20 +1030,19 @@ function setDemoTab(btn, mode) {
 
     if (mode === 'hash') {
         sel.style.display = 'block';
-        inp.placeholder = 'Type text to hash...';
+        inp.placeholder   = 'Type text to hash...';
     } else if (mode === 'base64') {
         sel.style.display = 'none';
-        inp.placeholder = 'Type text to encode in Base64...';
+        inp.placeholder   = 'Type text to encode in Base64...';
     } else {
         sel.style.display = 'none';
-        inp.placeholder = 'Enter a password to check strength...';
+        inp.placeholder   = 'Enter a password to check strength...';
     }
 
     document.getElementById('demoResult').innerHTML =
         '<span class="demo-result-placeholder">Your result will appear here...</span>';
 }
 
-// Hash Functions
 function sha256Hash(msg) {
     return crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg)).then(function(buf) {
         return Array.from(new Uint8Array(buf)).map(function(b) {
@@ -1009,25 +1068,23 @@ function fakeMd5(str) {
     return Math.abs(h).toString(16).padStart(8, '0').repeat(4);
 }
 
-// Password Strength
 function getPassStrength(p) {
     var s = 0;
-    if (p.length >= 8) s++;
-    if (p.length >= 12) s++;
-    if (p.length >= 16) s++;
-    if (/[A-Z]/.test(p)) s++;
-    if (/[a-z]/.test(p)) s++;
-    if (/[0-9]/.test(p)) s++;
-    if (/[^A-Za-z0-9]/.test(p)) s++;
+    if (p.length >= 8)           s++;
+    if (p.length >= 12)          s++;
+    if (p.length >= 16)          s++;
+    if (/[A-Z]/.test(p))         s++;
+    if (/[a-z]/.test(p))         s++;
+    if (/[0-9]/.test(p))         s++;
+    if (/[^A-Za-z0-9]/.test(p))  s++;
 
-    if (s <= 2) return { label: '❌ Very Weak', color: '#FF4444' };
-    if (s <= 3) return { label: '⚠️ Weak', color: '#FF8C00' };
-    if (s <= 4) return { label: '🟡 Fair', color: '#FFD700' };
-    if (s <= 5) return { label: '🟢 Strong', color: '#00CC66' };
-    return { label: '✅ Very Strong', color: '#00FF88' };
+    if (s <= 2) return { label: '❌ Very Weak',   color: '#FF4444' };
+    if (s <= 3) return { label: '⚠️ Weak',        color: '#FF8C00' };
+    if (s <= 4) return { label: '🟡 Fair',         color: '#FFD700' };
+    if (s <= 5) return { label: '🟢 Strong',       color: '#00CC66' };
+    return            { label: '✅ Very Strong',   color: '#00FF88' };
 }
 
-// Run Demo
 function runDemo() {
     var val = document.getElementById('demoInput').value;
     var res = document.getElementById('demoResult');
@@ -1041,9 +1098,9 @@ function runDemo() {
         var algo = document.getElementById('demoAlgo').value;
         var hashPromise;
 
-        if (algo === 'sha256') hashPromise = sha256Hash(val);
+        if      (algo === 'sha256') hashPromise = sha256Hash(val);
         else if (algo === 'sha512') hashPromise = sha512Hash(val);
-        else hashPromise = Promise.resolve(fakeMd5(val));
+        else                        hashPromise = Promise.resolve(fakeMd5(val));
 
         hashPromise.then(function(hash) {
             var warn = (algo === 'md5')
@@ -1068,19 +1125,18 @@ function runDemo() {
     }
 }
 
-// Copy to Clipboard
 function copyResult(text) {
     navigator.clipboard.writeText(text).then(function() {
         var btn = document.querySelector('.btn-copy');
         if (btn) {
             var orig = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.innerHTML      = '<i class="fas fa-check"></i> Copied!';
             btn.style.background = 'var(--success)';
-            btn.style.color = '#000';
+            btn.style.color      = '#000';
             setTimeout(function() {
-                btn.innerHTML = orig;
+                btn.innerHTML        = orig;
                 btn.style.background = '';
-                btn.style.color = '';
+                btn.style.color      = '';
             }, 2000);
         }
     });
@@ -1091,7 +1147,7 @@ function copyResult(text) {
    INTERSECTION OBSERVERS
 ═══════════════════════════════════════════════════════ */
 
-// Fade Up Observer
+/* Fade-up */
 var observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry, i) {
         if (entry.isIntersecting) {
@@ -1103,28 +1159,20 @@ var observer = new IntersectionObserver(function(entries) {
 }, { threshold: 0.1 });
 
 var fadeEls = document.querySelectorAll('.fade-up');
-for (var i = 0; i < fadeEls.length; i++) {
-    observer.observe(fadeEls[i]);
-}
+for (var i = 0; i < fadeEls.length; i++) { observer.observe(fadeEls[i]); }
 
-// Stats Counter Observer
+/* Stats counter */
 function animateCounter(el) {
     var target = parseInt(el.getAttribute('data-target'));
     var suffix = el.getAttribute('data-suffix') || '';
 
-    if (target === 0) {
-        el.textContent = '0' + suffix;
-        return;
-    }
+    if (target === 0) { el.textContent = '0' + suffix; return; }
 
     var current = 0;
-    var step = target / 60;
-    var timer = setInterval(function() {
+    var step    = target / 60;
+    var timer   = setInterval(function() {
         current += step;
-        if (current >= target) {
-            current = target;
-            clearInterval(timer);
-        }
+        if (current >= target) { current = target; clearInterval(timer); }
         el.textContent = Math.floor(current) + suffix;
     }, 20);
 }
@@ -1133,22 +1181,18 @@ var statsObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
         if (entry.isIntersecting) {
             var nums = entry.target.querySelectorAll('.stat-number');
-            for (var i = 0; i < nums.length; i++) {
-                animateCounter(nums[i]);
-            }
+            for (var i = 0; i < nums.length; i++) { animateCounter(nums[i]); }
             statsObserver.unobserve(entry.target);
         }
     });
 }, { threshold: 0.3 });
 
 var statContainers = document.querySelectorAll('.stats-container');
-for (var i = 0; i < statContainers.length; i++) {
-    statsObserver.observe(statContainers[i]);
-}
+for (var i = 0; i < statContainers.length; i++) { statsObserver.observe(statContainers[i]); }
 
 
 /* ═══════════════════════════════════════════════════════
-   FEEDBACK FORM FUNCTIONS
+   FEEDBACK FORM
 ═══════════════════════════════════════════════════════ */
 
 var currentRating = 0;
@@ -1156,7 +1200,6 @@ var currentRating = 0;
 function setRating(rating) {
     currentRating = rating;
     var stars = document.querySelectorAll('.rating-star');
-
     for (var i = 0; i < stars.length; i++) {
         if (i < rating) {
             stars[i].textContent = '★';
@@ -1171,17 +1214,12 @@ function setRating(rating) {
 function submitFeedback(event) {
     event.preventDefault();
 
-    if (currentRating === 0) {
-        alert('Please select a rating!');
-        return false;
-    }
+    if (currentRating === 0) { alert('Please select a rating!'); return false; }
 
-    // Get form data
-    var form = document.getElementById('feedbackForm');
+    var form   = document.getElementById('feedbackForm');
     var inputs = form.querySelectorAll('input, textarea');
-    var name = inputs[0].value;
+    var name   = inputs[0].value;
 
-    // Show success message
     var wrapper = document.querySelector('.feedback-form-wrapper');
     wrapper.innerHTML =
         '<div style="text-align:center;padding:40px 20px;">' +
@@ -1195,14 +1233,18 @@ function submitFeedback(event) {
 
 
 /* ═══════════════════════════════════════════════════════
-   🚀 LOAD SAVED THEME ON PAGE LOAD
+   PAGE LOAD — Restore saved theme + boot terminal
 ═══════════════════════════════════════════════════════ */
 
 window.addEventListener('DOMContentLoaded', function() {
+
+    /* 1. Boot the terminal (mac by default) */
+    setTimeout(function() { startTerminal('mac'); }, 600);
+
+    /* 2. Restore saved theme (silently, no overlay) */
     var savedTheme = localStorage.getItem('cryptokit-theme');
     if (savedTheme && savedTheme !== currentTheme) {
-        // Silently apply saved theme without transition overlay
-        currentTheme = (savedTheme === 'hacker') ? 'normal' : 'hacker'; // Trick selectMode to switch
+        currentTheme = (savedTheme === 'hacker') ? 'normal' : 'hacker';
         selectMode(savedTheme);
     }
 });
