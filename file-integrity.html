@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="normal">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Integrity Checker — CryptoKit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+
+/* ═══════════════════════════════════════════
+   THEME VARIABLES - NORMAL MODE
+═══════════════════════════════════════════ */
+[data-theme="normal"] {
+    --bg-primary:       #F0F4FF;
+    --bg-secondary:     #FFFFFF;
+    --bg-card:          #FFFFFF;
+    --bg-card-hover:    #F8F9FF;
+    --bg-inset:         #F7F8FF;
+    --primary:          #6C63FF;
+    --primary-glow:     rgba(108, 99, 255, 0.2);
+    --primary-rgb:      108, 99, 255;
+    --secondary:        #00B4D8;
+    --secondary-rgb:    0, 180, 216;
+    --accent:           #FF6584;
+    --success:          #06D6A0;
+    --success-dim:      rgba(6, 214, 160, 0.1);
+    --danger:           #FF4D6A;
+    --danger-dim:       rgba(255, 77, 106, 0.12);
+    --warning:          #FBBF77;
+    --warning-dim:      rgba(251, 191, 119, 0.12);
+    --violet:           #9B8CFF;
+    --violet-dim:       rgba(155, 140, 255, 0.12);
+    --text-primary:     #1A1A2E;
+    --text-secondary:   #4A5568;
+    --text-muted:       #718096;
+    --border:           rgba(108, 99, 255, 0.15);
+    --border-strong:    rgba(108, 99, 255, 0.25);
+    --glass:            rgba(108, 99, 255, 0.05);
+    --glass-border:     rgba(108, 99, 255, 0.12);
+    --shadow:           0 4px 24px rgba(108, 99, 255, 0.1);
+    --shadow-hover:     0 12px 40px rgba(108, 99, 255, 0.2);
+    --shadow-btn:       0 4px 15px rgba(108, 99, 255, 0.3);
+    --tag-bg:           rgba(108, 99, 255, 0.08);
+    --tag-border:       rgba(108, 99, 255, 0.2);
+    --input-bg:         #F7F8FF;
+    --scrollbar:        #6C63FF;
+    --gradient-primary: linear-gradient(135deg, #6C63FF, #00B4D8);
+    --gradient-text:    linear-gradient(135deg, #6C63FF, #00B4D8);
+    --progress-gradient:linear-gradient(90deg, #6C63FF, #00B4D8);
+    --radius:           14px;
+    --radius-sm:        9px;
+    --radius-xs:        7px;
+    --font-display:     'Space Grotesk', sans-serif;
+    --font-body:        'Inter', sans-serif;
+    --font-mono:        'JetBrains Mono', monospace;
+    --dz-border:        rgba(108, 99, 255, 0.25);
+    --dz-hover-border:  #6C63FF;
+    --dz-hover-bg:      rgba(108, 99, 255, 0.06);
+    --brand-gradient:   linear-gradient(135deg, #6C63FF, #00B4D8);
+    --brand-text:       #fff;
+    --tab-active-shadow:0 4px 15px rgba(108, 99, 255, 0.15);
+}
+
+/* ═══════════════════════════════════════════
+   THEME VARIABLES - HACKER MODE
+═══════════════════════════════════════════ */
+[data-theme="hacker"] {
+    --bg-primary:       #000000;
+    --bg-secondary:     #0A0A0A;
+    --bg-card:          #050505;
+    --bg-card-hover:    #0D1A0D;
+    --bg-inset:         #030503;
+    --primary:          #00FF41;
+    --primary-glow:     rgba(0, 255, 65, 0.25);
+    --primary-rgb:      0, 255, 65;
+    --secondary:        #00FFFF;
+    --secondary-rgb:    0, 255, 255;
+    --accent:           #FF0040;
+    --success:          #00FF41;
+    --success-dim:      rgba(0, 255, 65, 0.08);
+    --danger:           #FF0040;
+    --danger-dim:       rgba(255, 0, 64, 0.12);
+    --warning:          #FFD700;
+    --warning-dim:      rgba(255, 215, 0, 0.1);
+    --violet:           #B388FF;
+    --violet-dim:       rgba(179, 136, 255, 0.1);
+    --text-primary:     #00FF41;
+    --text-secondary:   #00CC33;
+    --text-muted:       #006611;
+    --border:           rgba(0, 255, 65, 0.15);
+    --border-strong:    rgba(0, 255, 65, 0.3);
+    --glass:            rgba(0, 255, 65, 0.03);
+    --glass-border:     rgba(0, 255, 65, 0.15);
+    --shadow:           0 4px 24px rgba(0, 255, 65, 0.08);
+    --shadow-hover:     0 12px 40px rgba(0, 255, 65, 0.18);
+    --shadow-btn:       0 4px 15px rgba(0, 255, 65, 0.2);
+    --tag-bg:           rgba(0, 255, 65, 0.05);
+    --tag-border:       rgba(0, 255, 65, 0.2);
+    --input-bg:         #050505;
+    --scrollbar:        #00FF41;
+    --gradient-primary: linear-gradient(135deg, #00FF41, #39FF14);
+    --gradient-text:    linear-gradient(135deg, #00FF41, #00FFFF);
+    --progress-gradient:linear-gradient(90deg, #00FF41, #39FF14);
+    --radius:           14px;
+    --radius-sm:        9px;
+    --radius-xs:        7px;
+    --font-display:     'Share Tech Mono', monospace;
+    --font-body:        'Share Tech Mono', monospace;
+    --font-mono:        'Share Tech Mono', monospace;
+    --dz-border:        rgba(0, 255, 65, 0.25);
+    --dz-hover-border:  #00FF41;
+    --dz-hover-bg:      rgba(0, 255, 65, 0.05);
+    --brand-gradient:   linear-gradient(135deg, #00FF41, #39FF14);
+    --brand-text:       #000;
+    --tab-active-shadow:0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background-color 0.5s, color 0.5s;
+}
+
+[data-theme="normal"] body {
+    background-image:
+        radial-gradient(ellipse 900px 500px at 15% -5%, rgba(108,99,255,0.06), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 100% 10%, rgba(0,180,216,0.04), transparent 60%);
+}
+
+[data-theme="hacker"] body {
+    background-image:
+        radial-gradient(ellipse 900px 500px at 15% -5%, rgba(0,255,65,0.04), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 100% 10%, rgba(57,255,20,0.03), transparent 60%);
+}
+
+[data-theme="hacker"] body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent, transparent 2px,
+        rgba(0,255,65,0.008) 2px,
+        rgba(0,255,65,0.008) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+::selection {
+    background: var(--primary-glow);
+    color: var(--primary);
+}
+
+a { text-decoration: none; }
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+}
+
+/* ═══════════════════════════════════════════
+   TOPBAR (Back to CryptoKit)
+═══════════════════════════════════════════ */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--glass);
+    transition: all 0.3s;
+    font-family: var(--font-body);
+}
+
+.back-link:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+}
+
+[data-theme="hacker"] .back-link {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.security-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.security-badge i { color: var(--primary); }
+
+[data-theme="hacker"] .security-badge {
+    color: var(--primary);
+    border-color: rgba(0,255,65,0.2);
+    text-shadow: 0 0 6px rgba(0,255,65,0.3);
+    letter-spacing: 1px;
+    font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════
+   HERO HEADER
+═══════════════════════════════════════════ */
+.tool-header {
+    margin-bottom: 36px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.tool-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+
+[data-theme="normal"] .tool-icon-wrap {
+    background: linear-gradient(135deg, #6C63FF, #00B4D8);
+    box-shadow: 0 8px 24px rgba(108,99,255,0.35);
+    color: #fff;
+}
+
+[data-theme="hacker"] .tool-icon-wrap {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%,100% { box-shadow: 0 0 20px rgba(0,255,65,0.25); }
+    50%      { box-shadow: 0 0 35px rgba(0,255,65,0.5); }
+}
+
+.tool-header-text {}
+
+.tool-title {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+    transition: color 0.3s;
+}
+
+[data-theme="normal"] .tool-title {
+    background: linear-gradient(135deg, #6C63FF, #00B4D8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="hacker"] .tool-title {
+    color: var(--primary);
+    text-shadow: 0 0 15px rgba(0,255,65,0.4);
+    letter-spacing: 2px;
+}
+
+.tool-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 540px;
+}
+
+[data-theme="hacker"] .tool-subtitle {
+    color: #B8FFB8;
+}
+
+/* ═══════════════════════════════════════════
+   SECTION BADGE
+═══════════════════════════════════════════ */
+.section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--primary);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    transition: all 0.3s;
+}
+
+[data-theme="hacker"] .section-badge {
+    border-color: rgba(0,255,65,0.3);
+    text-shadow: 0 0 8px rgba(0,255,65,0.4);
+}
+
+/* ═══════════════════════════════════════════
+   MODE TABS
+═══════════════════════════════════════════ */
+.mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    background: var(--bg-card);
+    padding: 7px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+}
+
+[data-theme="hacker"] .mode-tabs {
+    background: rgba(5,5,5,0.9);
+    border-color: rgba(0,255,65,0.15);
+    box-shadow: 0 0 20px rgba(0,255,65,0.05);
+}
+
+.mode-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+.mode-tab i { font-size: 13px; }
+
+[data-theme="normal"] .mode-tab.active {
+    background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(0,180,216,0.08));
+    color: var(--primary);
+    border-color: rgba(108,99,255,0.25);
+    box-shadow: var(--tab-active-shadow);
+}
+
+[data-theme="hacker"] .mode-tab.active {
+    background: rgba(0,255,65,0.07);
+    color: var(--primary);
+    border-color: rgba(0,255,65,0.3);
+    box-shadow: var(--tab-active-shadow);
+    text-shadow: 0 0 8px rgba(0,255,65,0.4);
+    letter-spacing: 1px;
+}
+
+.mode-tab:not(.active):hover {
+    color: var(--text-secondary);
+    background: var(--glass);
+}
+
+[data-theme="hacker"] .mode-tab:not(.active):hover {
+    background: rgba(0,255,65,0.03);
+    color: rgba(0,255,65,0.6);
+}
+
+.mode-panel { display: none; }
+.mode-panel.active {
+    display: block;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   PANEL / CARD
+═══════════════════════════════════════════ */
+.panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+[data-theme="normal"] .panel::before {
+    background: linear-gradient(90deg, #6C63FF, #00B4D8);
+}
+
+[data-theme="hacker"] .panel::before {
+    background: linear-gradient(90deg, #00FF41, #00FFFF);
+    box-shadow: 0 0 10px #00FF41;
+}
+
+.panel:hover::before { opacity: 1; }
+
+[data-theme="hacker"] .panel {
+    background: #050505;
+    border-color: rgba(0,255,65,0.12);
+    box-shadow: 0 0 20px rgba(0,255,65,0.02);
+}
+
+[data-theme="hacker"] .panel:hover {
+    border-color: rgba(0,255,65,0.25);
+    box-shadow: 0 0 30px rgba(0,255,65,0.06);
+}
+
+.panel-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--text-primary);
+    transition: color 0.3s;
+}
+
+.panel-title i {
+    color: var(--primary);
+    font-size: 14px;
+}
+
+[data-theme="hacker"] .panel-title {
+    text-shadow: 0 0 10px rgba(0,255,65,0.2);
+    letter-spacing: 1px;
+}
+
+.panel-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+[data-theme="hacker"] .panel-sub { color: rgba(0,255,65,0.5); }
+
+/* ═══════════════════════════════════════════
+   DROPZONE
+═══════════════════════════════════════════ */
+.dropzone {
+    border: 1.5px dashed var(--dz-border);
+    border-radius: 12px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--bg-inset);
+    position: relative;
+    overflow: hidden;
+}
+
+.dropzone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(var(--primary-rgb),0.05), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.dropzone:hover::before,
+.dropzone.drag::before { opacity: 1; }
+
+.dropzone:hover,
+.dropzone.drag {
+    border-color: var(--dz-hover-border);
+    background: var(--dz-hover-bg);
+}
+
+[data-theme="normal"] .dropzone:hover,
+[data-theme="normal"] .dropzone.drag {
+    box-shadow: 0 0 0 4px rgba(108,99,255,0.08);
+}
+
+[data-theme="hacker"] .dropzone:hover,
+[data-theme="hacker"] .dropzone.drag {
+    box-shadow: 0 0 30px rgba(0,255,65,0.1);
+}
+
+.dropzone .dz-icon {
+    font-size: 28px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 12px;
+    position: relative;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.dropzone:hover .dz-icon,
+.dropzone.drag .dz-icon {
+    color: var(--primary);
+    transform: translateY(-3px);
+}
+
+[data-theme="hacker"] .dropzone:hover .dz-icon {
+    text-shadow: 0 0 12px rgba(0,255,65,0.6);
+}
+
+.dropzone .dz-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+    position: relative;
+    transition: color 0.3s;
+}
+
+.dropzone .dz-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    position: relative;
+    transition: color 0.3s;
+}
+
+[data-theme="hacker"] .dropzone .dz-sub { color: rgba(0,255,65,0.4); }
+
+.dz-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+    position: relative;
+    flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    padding: 10px 18px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-inset);
+    color: var(--text-primary);
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+    transform: translateY(-1px);
+}
+
+[data-theme="hacker"] .btn {
+    background: transparent;
+    border-color: rgba(0,255,65,0.25);
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+[data-theme="hacker"] .btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 15px rgba(0,255,65,0.15);
+    text-shadow: 0 0 8px rgba(0,255,65,0.4);
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: var(--shadow-btn);
+}
+
+[data-theme="hacker"] .btn-primary {
+    color: #000;
+    letter-spacing: 2px;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(var(--primary-rgb),0.4);
+    border: none;
+}
+
+[data-theme="hacker"] .btn-primary:hover { color: #000; }
+
+.btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: none;
+    transform: none;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+}
+
+[data-theme="hacker"] .btn-ghost {
+    border-color: rgba(0,255,65,0.15);
+}
+
+.btn-ghost:hover {
+    border-color: var(--primary);
+    background: var(--glass);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+}
+
+input[type="file"] { display: none; }
+
+/* ═══════════════════════════════════════════
+   FILE LIST
+═══════════════════════════════════════════ */
+.file-stage {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.file-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.file-row:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+}
+
+[data-theme="hacker"] .file-row:hover {
+    border-color: rgba(0,255,65,0.25);
+    box-shadow: 0 0 10px rgba(0,255,65,0.04);
+}
+
+.file-row .f-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(var(--primary-rgb),0.1);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+[data-theme="hacker"] .file-row .f-icon {
+    background: rgba(0,255,65,0.07);
+    box-shadow: 0 0 8px rgba(0,255,65,0.06);
+}
+
+.file-row .f-meta { flex: 1; min-width: 0; }
+
+.file-row .f-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.file-row .f-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+}
+
+.file-row .f-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.file-row .f-remove:hover {
+    color: var(--danger);
+    background: var(--danger-dim);
+}
+
+/* ═══════════════════════════════════════════
+   OPTION ROWS & INPUTS
+═══════════════════════════════════════════ */
+.opt-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.opt-field {
+    flex: 1;
+    min-width: 150px;
+}
+
+.opt-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+[data-theme="hacker"] .opt-field label {
+    color: rgba(0,255,65,0.6);
+    letter-spacing: 2px;
+}
+
+.opt-select,
+.opt-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    transition: all 0.25s;
+    outline: none;
+}
+
+[data-theme="hacker"] .opt-select,
+[data-theme="hacker"] .opt-input {
+    background: #000;
+    border-color: rgba(0,255,65,0.2);
+    caret-color: var(--primary);
+}
+
+[data-theme="hacker"] .opt-input::placeholder {
+    color: rgba(0,255,65,0.25);
+}
+
+.opt-select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.opt-select:focus,
+.opt-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+[data-theme="hacker"] .opt-select:focus,
+[data-theme="hacker"] .opt-input:focus {
+    box-shadow: 0 0 0 3px rgba(0,255,65,0.08), 0 0 15px rgba(0,255,65,0.06);
+}
+
+.algo-checks {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+}
+
+.algo-checks label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+}
+
+.algo-checks label:hover { color: var(--primary); }
+
+.algo-checks input {
+    accent-color: var(--primary);
+    width: 15px;
+    height: 15px;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 22px 0;
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+.progress-wrap { display: none; margin: 18px 0; }
+.progress-wrap.show {
+    display: block;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.progress-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--bg-inset);
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--progress-gradient);
+    width: 0%;
+    transition: width 0.25s;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 30px; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35));
+    animation: progressShine 1.5s ease-in-out infinite;
+}
+
+[data-theme="hacker"] .progress-fill::after {
+    background: linear-gradient(90deg, transparent, rgba(0,255,65,0.5));
+}
+
+@keyframes progressShine {
+    0%   { transform: translateX(-30px); opacity: 0; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(0); opacity: 0; }
+}
+
+.progress-label {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 7px;
+    font-family: var(--font-mono);
+}
+
+[data-theme="hacker"] .progress-label {
+    color: var(--primary);
+    text-shadow: 0 0 6px rgba(0,255,65,0.3);
+}
+
+/* ═══════════════════════════════════════════
+   MANIFEST OUTPUT BOX
+═══════════════════════════════════════════ */
+.manifest-box { display: none; margin-top: 0; }
+.manifest-box.show {
+    display: block;
+    animation: fadeSlideIn 0.35s ease;
+}
+
+.signed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--radius-xs);
+    margin-bottom: 18px;
+}
+
+.signed-badge.on {
+    background: var(--success-dim);
+    color: var(--success);
+    border: 1px solid rgba(var(--primary-rgb),0.15);
+}
+
+[data-theme="hacker"] .signed-badge.on {
+    box-shadow: 0 0 12px rgba(0,255,65,0.1);
+    text-shadow: 0 0 8px rgba(0,255,65,0.4);
+}
+
+.signed-badge.off {
+    background: var(--glass);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.manifest-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════
+   RESULTS — SUMMARY STRIP & TABLE
+═══════════════════════════════════════════ */
+.summary-strip {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.summary-chip {
+    flex: 1;
+    min-width: 110px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: all 0.3s;
+}
+
+.summary-chip:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.summary-chip .sc-num {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    display: block;
+}
+
+.summary-chip .sc-label {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 5px;
+    display: block;
+}
+
+.summary-chip.verified .sc-num { color: var(--success); }
+.summary-chip.modified .sc-num { color: var(--danger); }
+.summary-chip.missing .sc-num  { color: var(--warning); }
+.summary-chip.extra .sc-num    { color: var(--violet); }
+
+[data-theme="hacker"] .summary-chip.verified .sc-num { text-shadow: 0 0 12px rgba(0,255,65,0.4); }
+[data-theme="hacker"] .summary-chip.modified .sc-num { text-shadow: 0 0 12px rgba(255,0,64,0.4); }
+[data-theme="hacker"] .summary-chip.missing .sc-num  { text-shadow: 0 0 12px rgba(255,215,0,0.4); }
+[data-theme="hacker"] .summary-chip.extra .sc-num    { text-shadow: 0 0 12px rgba(179,136,255,0.4); }
+
+.result-table {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.result-row {
+    display: grid;
+    grid-template-columns: 30px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 14px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.result-row:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+}
+
+[data-theme="hacker"] .result-row:hover {
+    border-color: rgba(0,255,65,0.2);
+    box-shadow: 0 0 12px rgba(0,255,65,0.04);
+}
+
+.result-row .r-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.result-row.verified .r-icon { background: var(--success-dim); color: var(--success); }
+.result-row.modified .r-icon { background: var(--danger-dim);  color: var(--danger); }
+.result-row.missing  .r-icon { background: var(--warning-dim); color: var(--warning); }
+.result-row.extra    .r-icon { background: var(--violet-dim);  color: var(--violet); }
+
+[data-theme="hacker"] .result-row.verified .r-icon { box-shadow: 0 0 10px rgba(0,255,65,0.2); }
+[data-theme="hacker"] .result-row.modified .r-icon { box-shadow: 0 0 10px rgba(255,0,64,0.2); }
+[data-theme="hacker"] .result-row.missing  .r-icon { box-shadow: 0 0 10px rgba(255,215,0,0.15); }
+[data-theme="hacker"] .result-row.extra    .r-icon { box-shadow: 0 0 10px rgba(179,136,255,0.15); }
+
+.result-row .r-name {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.result-row .r-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+}
+
+.result-row .r-status {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.result-row.verified .r-status { color: var(--success); }
+.result-row.modified .r-status { color: var(--danger); }
+.result-row.missing  .r-status { color: var(--warning); }
+.result-row.extra    .r-status { color: var(--violet); }
+
+[data-theme="hacker"] .result-row.verified .r-status { text-shadow: 0 0 6px rgba(0,255,65,0.4); }
+[data-theme="hacker"] .result-row.modified .r-status { text-shadow: 0 0 6px rgba(255,0,64,0.4); }
+
+/* ═══════════════════════════════════════════
+   VERIFY NOTES
+═══════════════════════════════════════════ */
+.manifest-verify-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+}
+
+.manifest-verify-note.ok {
+    background: var(--success-dim);
+    color: var(--success);
+    border: 1px solid rgba(var(--primary-rgb),0.12);
+}
+
+[data-theme="hacker"] .manifest-verify-note.ok {
+    box-shadow: 0 0 15px rgba(0,255,65,0.08);
+    text-shadow: 0 0 6px rgba(0,255,65,0.3);
+}
+
+.manifest-verify-note.bad {
+    background: var(--danger-dim);
+    color: var(--danger);
+    border: 1px solid rgba(255,77,106,0.15);
+}
+
+[data-theme="hacker"] .manifest-verify-note.bad {
+    box-shadow: 0 0 15px rgba(255,0,64,0.08);
+}
+
+.manifest-verify-note.neutral {
+    background: var(--glass);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="hacker"] .manifest-verify-note.neutral {
+    color: rgba(0,255,65,0.6);
+}
+
+/* ═══════════════════════════════════════════
+   QUICK CHECK — HASH DISPLAY
+═══════════════════════════════════════════ */
+.hash-display {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    word-break: break-all;
+    padding: 14px 16px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    line-height: 1.7;
+    color: var(--secondary);
+    transition: all 0.3s;
+}
+
+[data-theme="normal"] .hash-display {
+    background: rgba(0,180,216,0.04);
+    border-color: rgba(0,180,216,0.2);
+}
+
+[data-theme="hacker"] .hash-display {
+    color: var(--primary);
+    text-shadow: 0 0 6px rgba(0,255,65,0.2);
+    border-color: rgba(0,255,65,0.2);
+    background: rgba(0,255,65,0.02);
+}
+
+.match-result {
+    margin-top: 14px;
+    padding: 13px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    align-items: center;
+    gap: 9px;
+}
+
+.match-result.show {
+    display: flex;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.match-result.ok {
+    background: var(--success-dim);
+    color: var(--success);
+    border: 1px solid rgba(var(--primary-rgb),0.1);
+}
+
+[data-theme="hacker"] .match-result.ok {
+    box-shadow: 0 0 15px rgba(0,255,65,0.08);
+    text-shadow: 0 0 8px rgba(0,255,65,0.4);
+}
+
+.match-result.bad {
+    background: var(--danger-dim);
+    color: var(--danger);
+    border: 1px solid rgba(255,77,106,0.15);
+}
+
+[data-theme="hacker"] .match-result.bad {
+    box-shadow: 0 0 15px rgba(255,0,64,0.1);
+}
+
+/* ═══════════════════════════════════════════
+   HINTS
+═══════════════════════════════════════════ */
+.hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+}
+
+[data-theme="hacker"] .hint {
+    color: rgba(0,255,65,0.45);
+    border-color: rgba(0,255,65,0.1);
+}
+
+.hint code {
+    background: var(--bg-inset);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+}
+
+[data-theme="hacker"] .hint code {
+    text-shadow: 0 0 6px rgba(0,255,65,0.3);
+    border-color: rgba(0,255,65,0.2);
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.tool-footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+}
+
+.tool-footer p {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tool-footer i { color: var(--primary); }
+
+[data-theme="hacker"] .tool-footer {
+    border-color: rgba(0,255,65,0.1);
+}
+
+[data-theme="hacker"] .tool-footer p {
+    color: rgba(0,255,65,0.4);
+    text-shadow: 0 0 5px rgba(0,255,65,0.1);
+    letter-spacing: 1px;
+}
+
+.footer-tags {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.footer-tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+[data-theme="hacker"] .footer-tag {
+    color: rgba(0,255,65,0.4);
+    border-color: rgba(0,255,65,0.12);
+}
+
+/* ═══════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════ */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    user-select: none;
+    font-family: var(--font-body);
+}
+
+.theme-toggle:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.theme-toggle-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+[data-theme="hacker"] .theme-toggle-label {
+    color: var(--primary);
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px rgba(0,255,65,0.3);
+}
+
+.toggle-switch {
+    width: 34px;
+    height: 19px;
+    background: var(--glass-border);
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.3s;
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: all 0.3s;
+}
+
+[data-theme="hacker"] .toggle-switch {
+    background: rgba(0,255,65,0.2);
+}
+
+[data-theme="hacker"] .toggle-switch::after {
+    left: 18px;
+    background: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+}
+
+/* ═══════════════════════════════════════════
+   HACKER MODE — GLITCH EFFECTS ON TITLE
+═══════════════════════════════════════════ */
+[data-theme="hacker"] .tool-title {
+    animation: titleGlitch 4s infinite;
+}
+
+@keyframes titleGlitch {
+    0%, 85%, 100% { transform: translate(0); }
+    86% { transform: translate(-2px, 1px); }
+    87% { transform: translate(2px, -1px); }
+    88% { transform: translate(-1px, 0); }
+    89% { transform: translate(0); }
+}
+
+[data-theme="hacker"] .panel-title {
+    animation: borderPulse 3s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* ═══════════════════════════════════════════
+   HACKER MODE — GRID BACKGROUND
+═══════════════════════════════════════════ */
+[data-theme="hacker"] body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+        linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0%   { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+}
+
+.shell { position: relative; z-index: 2; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+    .shell { padding: 24px 16px 60px; }
+    .topbar { flex-direction: column; }
+    .mode-tabs { flex-direction: column; gap: 4px; }
+    .mode-tab { justify-content: flex-start; padding: 11px 14px; }
+    .result-row { grid-template-columns: 26px 1fr; }
+    .result-row .r-status { grid-column: 2; justify-self: start; }
+    .summary-strip { flex-direction: column; }
+    .manifest-actions { flex-direction: column; }
+    .manifest-actions .btn { width: 100%; justify-content: center; }
+    .dz-actions { flex-direction: column; align-items: stretch; }
+    .dz-actions .btn { width: 100%; justify-content: center; }
+    .tool-header { flex-direction: column; }
+    .topbar-right { flex-wrap: wrap; }
+}
+
+@media (max-width: 480px) {
+    .summary-chip { min-width: calc(50% - 5px); }
+    .theme-toggle-label { display: none; }
+}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+    <!-- ══════════════ TOPBAR ══════════════ -->
+    <div class="topbar">
+        <a href="index.html" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Back to CryptoKit
+        </a>
+        <div class="topbar-right">
+            <div class="security-badge">
+                <i class="fa-solid fa-lock"></i>
+                100% Client-Side — Files Never Leave Your Browser
+            </div>
+            <div class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                <span class="theme-toggle-label" id="themeLabel">Normal</span>
+                <div class="toggle-switch"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ HEADER ══════════════ -->
+    <div class="section-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        Cryptographic Tool
+    </div>
+
+    <div class="tool-header">
+        <div class="tool-icon-wrap">
+            <i class="fa-solid fa-fingerprint"></i>
+        </div>
+        <div class="tool-header-text">
+            <div class="tool-title">File Integrity Checker</div>
+            <div class="tool-subtitle">
+                Generate cryptographic fingerprints for your files, sign manifests with passphrases,
+                and verify file integrity — all locally in your browser using Web Crypto API.
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ MODE TABS ══════════════ -->
+    <div class="mode-tabs">
+        <div class="mode-tab active" id="tabCreate" onclick="setMode('create')">
+            <i class="fa-solid fa-stamp"></i> Create &amp; Sign
+        </div>
+        <div class="mode-tab" id="tabVerify" onclick="setMode('verify')">
+            <i class="fa-solid fa-shield-halved"></i> Verify Files
+        </div>
+        <div class="mode-tab" id="tabQuick" onclick="setMode('quick')">
+            <i class="fa-solid fa-bolt"></i> Quick Check
+        </div>
+    </div>
+
+    <!-- ══════════════ CREATE & SIGN ══════════════ -->
+    <div class="mode-panel active" id="panelCreate">
+
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-folder-open"></i> Stage Files
+            </div>
+            <div class="panel-sub">
+                Add any documents, images, or files you want to fingerprint. Nothing leaves this page.
+            </div>
+
+            <div class="dropzone" id="dzCreate">
+                <i class="fa-solid fa-cloud-arrow-up dz-icon"></i>
+                <div class="dz-title">Drag &amp; drop files here</div>
+                <div class="dz-sub">or use the buttons below — folders supported</div>
+                <div class="dz-actions">
+                    <button class="btn" onclick="event.stopPropagation(); document.getElementById('createFileInput').click()">
+                        <i class="fa-solid fa-file"></i> Choose Files
+                    </button>
+                    <button class="btn" onclick="event.stopPropagation(); document.getElementById('createFolderInput').click()">
+                        <i class="fa-solid fa-folder"></i> Choose Folder
+                    </button>
+                </div>
+                <input type="file" id="createFileInput" multiple onchange="stageFiles(this.files,'create')">
+                <input type="file" id="createFolderInput" webkitdirectory directory multiple onchange="stageFiles(this.files,'create')">
+            </div>
+
+            <div class="file-stage" id="createFileStage"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-sliders"></i> Manifest Options
+            </div>
+            <div class="panel-sub">
+                Choose which algorithms to compute, and optionally sign the manifest so it can't be silently edited.
+            </div>
+
+            <div class="opt-row">
+                <div class="opt-field">
+                    <label>Hash Algorithms</label>
+                    <div class="algo-checks">
+                        <label><input type="checkbox" class="create-algo" value="sha256" checked> SHA-256</label>
+                        <label><input type="checkbox" class="create-algo" value="sha512"> SHA-512</label>
+                        <label><input type="checkbox" class="create-algo" value="md5"> MD5</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="opt-row">
+                <div class="opt-field">
+                    <label>Sign Manifest with Passphrase
+                        <span style="text-transform:none;color:var(--text-muted);font-weight:400;letter-spacing:0;">&nbsp;(optional)</span>
+                    </label>
+                    <input type="password" class="opt-input" id="createPassphrase"
+                        placeholder="Leave blank for an unsigned manifest">
+                </div>
+            </div>
+
+            <div class="hint">
+                <i class="fa-solid fa-circle-info" style="color:var(--primary);margin-right:6px;"></i>
+                Signing uses <code>PBKDF2 → HMAC-SHA256</code> so a manifest can't be edited without the same
+                passphrase — protects against someone tampering with the hash list itself, not just the files.
+            </div>
+
+            <div class="progress-wrap" id="createProgress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="createProgressFill"></div>
+                </div>
+                <div class="progress-label" id="createProgressLabel">Hashing…</div>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="createGenerateBtn"
+                style="margin-top:20px;" onclick="generateManifest()">
+                <i class="fa-solid fa-fingerprint"></i> Generate &amp; Sign Manifest
+            </button>
+        </div>
+
+        <div class="panel manifest-box" id="manifestBox">
+            <div class="panel-title">
+                <i class="fa-solid fa-file-shield"></i> Manifest Ready
+            </div>
+            <span class="signed-badge" id="signedBadge"></span>
+            <div class="manifest-actions">
+                <button class="btn btn-primary" onclick="downloadManifestJson()">
+                    <i class="fa-solid fa-download"></i> Download manifest.json
+                </button>
+                <button class="btn" onclick="downloadChecksumTxt()">
+                    <i class="fa-solid fa-file-lines"></i> Download checksums.txt
+                </button>
+                <button class="btn btn-ghost" onclick="copyManifestJson()">
+                    <i class="fa-solid fa-copy"></i> Copy JSON
+                </button>
+            </div>
+            <div class="hint" style="margin-top:16px;">
+                <i class="fa-solid fa-circle-info" style="color:var(--primary);margin-right:6px;"></i>
+                Keep <code>manifest.json</code> alongside the files (or store it separately for extra safety).
+                Use the <b>Verify Files</b> tab later with this manifest to check nothing changed.
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ VERIFY ══════════════ -->
+    <div class="mode-panel" id="panelVerify">
+
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-file-shield"></i> Load Manifest
+            </div>
+            <div class="panel-sub">
+                Upload the manifest.json you generated earlier, or paste it directly.
+            </div>
+            <div class="dz-actions" style="justify-content:flex-start; margin-bottom:0;">
+                <button class="btn" onclick="document.getElementById('manifestFileInput').click()">
+                    <i class="fa-solid fa-file-import"></i> Upload manifest.json
+                </button>
+                <button class="btn btn-ghost" onclick="togglePasteManifest()">
+                    <i class="fa-solid fa-paste"></i> Paste JSON
+                </button>
+            </div>
+            <input type="file" id="manifestFileInput" accept=".json" onchange="loadManifestFile(this.files[0])">
+            <textarea class="opt-input" id="manifestPasteArea"
+                style="display:none; margin-top:14px; min-height:100px; font-size:12px;"
+                placeholder="Paste manifest JSON here..."
+                oninput="parseManifestText(this.value)"></textarea>
+            <div id="manifestLoadedInfo" style="margin-top:14px;"></div>
+
+            <div class="opt-row" id="verifyPassphraseRow" style="display:none; margin-top:14px;">
+                <div class="opt-field">
+                    <label>Passphrase (manifest is signed)</label>
+                    <input type="password" class="opt-input" id="verifyPassphrase"
+                        placeholder="Enter the passphrase used to sign this manifest"
+                        oninput="checkManifestSignature()">
+                </div>
+            </div>
+            <div class="manifest-verify-note neutral" id="signatureStatus" style="display:none;"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-folder-open"></i> Upload Files to Check
+            </div>
+            <div class="panel-sub">
+                Add the same files (or folder) you want to verify against the manifest.
+            </div>
+            <div class="dropzone" id="dzVerify">
+                <i class="fa-solid fa-cloud-arrow-up dz-icon"></i>
+                <div class="dz-title">Drag &amp; drop files here</div>
+                <div class="dz-sub">or use the buttons below</div>
+                <div class="dz-actions">
+                    <button class="btn" onclick="event.stopPropagation(); document.getElementById('verifyFileInput').click()">
+                        <i class="fa-solid fa-file"></i> Choose Files
+                    </button>
+                    <button class="btn" onclick="event.stopPropagation(); document.getElementById('verifyFolderInput').click()">
+                        <i class="fa-solid fa-folder"></i> Choose Folder
+                    </button>
+                </div>
+                <input type="file" id="verifyFileInput" multiple onchange="stageFiles(this.files,'verify')">
+                <input type="file" id="verifyFolderInput" webkitdirectory directory multiple onchange="stageFiles(this.files,'verify')">
+            </div>
+            <div class="file-stage" id="verifyFileStage"></div>
+
+            <div class="progress-wrap" id="verifyProgress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="verifyProgressFill"></div>
+                </div>
+                <div class="progress-label" id="verifyProgressLabel">Checking…</div>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="verifyRunBtn"
+                style="margin-top:20px;" onclick="runVerification()">
+                <i class="fa-solid fa-magnifying-glass"></i> Verify Integrity
+            </button>
+        </div>
+
+        <div class="panel" id="verifyResultsBox" style="display:none;">
+            <div class="panel-title">
+                <i class="fa-solid fa-clipboard-check"></i> Results
+            </div>
+            <div class="summary-strip" id="summaryStrip"></div>
+            <div class="result-table" id="resultTable"></div>
+            <div class="manifest-actions" style="margin-top:18px;">
+                <button class="btn btn-ghost" onclick="downloadVerificationReport()">
+                    <i class="fa-solid fa-download"></i> Download report.csv
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ QUICK CHECK ══════════════ -->
+    <div class="mode-panel" id="panelQuick">
+        <div class="panel">
+            <div class="panel-title">
+                <i class="fa-solid fa-bolt"></i> Quick Single-File Check
+            </div>
+            <div class="panel-sub">
+                No manifest needed — hash one file and compare it against a hash you already have
+                (e.g. from a download page).
+            </div>
+
+            <div class="dropzone" id="dzQuick">
+                <i class="fa-solid fa-file-arrow-up dz-icon"></i>
+                <div class="dz-title">Drag &amp; drop a single file</div>
+                <div class="dz-sub">or click to choose</div>
+                <input type="file" id="quickFileInput" onchange="quickFileSelected(this.files[0])">
+            </div>
+            <div id="quickFileInfo" style="margin-top:14px;"></div>
+
+            <div class="opt-row" style="margin-top:18px;">
+                <div class="opt-field">
+                    <label>Algorithm</label>
+                    <select class="opt-select" id="quickAlgo" onchange="recomputeQuickHash()">
+                        <option value="sha256" selected>SHA-256</option>
+                        <option value="sha512">SHA-512</option>
+                        <option value="md5">MD5</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="hash-display" id="quickHashOut">
+                Computed hash will appear here…
+            </div>
+
+            <div class="opt-row" style="margin-top:18px;">
+                <div class="opt-field">
+                    <label>Compare Against</label>
+                    <input type="text" class="opt-input" id="quickCompareInput"
+                        placeholder="Paste the expected hash to compare..."
+                        oninput="checkQuickMatch()">
+                </div>
+            </div>
+            <div class="match-result" id="quickMatchResult"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════ FOOTER ══════════════ -->
+    <div class="tool-footer">
+        <p>
+            <i class="fa-solid fa-shield-halved"></i>
+            CryptoKit — File Integrity Checker runs 100% client-side
+        </p>
+        <div class="footer-tags">
+            <span class="footer-tag">Web Crypto API</span>
+            <span class="footer-tag">PBKDF2</span>
+            <span class="footer-tag">HMAC-SHA256</span>
+            <span class="footer-tag">SHA-512</span>
+            <span class="footer-tag">MD5</span>
+        </div>
+    </div>
+
+</div><!-- /.shell -->
+
+<script>
+/* ═══════════════════════════════════════════════
+   THEME MANAGEMENT
+═══════════════════════════════════════════════ */
+(function() {
+    var saved = localStorage.getItem('cryptokit-theme') || 'normal';
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeUI(saved);
+})();
+
+function toggleTheme() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'hacker' ? 'normal' : 'hacker';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('cryptokit-theme', next);
+    updateThemeUI(next);
+}
+
+function updateThemeUI(theme) {
+    var label = document.getElementById('themeLabel');
+    if (label) {
+        label.textContent = theme === 'hacker' ? 'HACKER' : 'Normal';
+    }
+}
+
+/* ═══════════════════════════════════════════════
+   MD5 IMPLEMENTATION
+═══════════════════════════════════════════════ */
+function md5FromBytes(msg) {
+    function rotl(x, c) { return (x << c) | (x >>> (32 - c)); }
+    var K = new Uint32Array([
+        0xd76aa478,0xe8c7b756,0x242070db,0xc1bdceee,0xf57c0faf,0x4787c62a,0xa8304613,0xfd469501,
+        0x698098d8,0x8b44f7af,0xffff5bb1,0x895cd7be,0x6b901122,0xfd987193,0xa679438e,0x49b40821,
+        0xf61e2562,0xc040b340,0x265e5a51,0xe9b6c7aa,0xd62f105d,0x02441453,0xd8a1e681,0xe7d3fbc8,
+        0x21e1cde6,0xc33707d6,0xf4d50d87,0x455a14ed,0xa9e3e905,0xfcefa3f8,0x676f02d9,0x8d2a4c8a,
+        0xfffa3942,0x8771f681,0x6d9d6122,0xfde5380c,0xa4beea44,0x4bdecfa9,0xf6bb4b60,0xbebfbc70,
+        0x289b7ec6,0xeaa127fa,0xd4ef3085,0x04881d05,0xd9d4d039,0xe6db99e5,0x1fa27cf8,0xc4ac5665,
+        0xf4292244,0x432aff97,0xab9423a7,0xfc93a039,0x655b59c3,0x8f0ccc92,0xffeff47d,0x85845dd1,
+        0x6fa87e4f,0xfe2ce6e0,0xa3014314,0x4e0811a1,0xf7537e82,0xbd3af235,0x2ad7d2bb,0xeb86d391
+    ]);
+    var S = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
+             5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+             4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
+             6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+    var origLenBits = msg.length * 8;
+    var totalLen = Math.ceil((msg.length + 9) / 64) * 64;
+    var padded = new Uint8Array(totalLen);
+    padded.set(msg);
+    padded[msg.length] = 0x80;
+    var view = new DataView(padded.buffer);
+    view.setUint32(totalLen - 8, origLenBits >>> 0, true);
+    view.setUint32(totalLen - 4, Math.floor(origLenBits / 0x100000000), true);
+    var a0=0x67452301, b0=0xefcdab89, c0=0x98badcfe, d0=0x10325476;
+    for (var cs = 0; cs < totalLen; cs += 64) {
+        var M = new Uint32Array(16);
+        for (var j = 0; j < 16; j++) M[j] = view.getUint32(cs + j*4, true);
+        var A=a0, B=b0, C=c0, D=d0;
+        for (var i = 0; i < 64; i++) {
+            var F, g;
+            if (i<16) { F=(B&C)|(~B&D); g=i; }
+            else if (i<32) { F=(D&B)|(~D&C); g=(5*i+1)%16; }
+            else if (i<48) { F=B^C^D; g=(3*i+5)%16; }
+            else { F=C^(B|~D); g=(7*i)%16; }
+            F=(F+A+K[i]+M[g])>>>0;
+            A=D; D=C; C=B; B=(B+rotl(F,S[i]))>>>0;
+        }
+        a0=(a0+A)>>>0; b0=(b0+B)>>>0; c0=(c0+C)>>>0; d0=(d0+D)>>>0;
+    }
+    function toHexLE(n) {
+        return [n&0xff,(n>>>8)&0xff,(n>>>16)&0xff,(n>>>24)&0xff]
+            .map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    }
+    return toHexLE(a0)+toHexLE(b0)+toHexLE(c0)+toHexLE(d0);
+}
+
+/* ═══════════════════════════════════════════════
+   CRYPTO HELPERS
+═══════════════════════════════════════════════ */
+function bufToHex(buf) {
+    return Array.from(new Uint8Array(buf))
+        .map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
+async function computeHash(algo, bytes) {
+    if (algo === 'md5') return md5FromBytes(bytes);
+    if (algo === 'sha256') return bufToHex(await crypto.subtle.digest('SHA-256', bytes));
+    if (algo === 'sha512') return bufToHex(await crypto.subtle.digest('SHA-512', bytes));
+}
+
+function readFileBytes(file) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) { resolve(new Uint8Array(e.target.result)); };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+/* ═══════════════════════════════════════════════
+   PBKDF2 → HMAC-SHA256 SIGNING
+═══════════════════════════════════════════════ */
+async function deriveHmacKey(passphrase, saltB64) {
+    var salt = saltB64 ? base64ToBytes(saltB64) : crypto.getRandomValues(new Uint8Array(16));
+    var baseKey = await crypto.subtle.importKey(
+        'raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+    var hmacKey = await crypto.subtle.deriveKey(
+        { name:'PBKDF2', salt:salt, iterations:150000, hash:'SHA-256' },
+        baseKey,
+        { name:'HMAC', hash:'SHA-256', length:256 },
+        false, ['sign','verify']
+    );
+    return { key: hmacKey, salt: salt };
+}
+
+async function signManifestPayload(payloadStr, passphrase) {
+    var derived = await deriveHmacKey(passphrase, null);
+    var sigBuf = await crypto.subtle.sign('HMAC', derived.key, new TextEncoder().encode(payloadStr));
+    return { signature: bytesToBase64(new Uint8Array(sigBuf)), salt: bytesToBase64(derived.salt) };
+}
+
+async function verifyManifestSignature(payloadStr, passphrase, signatureB64, saltB64) {
+    var derived = await deriveHmacKey(passphrase, saltB64);
+    var sigBytes = base64ToBytes(signatureB64);
+    return crypto.subtle.verify('HMAC', derived.key, sigBytes, new TextEncoder().encode(payloadStr));
+}
+
+function bytesToBase64(bytes) {
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+}
+
+function base64ToBytes(b64) {
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+}
+
+/* ═══════════════════════════════════════════════
+   UTILITY HELPERS
+═══════════════════════════════════════════════ */
+function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    if (bytes < 1024*1024*1024) return (bytes/(1024*1024)).toFixed(1) + ' MB';
+    return (bytes/(1024*1024*1024)).toFixed(2) + ' GB';
+}
+
+function fileIconClass(name) {
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    if (['png','jpg','jpeg','gif','webp','svg','bmp'].indexOf(ext) !== -1) return 'fa-image';
+    if (['pdf'].indexOf(ext) !== -1) return 'fa-file-pdf';
+    if (['doc','docx'].indexOf(ext) !== -1) return 'fa-file-word';
+    if (['xls','xlsx','csv'].indexOf(ext) !== -1) return 'fa-file-excel';
+    if (['zip','rar','7z','tar','gz'].indexOf(ext) !== -1) return 'fa-file-zipper';
+    if (['mp4','mov','avi','mkv'].indexOf(ext) !== -1) return 'fa-file-video';
+    if (['mp3','wav','flac'].indexOf(ext) !== -1) return 'fa-file-audio';
+    return 'fa-file';
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+}
+
+/* ═══════════════════════════════════════════════
+   MODE SWITCHING
+═══════════════════════════════════════════════ */
+function setMode(mode) {
+    ['Create','Verify','Quick'].forEach(function(m) {
+        document.getElementById('tab' + m).classList.toggle('active', m.toLowerCase() === mode);
+        document.getElementById('panel' + m).classList.toggle('active', m.toLowerCase() === mode);
+    });
+}
+
+/* ═══════════════════════════════════════════════
+   STAGED FILE STATE
+═══════════════════════════════════════════════ */
+var stagedFiles = { create: [], verify: [] };
+
+function stageFiles(fileList, target) {
+    stagedFiles[target] = stagedFiles[target].concat(Array.from(fileList));
+    renderFileStage(target);
+}
+
+function removeStagedFile(target, idx) {
+    stagedFiles[target].splice(idx, 1);
+    renderFileStage(target);
+}
+
+function renderFileStage(target) {
+    var container = document.getElementById(target === 'create' ? 'createFileStage' : 'verifyFileStage');
+    var files = stagedFiles[target];
+    if (!files.length) { container.innerHTML = ''; return; }
+    container.innerHTML = files.map(function(f, idx) {
+        var displayName = f.webkitRelativePath || f.name;
+        return '<div class="file-row">' +
+            '<div class="f-icon"><i class="fa-solid ' + fileIconClass(f.name) + '"></i></div>' +
+            '<div class="f-meta">' +
+            '<div class="f-name">' + escapeHtml(displayName) + '</div>' +
+            '<div class="f-sub">' + formatSize(f.size) + '</div>' +
+            '</div>' +
+            '<button class="f-remove" onclick="removeStagedFile(\'' + target + '\',' + idx + ')" title="Remove">' +
+            '<i class="fa-solid fa-xmark"></i></button>' +
+            '</div>';
+    }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   DRAG & DROP WIRING
+═══════════════════════════════════════════════ */
+function wireDropzone(id, target) {
+    var dz = document.getElementById(id);
+    dz.addEventListener('click', function(e) {
+        if (e.target.closest('.dz-actions') || e.target.closest('input')) return;
+        if (target === 'quick') document.getElementById('quickFileInput').click();
+    });
+    dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('drag'); });
+    dz.addEventListener('dragleave', function() { dz.classList.remove('drag'); });
+    dz.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dz.classList.remove('drag');
+        if (target === 'quick') {
+            if (e.dataTransfer.files.length) quickFileSelected(e.dataTransfer.files[0]);
+        } else {
+            stageFiles(e.dataTransfer.files, target);
+        }
+    });
+}
+
+wireDropzone('dzCreate', 'create');
+wireDropzone('dzVerify', 'verify');
+wireDropzone('dzQuick', 'quick');
+
+/* ═══════════════════════════════════════════════
+   CREATE & SIGN
+═══════════════════════════════════════════════ */
+var lastManifest = null;
+var lastManifestPayloadStr = null;
+
+function getSelectedCreateAlgos() {
+    return Array.from(document.querySelectorAll('.create-algo'))
+        .filter(function(c){return c.checked;})
+        .map(function(c){return c.value;});
+}
+
+async function generateManifest() {
+    var files = stagedFiles.create;
+    if (!files.length) { alert('Add at least one file first.'); return; }
+    var algos = getSelectedCreateAlgos();
+    if (!algos.length) { alert('Select at least one hash algorithm.'); return; }
+
+    var btn = document.getElementById('createGenerateBtn');
+    var progressWrap = document.getElementById('createProgress');
+    var fill = document.getElementById('createProgressFill');
+    var label = document.getElementById('createProgressLabel');
+
+    btn.disabled = true;
+    progressWrap.classList.add('show');
+
+    var entries = [];
+    for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        label.textContent = 'Hashing ' + (i+1) + ' / ' + files.length + ' — ' + f.name;
+        fill.style.width = Math.round((i / files.length) * 100) + '%';
+        var bytes = await readFileBytes(f);
+        var hashes = {};
+        for (var a = 0; a < algos.length; a++) {
+            hashes[algos[a]] = await computeHash(algos[a], bytes);
+        }
+        entries.push({
+            name: f.webkitRelativePath || f.name,
+            size: f.size,
+            type: f.type || 'application/octet-stream',
+            hashes: hashes
+        });
+    }
+    fill.style.width = '100%';
+    label.textContent = 'Done — ' + files.length + ' file(s) fingerprinted.';
+
+    var manifest = {
+        vaultmark_version: 1,
+        created_at: new Date().toISOString(),
+        algorithms: algos,
+        file_count: entries.length,
+        files: entries,
+        signature: null
+    };
+
+    var passphrase = document.getElementById('createPassphrase').value;
+    var payloadStr = JSON.stringify({
+        vaultmark_version: manifest.vaultmark_version,
+        created_at: manifest.created_at,
+        algorithms: manifest.algorithms,
+        file_count: manifest.file_count,
+        files: manifest.files
+    });
+
+    if (passphrase) {
+        var sig = await signManifestPayload(payloadStr, passphrase);
+        manifest.signature = {
+            alg: 'PBKDF2-HMAC-SHA256',
+            iterations: 150000,
+            salt: sig.salt,
+            value: sig.signature
+        };
+    }
+
+    lastManifest = manifest;
+    lastManifestPayloadStr = payloadStr;
+
+    document.getElementById('manifestBox').classList.add('show');
+    var badge = document.getElementById('signedBadge');
+    if (manifest.signature) {
+        badge.className = 'signed-badge on';
+        badge.innerHTML = '<i class="fa-solid fa-lock"></i> Signed Manifest — Tamper-Evident';
+    } else {
+        badge.className = 'signed-badge off';
+        badge.innerHTML = '<i class="fa-solid fa-lock-open"></i> Unsigned Manifest';
+    }
+
+    btn.disabled = false;
+    setTimeout(function() { progressWrap.classList.remove('show'); }, 1000);
+}
+
+function downloadManifestJson() {
+    if (!lastManifest) return;
+    var blob = new Blob([JSON.stringify(lastManifest, null, 2)], { type: 'application/json' });
+    triggerDownload(blob, 'manifest.json');
+}
+
+function downloadChecksumTxt() {
+    if (!lastManifest) return;
+    var primaryAlgo = lastManifest.algorithms[0];
+    var lines = lastManifest.files.map(function(f) {
+        return f.hashes[primaryAlgo] + '  ' + f.name;
+    });
+    var blob = new Blob([lines.join('\n') + '\n'], { type: 'text/plain' });
+    triggerDownload(blob, 'checksums_' + primaryAlgo + '.txt');
+}
+
+function copyManifestJson() {
+    if (!lastManifest) return;
+    navigator.clipboard.writeText(JSON.stringify(lastManifest, null, 2));
+}
+
+function triggerDownload(blob, filename) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+/* ═══════════════════════════════════════════════
+   VERIFY
+═══════════════════════════════════════════════ */
+var loadedManifest = null;
+
+function togglePasteManifest() {
+    var area = document.getElementById('manifestPasteArea');
+    area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+
+function loadManifestFile(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) { parseManifestText(e.target.result); };
+    reader.readAsText(file);
+}
+
+function parseManifestText(text) {
+    try {
+        var obj = JSON.parse(text);
+        if (!obj.files || !Array.isArray(obj.files))
+            throw new Error('Not a valid manifest (missing "files" array).');
+        loadedManifest = obj;
+        renderManifestInfo(obj);
+    } catch (err) {
+        document.getElementById('manifestLoadedInfo').innerHTML =
+            '<div class="manifest-verify-note bad" style="display:flex;">' +
+            '<i class="fa-solid fa-triangle-exclamation"></i> Could not parse: ' +
+            escapeHtml(err.message) + '</div>';
+        loadedManifest = null;
+    }
+}
+
+function renderManifestInfo(obj) {
+    var info = document.getElementById('manifestLoadedInfo');
+    info.innerHTML =
+        '<div class="manifest-verify-note neutral" style="display:flex;">' +
+        '<i class="fa-solid fa-circle-info"></i> Loaded — ' +
+        obj.file_count + ' file(s), created ' +
+        new Date(obj.created_at).toLocaleString() +
+        ', algorithms: ' + obj.algorithms.join(', ') + '</div>';
+
+    var passRow = document.getElementById('verifyPassphraseRow');
+    var sigStatus = document.getElementById('signatureStatus');
+    if (obj.signature) {
+        passRow.style.display = 'block';
+        sigStatus.style.display = 'flex';
+        sigStatus.className = 'manifest-verify-note neutral';
+        sigStatus.innerHTML = '<i class="fa-solid fa-key"></i> This manifest is signed — enter the passphrase to verify authenticity.';
+    } else {
+        passRow.style.display = 'none';
+        sigStatus.style.display = 'flex';
+        sigStatus.className = 'manifest-verify-note neutral';
+        sigStatus.innerHTML = '<i class="fa-solid fa-lock-open"></i> Unsigned manifest — anyone could have edited the hash list.';
+    }
+}
+
+async function checkManifestSignature() {
+    var sigStatus = document.getElementById('signatureStatus');
+    if (!loadedManifest || !loadedManifest.signature) return;
+    var passphrase = document.getElementById('verifyPassphrase').value;
+    if (!passphrase) {
+        sigStatus.className = 'manifest-verify-note neutral';
+        sigStatus.innerHTML = '<i class="fa-solid fa-key"></i> Enter the passphrase used to sign this manifest.';
+        return;
+    }
+    var payloadStr = JSON.stringify({
+        vaultmark_version: loadedManifest.vaultmark_version,
+        created_at: loadedManifest.created_at,
+        algorithms: loadedManifest.algorithms,
+        file_count: loadedManifest.file_count,
+        files: loadedManifest.files
+    });
+    try {
+        var valid = await verifyManifestSignature(
+            payloadStr, passphrase,
+            loadedManifest.signature.value,
+            loadedManifest.signature.salt
+        );
+        if (valid) {
+            sigStatus.className = 'manifest-verify-note ok';
+            sigStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> Signature verified — manifest is authentic and unmodified.';
+        } else {
+            sigStatus.className = 'manifest-verify-note bad';
+            sigStatus.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Signature does NOT match — wrong passphrase, or manifest was tampered with.';
+        }
+    } catch (err) {
+        sigStatus.className = 'manifest-verify-note bad';
+        sigStatus.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Could not verify: ' + escapeHtml(err.message);
+    }
+}
+
+async function runVerification() {
+    if (!loadedManifest) { alert('Load a manifest first.'); return; }
+    var files = stagedFiles.verify;
+    if (!files.length) { alert('Upload at least one file to check.'); return; }
+
+    var btn = document.getElementById('verifyRunBtn');
+    var progressWrap = document.getElementById('verifyProgress');
+    var fill = document.getElementById('verifyProgressFill');
+    var label = document.getElementById('verifyProgressLabel');
+
+    btn.disabled = true;
+    progressWrap.classList.add('show');
+
+    var primaryAlgo = loadedManifest.algorithms[0];
+    var manifestByName = {};
+    loadedManifest.files.forEach(function(f) { manifestByName[f.name] = f; });
+
+    var uploadedByName = {};
+    for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        var name = f.webkitRelativePath || f.name;
+        label.textContent = 'Checking ' + (i+1) + ' / ' + files.length + ' — ' + name;
+        fill.style.width = Math.round((i / files.length) * 100) + '%';
+        var bytes = await readFileBytes(f);
+        var hash = await computeHash(primaryAlgo, bytes);
+        uploadedByName[name] = { hash: hash, size: f.size };
+    }
+
+    fill.style.width = '100%';
+    label.textContent = 'Verification complete.';
+
+    var results = [];
+    Object.keys(manifestByName).forEach(function(name) {
+        var mEntry = manifestByName[name];
+        var uploaded = uploadedByName[name];
+        if (!uploaded) {
+            results.push({ name:name, status:'missing', detail:'Listed in manifest but not uploaded' });
+        } else if (uploaded.hash === mEntry.hashes[primaryAlgo]) {
+            results.push({ name:name, status:'verified', detail:primaryAlgo.toUpperCase() + ' match — ' + formatSize(uploaded.size) });
+        } else {
+            results.push({ name:name, status:'modified', detail:'Hash mismatch — content has changed' });
+        }
+        delete uploadedByName[name];
+    });
+    Object.keys(uploadedByName).forEach(function(name) {
+        results.push({ name:name, status:'extra', detail:'Not listed in manifest — new/unexpected file' });
+    });
+
+    renderVerificationResults(results);
+    lastVerificationResults = results;
+
+    btn.disabled = false;
+    setTimeout(function() { progressWrap.classList.remove('show'); }, 1000);
+}
+
+var lastVerificationResults = [];
+var statusMeta = {
+    verified: { icon:'fa-circle-check',        label:'Verified' },
+    modified: { icon:'fa-triangle-exclamation', label:'Modified' },
+    missing:  { icon:'fa-question',             label:'Missing'  },
+    extra:    { icon:'fa-plus',                 label:'Extra'    }
+};
+
+function renderVerificationResults(results) {
+    var box = document.getElementById('verifyResultsBox');
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    var counts = { verified:0, modified:0, missing:0, extra:0 };
+    results.forEach(function(r) { counts[r.status]++; });
+
+    document.getElementById('summaryStrip').innerHTML =
+        ['verified','modified','missing','extra'].map(function(k) {
+            return '<div class="summary-chip ' + k + '">' +
+                '<span class="sc-num">' + counts[k] + '</span>' +
+                '<span class="sc-label">' + k + '</span>' +
+                '</div>';
+        }).join('');
+
+    document.getElementById('resultTable').innerHTML = results.map(function(r) {
+        var meta = statusMeta[r.status];
+        return '<div class="result-row ' + r.status + '">' +
+            '<div class="r-icon"><i class="fa-solid ' + meta.icon + '"></i></div>' +
+            '<div>' +
+            '<div class="r-name">' + escapeHtml(r.name) + '</div>' +
+            '<div class="r-detail">' + escapeHtml(r.detail) + '</div>' +
+            '</div>' +
+            '<div class="r-status">' + meta.label + '</div>' +
+            '</div>';
+    }).join('');
+}
+
+function downloadVerificationReport() {
+    if (!lastVerificationResults.length) return;
+    var lines = ['file,status,detail'];
+    lastVerificationResults.forEach(function(r) {
+        lines.push('"' + r.name.replace(/"/g,'""') + '","' + r.status + '","' + r.detail.replace(/"/g,'""') + '"');
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    triggerDownload(blob, 'integrity_report.csv');
+}
+
+/* ═══════════════════════════════════════════════
+   QUICK CHECK
+═══════════════════════════════════════════════ */
+var quickFile = null;
+
+function quickFileSelected(file) {
+    if (!file) return;
+    quickFile = file;
+    document.getElementById('quickFileInfo').innerHTML =
+        '<div class="file-row">' +
+        '<div class="f-icon"><i class="fa-solid ' + fileIconClass(file.name) + '"></i></div>' +
+        '<div class="f-meta">' +
+        '<div class="f-name">' + escapeHtml(file.name) + '</div>' +
+        '<div class="f-sub">' + formatSize(file.size) + '</div>' +
+        '</div></div>';
+    recomputeQuickHash();
+}
+
+async function recomputeQuickHash() {
+    var out = document.getElementById('quickHashOut');
+    if (!quickFile) { out.textContent = 'Computed hash will appear here…'; return; }
+    out.textContent = 'Computing…';
+    var algo = document.getElementById('quickAlgo').value;
+    var bytes = await readFileBytes(quickFile);
+    var hash = await computeHash(algo, bytes);
+    out.textContent = hash;
+    checkQuickMatch();
+}
+
+function checkQuickMatch() {
+    var out = document.getElementById('quickHashOut').textContent.trim().toLowerCase();
+    var compare = document.getElementById('quickCompareInput').value.trim().toLowerCase();
+    var resultEl = document.getElementById('quickMatchResult');
+    if (!compare || out === 'computed hash will appear here…' || out === 'computing…') {
+        resultEl.classList.remove('show');
+        return;
+    }
+    resultEl.classList.add('show');
+    if (out === compare) {
+        resultEl.className = 'match-result show ok';
+        resultEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Match — file is authentic and unmodified.';
+    } else {
+        resultEl.className = 'match-result show bad';
+        resultEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> No match — file differs from the expected hash.';
+    }
+}
+</script>
+</body>
+</html>
