@@ -1,126 +1,4 @@
 /* ═══════════════════════════════════════════════════════
-   AI KNOWLEDGE BASE
-═══════════════════════════════════════════════════════ */
-
-var KB = [
-    // ── Tool Navigation ──
-    {
-        id: 'hash',
-        kw: ['hash','sha256','sha-256','sha512','md5','blake','checksum','digest','generate hash','hashing','hash generator'],
-        cat: 'tools',
-        ans: '<strong>Hash Generator</strong> 🔐<br><br>✅ Hash any text instantly<br>✅ Choose MD5, SHA-1, SHA-256, SHA-512<br>✅ Generate all hashes at once<br>✅ Copy with one click<br><br><em>💡 Use SHA-256 or higher for security.</em>',
-        tid: 'tool-hash',
-        tn: 'Hash Generator',
-        sg: ['Is MD5 safe?', 'SHA-256 vs SHA-512?', 'What is a hash?']
-    },
-    {
-        id: 'file',
-        kw: ['file','integrity','tamper','tampered','changed','verify file','check file','file hash','modified','corrupted','authenticity'],
-        cat: 'tools',
-        ans: '<strong>File Integrity Checker</strong> 📁<br><br>✅ Upload file to generate hash<br>✅ Paste original hash to compare<br>✅ Detect any modification instantly<br>✅ Supports SHA-256, SHA-512, MD5<br><br><em>💡 Great for verifying downloads.</em>',
-        tid: 'tool-integrity',
-        tn: 'File Integrity Checker',
-        sg: ['What is SHA-256?', 'Verify a file']
-    },
-    {
-        id: 'rsa',
-        kw: ['rsa','key pair','public key','private key','generate key','asymmetric','key size','2048','4096','pem','keypair'],
-        cat: 'tools',
-        ans: '<strong>RSA Key Generator</strong> 🔑<br><br>✅ Generate RSA pairs (1024-4096 bits)<br>✅ Analyze key strength<br>✅ Export in PEM format<br>✅ Security recommendations<br><br><em>💡 Use RSA-2048 minimum.</em>',
-        tid: 'tool-rsa',
-        tn: 'RSA Key Generator',
-        sg: ['Safe key size?', 'What is RSA?']
-    },
-    {
-        id: 'enc',
-        kw: ['encrypt','decrypt','aes','cipher','secret','message','lock','unlock','encryption','decryption','aes-256'],
-        cat: 'tools',
-        ans: '<strong>Text Encrypt/Decrypt</strong> 🔒<br><br>✅ AES-256 encryption<br>✅ RSA public key encryption<br>✅ Encrypt any text or message<br>✅ Decrypt with your key<br><br><em>💡 AES-256 is the gold standard.</em>',
-        tid: 'tool-encrypt',
-        tn: 'Text Encrypt/Decrypt',
-        sg: ['AES vs RSA?', 'What is AES-256?']
-    },
-    {
-        id: 'sig',
-        kw: ['sign','signature','verify sign','digital sign','digital signature','ecdsa','rsa-pss'],
-        cat: 'tools',
-        ans: '<strong>Digital Signature</strong> ✍️<br><br>✅ Sign documents with private key<br>✅ Verify with public keys<br>✅ RSA-PSS and ECDSA support<br><br><em>💡 Proves identity and integrity.</em>',
-        tid: 'tool-signature',
-        tn: 'Digital Signature',
-        sg: ['What is digital signature?']
-    },
-    {
-        id: 'pass',
-        kw: ['password','strength','weak password','strong password','secure password','generate password','entropy','brute force','crack password'],
-        cat: 'tools',
-        ans: '<strong>Password Tools</strong> 🛡️<br><br>✅ Check password strength<br>✅ Estimated crack time<br>✅ Generate secure passwords<br>✅ Entropy calculations<br><br><em>💡 16+ chars with mixed case, numbers & symbols.</em>',
-        tid: 'tool-password',
-        tn: 'Password Tools',
-        sg: ['What is entropy?', 'Strong password tips']
-    },
-
-    // ── Education ──
-    {
-        id: 'whash',
-        kw: ['what is hash','what is hashing','how hash work','explain hash','hash function'],
-        cat: 'learn',
-        ans: '<strong>What is a Hash Function?</strong> 🔐<br><br>Takes any input → produces fixed-length fingerprint.<br><br>• <strong>One-way</strong> — Cannot be reversed<br>• <strong>Deterministic</strong> — Same input = same output<br>• <strong>Avalanche effect</strong> — Tiny change = different hash<br>• <strong>Fixed length</strong> — SHA-256 = always 64 hex chars',
-        sg: ['Is MD5 safe?', 'Hash Generator']
-    },
-    {
-        id: 'wrsa',
-        kw: ['what is rsa','explain rsa','rsa explained','how rsa works','public key cryptography','asymmetric encryption'],
-        cat: 'learn',
-        ans: '<strong>What is RSA?</strong> 🔑<br><br>Most widely used public-key encryption.<br><br>• <strong>Two linked keys</strong> (public + private)<br>• <strong>Public</strong> → anyone encrypts<br>• <strong>Private</strong> → only you decrypt<br><br>Used in: HTTPS, email, SSH, digital signatures',
-        sg: ['Safe key size?', 'Generate RSA keys']
-    },
-    {
-        id: 'waes',
-        kw: ['what is aes','explain aes','aes algorithm','aes-256','symmetric encryption','how aes works'],
-        cat: 'learn',
-        ans: '<strong>What is AES?</strong> 🔒<br><br>World\'s most trusted symmetric encryption.<br><br>• <strong>Same key</strong> to encrypt & decrypt<br>• <strong>AES-256</strong> = strongest variant<br>• Used by: Governments, banks, WhatsApp<br><br><em>AES-256 has never been cracked!</em>',
-        sg: ['AES vs RSA?', 'Encryption Tool']
-    },
-
-    // ── Security Advice ──
-    {
-        id: 'md5s',
-        kw: ['md5 safe','is md5 safe','md5 secure','should i use md5','md5 broken','md5 weak'],
-        cat: 'security',
-        ans: '<strong>⚠️ MD5 is NOT safe!</strong><br><br>Broken since 2004:<br>❌ Collision attacks proven<br>❌ Rainbow tables easily crack it<br><br>Use instead:<br>✅ SHA-256 — General purpose<br>✅ SHA-512 — High security<br>✅ Argon2/bcrypt — For passwords',
-        sg: ['Try SHA-256', 'Hash Generator']
-    },
-    {
-        id: 'rks',
-        kw: ['rsa key size','key size','2048 bit','4096 bit','recommended key','key length','rsa size'],
-        cat: 'security',
-        ans: '<strong>RSA Key Size Guide</strong> 🔑<br><br>1024-bit → ❌ BROKEN<br>2048-bit → ✅ Minimum (until ~2030)<br>3072-bit → ✅ Good (until ~2040)<br>4096-bit → ✅ Excellent (long-term)<br><br><em>Larger = more secure but slower.</em>',
-        tid: 'tool-rsa',
-        tn: 'RSA Key Generator',
-        sg: ['Generate RSA Keys', 'What is RSA?']
-    },
-    {
-        id: 'spass',
-        kw: ['strong password','good password','password tips','password best practices'],
-        cat: 'security',
-        ans: '<strong>Strong Password Tips</strong> 💪<br><br>✅ 16+ characters minimum<br>✅ Uppercase & lowercase<br>✅ Numbers (0-9)<br>✅ Special chars (!@#$%^&*)<br>✅ No dictionary words<br>✅ Unique per account',
-        tid: 'tool-password',
-        tn: 'Password Tools',
-        sg: ['Generate password', 'Check strength']
-    },
-
-    // ── About ──
-    {
-        id: 'about',
-        kw: ['about cryptokit','what is cryptokit','who made','cryptokit info','is cryptokit safe'],
-        cat: 'help',
-        ans: '<strong>About CryptoKit</strong> 🔐<br><br>Free, open-source crypto toolkit.<br><br>🔒 Zero data storage<br>🌐 Client-side processing<br>📖 Open source on GitHub<br>🆓 Free forever<br>🛡️ NIST compliant algorithms',
-        sg: ['See all tools', 'Learn crypto']
-    }
-];
-
-
-/* ═══════════════════════════════════════════════════════
    CATEGORY RESPONSES
 ═══════════════════════════════════════════════════════ */
 
@@ -438,21 +316,57 @@ function clearChat() {
 }
 
 
-/* ── Update AI Theme ── */
+/* ══════════════════════════════════════════════════════
+   ── Update AI Theme ──
+   Called every time mode switches (hacker ↔ normal).
+   Fixes: name stays "GHOST" when switching back to normal.
+══════════════════════════════════════════════════════ */
 function updateAiTheme(isH) {
+
+    /* ── Header elements ── */
     var fabIcon  = document.getElementById('fabIcon');
     var aiAvatar = document.getElementById('aiAvatar');
     var aiName   = document.getElementById('aiName');
     var aiStatus = document.getElementById('aiStatusText');
     var aiInput  = document.querySelector('.ai-input');
 
+    /* ── Apply icon / name / status / placeholder ── */
     if (fabIcon)  fabIcon.textContent  = isH ? '👾' : '🤖';
     if (aiAvatar) aiAvatar.textContent = isH ? '👾' : '🤖';
-    if (aiName)   aiName.textContent   = isH ? 'GHOST' : 'CryptoBot';
     if (aiStatus) aiStatus.textContent = isH ? 'ONLINE · SECURE' : 'Online · Ready';
     if (aiInput)  aiInput.placeholder  = isH
         ? '> TYPE QUERY OR /help...'
         : 'Ask me anything about cryptography...';
+
+    /* ── FIX: Force name update with reflow trick ── */
+    if (aiName) {
+        aiName.textContent   = '';          /* clear first         */
+        aiName.offsetHeight;                /* force browser reflow */
+        aiName.textContent   = isH ? 'GHOST' : 'CryptoBot'; /* set new name */
+    }
+
+    /* ── Update all existing bot avatars already in chat ── */
+    var botAvatars = document.querySelectorAll('.ai-msg-avatar.bot');
+    for (var i = 0; i < botAvatars.length; i++) {
+        botAvatars[i].textContent = isH ? '👾' : '🤖';
+    }
+
+    /* ── Update all existing user avatars already in chat ── */
+    var userAvatars = document.querySelectorAll('.ai-msg-avatar.user');
+    for (var i = 0; i < userAvatars.length; i++) {
+        userAvatars[i].textContent = isH ? '💀' : '👤';
+    }
+
+    /* ── Update suggestion button prefixes ── */
+    var sugBtns = document.querySelectorAll('.ai-suggestion-btn');
+    for (var i = 0; i < sugBtns.length; i++) {
+        var txt = sugBtns[i].textContent;
+        if (isH && txt.substring(0, 2) !== '> ') {
+            sugBtns[i].textContent = '> ' + txt;
+        } else if (!isH && txt.substring(0, 2) === '> ') {
+            sugBtns[i].textContent = txt.substring(2);
+        }
+    }
 }
 
 
@@ -656,19 +570,19 @@ var CHAR_DELAYS = {
 
 /* ── Post-line pause (ms) ── */
 var LINE_PAUSE = {
-    cmd:    480,   /* longer pause after commands so output feels "responsive" */
+    cmd:    480,
     output:  70,
     hash:    70,
     success: 90,
     info:    90,
     blank:  200,
-    restart: 2800  /* pause before the whole sequence loops */
+    restart: 2800
 };
 
 /* ── Terminal state ── */
 var termOS      = 'mac';
-var termTimerId = null;   /* single setTimeout handle — easy to cancel */
-var termAlive   = false;  /* flag: false = stop the current run */
+var termTimerId = null;
+var termAlive   = false;
 
 
 /* ── Build one empty terminal line element ── */
@@ -712,7 +626,7 @@ function typeIntoSpan(span, text, charDelay, onDone) {
     var idx = 0;
 
     function nextChar() {
-        if (!termAlive) return;          /* abort if terminal was stopped */
+        if (!termAlive) return;
         if (idx < text.length) {
             span.textContent += text[idx++];
             var body = document.getElementById('terminalBody');
@@ -731,7 +645,6 @@ function typeIntoSpan(span, text, charDelay, onDone) {
 function renderLine(lines, prompt, idx) {
     if (!termAlive) return;
 
-    /* All lines done → wait, then loop */
     if (idx >= lines.length) {
         termTimerId = setTimeout(function() {
             var body = document.getElementById('terminalBody');
@@ -761,7 +674,6 @@ function renderLine(lines, prompt, idx) {
     if (line.type === 'cursor') {
         body.appendChild(buildTermLine('cursor', prompt));
         body.scrollTop = body.scrollHeight;
-        /* wait then restart */
         termTimerId = setTimeout(function() {
             if (body && termAlive) {
                 body.innerHTML = '';
@@ -776,7 +688,6 @@ function renderLine(lines, prompt, idx) {
     body.appendChild(el);
     body.scrollTop = body.scrollHeight;
 
-    /* find the span we type into */
     var spanClass = {
         cmd:     '.terminal-cmd',
         output:  '.terminal-output',
@@ -799,7 +710,6 @@ function renderLine(lines, prompt, idx) {
 
 /* ── Start (or restart) the terminal for the given OS ── */
 function startTerminal(os) {
-    /* 1. Kill any running animation */
     termAlive = false;
     clearTimeout(termTimerId);
 
@@ -809,11 +719,9 @@ function startTerminal(os) {
 
     if (!body || !title || !data) return;
 
-    /* 2. Reset DOM */
     body.innerHTML    = '';
     title.textContent = data.title;
 
-    /* 3. Brief pause so the clear is visible, then start */
     termTimerId = setTimeout(function() {
         termAlive = true;
         renderLine(data.lines, data.prompt, 0);
@@ -910,7 +818,12 @@ function mobileThemeSwitch() {
 }
 
 
-/* ── MAIN MODE SELECTOR ── */
+/* ══════════════════════════════════════════════════════
+   MAIN MODE SELECTOR
+   FIX: updateAiTheme() is now called BEFORE the chat
+        is cleared/re-shown so the header name is always
+        correct when showWelcome() reads currentTheme.
+══════════════════════════════════════════════════════ */
 function selectMode(mode) {
 
     /* Close dropdown */
@@ -946,12 +859,10 @@ function selectMode(mode) {
             var ml = document.getElementById('modeLabel');
             var cn = document.getElementById('checkNormal');
             var ch = document.getElementById('checkHacker');
-            if (mi) mi.textContent  = '💀';
-            if (ml) ml.textContent  = 'Hacker';
+            if (mi) mi.textContent   = '💀';
+            if (ml) ml.textContent   = 'Hacker';
             if (cn) cn.style.display = 'none';
             if (ch) ch.style.display = 'inline';
-
-            updateAiTheme(true);
 
         } else {
             /* ── TO NORMAL ── */
@@ -968,18 +879,27 @@ function selectMode(mode) {
             var ml2 = document.getElementById('modeLabel');
             var cn2 = document.getElementById('checkNormal');
             var ch2 = document.getElementById('checkHacker');
-            if (mi2) mi2.textContent  = '☀️';
-            if (ml2) ml2.textContent  = 'Normal';
+            if (mi2) mi2.textContent   = '☀️';
+            if (ml2) ml2.textContent   = 'Normal';
             if (cn2) cn2.style.display = 'inline';
             if (ch2) ch2.style.display = 'none';
-
-            updateAiTheme(false);
         }
 
-        /* Refresh chat if open */
-        if (chatOpen && msgCount > 0) {
-            document.getElementById('aiMessages').innerHTML = '';
-            msgCount = 0;
+        /*
+         * ── FIX: updateAiTheme FIRST ──
+         * Update the header name/icon BEFORE clearing the chat.
+         * This guarantees aiName reads the correct value
+         * and showWelcome() uses the already-updated currentTheme.
+         */
+        updateAiTheme(isGoingHacker);
+
+        /* ── Then reset chat (always, not just when open) ── */
+        var msgs = document.getElementById('aiMessages');
+        if (msgs) msgs.innerHTML = '';
+        msgCount = 0;
+
+        /* Only re-show welcome if chat window is actually open */
+        if (chatOpen) {
             showWelcome();
         }
     });
@@ -1078,11 +998,11 @@ function getPassStrength(p) {
     if (/[0-9]/.test(p))         s++;
     if (/[^A-Za-z0-9]/.test(p))  s++;
 
-    if (s <= 2) return { label: '❌ Very Weak',   color: '#FF4444' };
-    if (s <= 3) return { label: '⚠️ Weak',        color: '#FF8C00' };
-    if (s <= 4) return { label: '🟡 Fair',         color: '#FFD700' };
-    if (s <= 5) return { label: '🟢 Strong',       color: '#00CC66' };
-    return            { label: '✅ Very Strong',   color: '#00FF88' };
+    if (s <= 2) return { label: '❌ Very Weak',  color: '#FF4444' };
+    if (s <= 3) return { label: '⚠️ Weak',       color: '#FF8C00' };
+    if (s <= 4) return { label: '🟡 Fair',        color: '#FFD700' };
+    if (s <= 5) return { label: '🟢 Strong',      color: '#00CC66' };
+    return            { label: '✅ Very Strong',  color: '#00FF88' };
 }
 
 function runDemo() {
@@ -1130,7 +1050,7 @@ function copyResult(text) {
         var btn = document.querySelector('.btn-copy');
         if (btn) {
             var orig = btn.innerHTML;
-            btn.innerHTML      = '<i class="fas fa-check"></i> Copied!';
+            btn.innerHTML        = '<i class="fas fa-check"></i> Copied!';
             btn.style.background = 'var(--success)';
             btn.style.color      = '#000';
             setTimeout(function() {
@@ -1147,7 +1067,6 @@ function copyResult(text) {
    INTERSECTION OBSERVERS
 ═══════════════════════════════════════════════════════ */
 
-/* Fade-up */
 var observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry, i) {
         if (entry.isIntersecting) {

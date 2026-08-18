@@ -1005,8 +1005,14 @@
     </div>
 
 
-    <!-- Custom JavaScript -->
+    <!-- ═══════════════════════════════════════════════════════
+         SCRIPTS — ORDER MATTERS!
+         1. kb.js     → defines global KB array (knowledge base)
+         2. script.js → main app logic (reads KB)
+    ═══════════════════════════════════════════════════════ -->
+    <script src="kb.js"></script>
     <script src="script.js"></script>
+
 
     <!-- ═══════════════════════════════════
          MOBILE THEME & DEV POPUP SCRIPTS
@@ -1026,7 +1032,7 @@
             } else {
                 submenu.classList.add('open');
                 arrow.style.transform = 'rotate(180deg)';
-                updateMobileThemeDots(); // refresh active dots
+                updateMobileThemeDots();
             }
         }
 
@@ -1034,18 +1040,14 @@
            Switch theme from mobile submenu
         ────────────────────────────────────── */
         function mobileSwitchTheme(mode) {
-            // Call existing selectMode from script.js
             if (typeof selectMode === 'function') {
                 selectMode(mode);
             } else {
-                // Fallback: manually set theme attribute
                 document.documentElement.setAttribute('data-theme', mode);
             }
 
-            // Update active dots
             updateMobileThemeDots();
 
-            // Close submenu + menu after a short delay
             setTimeout(() => {
                 document.getElementById('mobileThemeSubmenu').classList.remove('open');
                 document.getElementById('mobileThemeArrow').style.transform = 'rotate(0deg)';
@@ -1064,13 +1066,11 @@
             const normalLink = document.getElementById('mobileNormalOption');
             const hackerLink = document.getElementById('mobileHackerOption');
 
-            // Reset
             if (normalDot) normalDot.style.display = 'none';
             if (hackerDot) hackerDot.style.display = 'none';
             if (normalLink) normalLink.classList.remove('active-theme');
             if (hackerLink) hackerLink.classList.remove('active-theme');
 
-            // Set active
             if (currentTheme === 'hacker') {
                 if (hackerDot)  hackerDot.style.display  = 'inline-block';
                 if (hackerLink) hackerLink.classList.add('active-theme');
@@ -1084,22 +1084,19 @@
            Show Developer Mode desktop-only popup
         ────────────────────────────────────── */
         function showMobileDevPopup() {
-            // Close the submenu & mobile menu first
             document.getElementById('mobileThemeSubmenu').classList.remove('open');
             document.getElementById('mobileThemeArrow').style.transform = 'rotate(0deg)';
             if (typeof toggleMenu === 'function') toggleMenu();
 
-            // Show popup
             const popup = document.getElementById('mobileDevPopup');
             popup.classList.add('show');
-            document.body.style.overflow = 'hidden'; // prevent scroll
+            document.body.style.overflow = 'hidden';
         }
 
         /* ──────────────────────────────────────
            Hide Developer Mode popup
         ────────────────────────────────────── */
         function hideMobileDevPopup(event) {
-            // If clicking backdrop (not the box itself), close
             if (event && event.target !== document.getElementById('mobileDevPopup')) return;
 
             const popup = document.getElementById('mobileDevPopup');
@@ -1107,7 +1104,6 @@
             document.body.style.overflow = '';
         }
 
-        // Also allow the button click to close
         document.addEventListener('DOMContentLoaded', function () {
             const closeBtn = document.querySelector('.mobile-dev-popup-close');
             if (closeBtn) {
@@ -1117,7 +1113,6 @@
                 });
             }
 
-            // Initialize dots on load
             updateMobileThemeDots();
         });
 
